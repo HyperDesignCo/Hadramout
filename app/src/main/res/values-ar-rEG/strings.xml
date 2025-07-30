@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">Hadramout</string>
     <string name="phone_number">Phone number</string>
     <string name="coninue">Coninue</string>
