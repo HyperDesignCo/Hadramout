@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.main.navcontroller
 
 object ScreensConst {
     const val LOGIN_IN_SCREEN = "login_in_screen"
+    const val LOGIN_SCREEN_STEP_TWO = "login_screen_step_two"
     const val HOME_SCREEN = "home_screen"
     const val PROFILE_SCREEN = "profile_screen"
     const val SETTING_SCREEN = "setting_screen"

@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreen
+import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreenStepTwo
 
 @Composable
 fun AppNavigation(destenation:String) {
@@ -13,7 +14,15 @@ fun AppNavigation(destenation:String) {
 
     NavHost(navController = navController, startDestination = destenation) {
         composable(Screen.LoginInScreen.route){
-            LoginScreen()
+            LoginScreen(
+                onClickToScreenLoginTwo = {
+                    navController.navigate(Screen.LoginStepTwoScreen.route)
+                }
+            )
+        }
+        composable(Screen.LoginStepTwoScreen.route) {
+            LoginScreenStepTwo()
+
         }
 
     }

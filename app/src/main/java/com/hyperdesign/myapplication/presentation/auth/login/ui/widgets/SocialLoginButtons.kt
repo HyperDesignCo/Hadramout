@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import com.hyperdesign.myapplication.R
 fun SocialLoginButtons(
     onGoogleClick: () -> Unit,
     onFacebookClick: () -> Unit,
+    onLoginAsGuestClick: () -> Unit,
     modifier: Modifier = Modifier,
     orTextColor: Color = Color.Gray,
     buttonTextColor: Color = Color.Black,
@@ -40,61 +42,56 @@ fun SocialLoginButtons(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-
-//            Spacer(
-//                modifier = Modifier.border(
-//                    width = 6.dp,
-//                    color = Color.Black,
-//
-//                )
-//            )
-//            Image(
-//                painter = painterResource(id = R.drawable.line),
-//                contentDescription = "Or Separator",
-//                modifier = Modifier.size(33.dp)
-//            )
+            Divider(
+                color = Color.Gray,
+                thickness = 1.dp,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+            )
             Text(
                 text = stringResource(R.string.or),
                 color = orTextColor,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
-//            Image(
-//                painter = painterResource(id = R.drawable.line),
-//                contentDescription = "Or Separator",
-//                modifier = Modifier.size(33.dp)
-//            )
+            Divider(
+                color = Color.Gray,
+                thickness = 1.dp,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+            )
         }
 
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
-            onClick = {},
+            onClick = { onLoginAsGuestClick() },
             modifier = Modifier
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
                     color = Color.Black,
                     shape = RoundedCornerShape(cornerRadius.dp)
-                )
-               ,
+                ),
             shape = RoundedCornerShape(cornerRadius.dp),
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-
                 containerColor = Color.Transparent,
                 contentColor = Color.LightGray
             )
         ) {
             Text(
-                text = stringResource(com.hyperdesign.myapplication.R.string.login_as_a_guest),
+                text = stringResource(R.string.login_as_a_guest),
                 fontSize = 16.sp
             )
         }
 
         Spacer(modifier = Modifier.height(15.dp))
-
-
 
         Button(
             onClick = onGoogleClick,
@@ -111,9 +108,8 @@ fun SocialLoginButtons(
                 contentColor = Color.LightGray
             )
         ) {
-
             Image(
-                painter = painterResource(id =R.drawable.google_logo),
+                painter = painterResource(id = R.drawable.google_logo),
                 contentDescription = "Google Icon",
                 modifier = Modifier.size(20.dp)
             )
@@ -133,9 +129,7 @@ fun SocialLoginButtons(
                     width = 1.dp,
                     color = Color.Transparent,
                     shape = RoundedCornerShape(cornerRadius.dp)
-                )
-
-                ,
+                ),
             shape = RoundedCornerShape(cornerRadius.dp),
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                 containerColor = facebookButtonColor

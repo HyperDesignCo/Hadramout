@@ -6,4 +6,12 @@
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="continue_with_facebook">Continue with facebook</string>
     <string name="or">Or</string>
+    <string name="change_Number">Change number</string>
+    <string name="do_you_want_to_continue">Do you want to continue?</string>
+    <string name="we_will_send_an_authentication_code_to_the_phone_number_above">We will send an authentication code to the phone number above</string>
+    <string name="welcome_back_to_hadramout_shekh_elmandy">WELCOME BACK TO HADRAMOUT SHEKH ELMANDY</string>
+    <string name="hello_muhammed_we_ve_missed_you">Hello Muhammed, we’ve missed you!</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="login">Login</string>
 </resources>
