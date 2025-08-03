@@ -11,4 +11,7 @@ object ScreensConst {
     const val ADD_PAYMENT_SCREEN = "add_payment_screen"
     const val UPDATE_PAYMENT_SCREEN = "update_payment_screen"
     const val DELETE_PAYMENT_SCREEN = "delete_payment_screen"
+    const val FORGOT_PASSWORD_SCREEN = "forgot_password_screen"
+    const val Verify_Screen = "verify_screen"
+    const val RESET_PASSWORD_SCREEN = "reset_password_screen"
 }

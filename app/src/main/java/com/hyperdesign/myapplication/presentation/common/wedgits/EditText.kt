@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -30,6 +32,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
@@ -41,15 +47,23 @@ fun CustomTextField(
     textColor: Color = Color.Black,
     borderColor: Color = Color(0xFF8F8F8F),
     borderWidth: Float = 2f,
-    isPassword: Boolean = false
-) {
+    isPassword: Boolean = false,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    maxLines: Int = 1,
+    onNext: () -> Unit = {},
+    focusRequester: FocusRequester = FocusRequester(),
+
+
+
+
+    ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
     val visualTransformation = if (isPassword && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None
 
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier
+        modifier = modifier.focusRequester(focusRequester)
             .border(
                 width = borderWidth.dp,
                 color = borderColor,
@@ -62,6 +76,14 @@ fun CustomTextField(
             fontSize = 16.sp,
             textAlign = TextAlign.Start
         ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = keyboardType,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = {
+            onNext()
+        }),
+        maxLines = maxLines,
         visualTransformation = visualTransformation,
         decorationBox = { innerTextField ->
             Row(
