@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                 if (showSplash) {
                     CustomSplashScreen { showSplash = false }
                 } else {
-                    AppNavigation(destenation= Screen.LoginInScreen.route)
+                    AppNavigation(startDestination = Screen.LoginInScreen.route)
                 }
 
 

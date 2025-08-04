@@ -23,4 +23,7 @@
     <string name="forgot_my_password">Forgot Password</string>
     <string name="enter_new_password">Enter new password</string>
     <string name="reset_password">Reset password</string>
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
+    <string name="menu">Menu</string>
 </resources>

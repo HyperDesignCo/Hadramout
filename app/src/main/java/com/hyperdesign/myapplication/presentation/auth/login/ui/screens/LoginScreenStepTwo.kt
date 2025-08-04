@@ -34,12 +34,18 @@ fun LoginScreenStepTwo() {
     LoginScreenStepTwoContent(onGoToForgePasswordScreen = {
         navController.navigate(Screen.ForgotPasswordScreen.route)
 
+    }, onNavToHomeScreen = {
+        navController.navigate(Screen.HomeScreen.route) {
+            popUpTo(Screen.LoginStepTwoScreen.route) {
+                inclusive = true
+            }
+        }
     })
 }
 
 
 @Composable
-fun LoginScreenStepTwoContent(onGoToForgePasswordScreen:()->Unit) {
+fun LoginScreenStepTwoContent(onGoToForgePasswordScreen:()->Unit,onNavToHomeScreen: () -> Unit) {
 
     Column(
         modifier = Modifier
@@ -103,7 +109,10 @@ fun LoginScreenStepTwoContent(onGoToForgePasswordScreen:()->Unit) {
 
             CustomButton(
                 text = stringResource(R.string.login),
-                onClick = {  },
+                onClick = {
+                    onNavToHomeScreen()
+
+                },
                 modifier = Modifier.fillMaxWidth(),
                 startColor = Color(0xFFF15A25),
                 endColor = Color(0xFFFCB203)
