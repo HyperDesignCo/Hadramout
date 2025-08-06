@@ -14,7 +14,7 @@ import com.hyperdesign.myapplication.R
 
 @Composable
 fun HadramoutHeader() {
-    Box(modifier = Modifier.padding(top = 40.dp).fillMaxWidth().height(200.dp)){
+    Box(modifier = Modifier.fillMaxWidth().height(200.dp)){
         Image(
             painter = painterResource(id = R.drawable.hadramout_header),
             contentDescription = "Hadramout Header",

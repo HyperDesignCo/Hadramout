@@ -39,7 +39,7 @@ fun MainHeader(
     cardCount : String? = "7"
 
 ) {
-        Row(modifier = Modifier.padding(top = 40.dp).fillMaxWidth().height(140.dp).background(color = Secondry)) {
+        Row(modifier = Modifier.fillMaxWidth().height(140.dp).background(color = Secondry)) {
 
             IconButton(
                 onClick = onBackPressesd,

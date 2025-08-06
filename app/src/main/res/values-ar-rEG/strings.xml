@@ -26,4 +26,8 @@
     <string name="home">Home</string>
     <string name="profile">Profile</string>
     <string name="menu">Menu</string>
+    <string name="hello">Hello</string>
+    <string name="delevery_to">Delivery to</string>
+    <string name="offers">Offers</string>
+    <string name="featured">Featured</string>
 </resources>
