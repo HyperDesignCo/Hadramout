@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.main.navcontroller
 
+
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -38,7 +39,7 @@ fun BottomNavigationBar(navController: NavController) {
                 selected = isSelected,
                 onClick = {
                     navController.navigate(screen.route) {
-                        popUpTo(navController.graph.startDestinationId) {
+                        popUpTo(Screen.HomeScreen.route) {
                             saveState = true
                         }
                         launchSingleTop = true
@@ -54,7 +55,7 @@ fun BottomNavigationBar(navController: NavController) {
                                 contentDescription = screen.title?.let { stringResource(id = it) },
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .graphicsLayer(alpha = 0.99f) // needed to trigger drawWithCache
+                                    .graphicsLayer(alpha = 0.99f)
                                     .drawWithCache {
                                         onDrawWithContent {
                                             drawContent()
@@ -99,7 +100,7 @@ fun BottomNavigationBar(navController: NavController) {
                 },
                 colors = NavigationBarItemDefaults.colors(
                     indicatorColor = Color.Transparent,
-                    selectedIconColor = Color.Unspecified, // avoid default tint
+                    selectedIconColor = Color.Unspecified,
                     selectedTextColor = Color.Unspecified,
                     unselectedIconColor = Secondry,
                     unselectedTextColor = Secondry

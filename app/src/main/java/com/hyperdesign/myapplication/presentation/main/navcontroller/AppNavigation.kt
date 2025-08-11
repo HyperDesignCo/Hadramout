@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.main.navcontroller
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -11,6 +12,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -32,13 +34,11 @@ import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.VerifyScreen
 import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreen
 import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreenStepTwo
-import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.MenuScreen
 import com.hyperdesign.myapplication.presentation.profile.ui.screens.ProfileScreen
-
 
 val bottomNavScreens = listOf(
     Screen.HomeScreen,
@@ -53,21 +53,17 @@ val LocalNavController = compositionLocalOf<NavController> {
 @Composable
 fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentRoute = navController.currentBackStackEntryFlow
+        .collectAsState(initial = navController.currentBackStackEntry)
+        .value?.destination?.route
 
-    // Determine if the current screen should show the bottom navigation
-    val showBottomNav = bottomNavScreens.any {
-        it.route == currentRoute
-
-    }
-//            || currentRoute == Screen.LoginInScreen.route
-
+    // Determine if the current screen is part of the bottom navigation
+    val isBottomNavScreen = bottomNavScreens.any { it.route == currentRoute }
 
     CompositionLocalProvider(LocalNavController provides navController) {
         Scaffold(
             bottomBar = {
-                if (showBottomNav) {
+                if (isBottomNavScreen) {
                     BottomNavigationBar(navController = navController)
                 }
             }
