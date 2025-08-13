@@ -122,4 +122,20 @@ dependencies {
 //    implementation(libs.firebase.analytics)
     implementation (libs.firebase.messaging.directboot)
     implementation(libs.firebase.auth)
+
+
+    //ktor dependencies
+    implementation("io.ktor:ktor-client-core:2.3.4")
+    implementation("io.ktor:ktor-client-cio:2.3.4")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.4")
+    implementation("io.ktor:ktor-serialization-gson:2.3.4")
+    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("io.ktor:ktor-client-logging:2.3.12")
+
+
+    //koin
+    implementation(libs.bundles.koin)
+
+
+
 }
