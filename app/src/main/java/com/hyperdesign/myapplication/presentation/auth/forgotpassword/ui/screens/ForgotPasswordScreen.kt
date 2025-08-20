@@ -59,7 +59,7 @@ fun ForGotPasswordScreenContent(onBackPressed: () -> Unit,onClickToVerifyScreen:
                 fontWeight = FontWeight.Bold
             )
             CustomTextField(
-                value = "+2 ",
+                value = "",
                 onValueChange = {},
                 textColor = Color.Black,
                 borderWidth = 2f,

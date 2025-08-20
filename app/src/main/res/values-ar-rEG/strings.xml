@@ -37,4 +37,13 @@
     <string name="Pick_up">Pick up</string>
     <string name="Delivery">"Delivery "</string>
     <string name="Call_support">Call support</string>
+    <string name="this_field_is_required">This field is required</string>
+    <string name="invalid_phone_number_format">Invalid phone number format</string>
+    <string name="email_or_phoneNumber">Email Or PhoneNumber</string>
+    <string name="enter_your_email_or_phone">Enter Your Email Or Phone</string>
+    <string name="enter_your_password">Enter Your Password</string>
+    <string name="dont_have_an_account">Don\'t Have An Account</string>
+    <string name="create_new_account">Create New Account</string>
+    <string name="please_enter_your_email_or_phone_number">"please Enter Your Email or Phone Number "</string>
+    <string name="please_enter_your_password">Please Enter Your Password</string>
 </resources>

@@ -6,6 +6,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.hyperdesign.myapplication.data.remote.model.User
+import com.hyperdesign.myapplication.domain.Entity.UserEntity
 import java.util.Locale
 
 class TokenManager(private val context: Context) {
@@ -59,16 +60,16 @@ class TokenManager(private val context: Context) {
             .apply()
     }
 
-    fun saveUserData(user: User?) {
+    fun saveUserData(user: UserEntity?) {
         val gson = Gson()
         encryptedSharedPreferences.edit()
             .putString(USER_DATA, gson.toJson(user))
             .apply()
     }
 
-    fun getUserData(): User? {
+    fun getUserData(): UserEntity? {
         val json = encryptedSharedPreferences.getString(USER_DATA, "") ?: ""
-        return if (json.isNotEmpty()) Gson().fromJson(json, User::class.java) else null
+        return if (json.isNotEmpty()) Gson().fromJson(json, UserEntity::class.java) else null
     }
 
     fun getAccessToken(): String? =
