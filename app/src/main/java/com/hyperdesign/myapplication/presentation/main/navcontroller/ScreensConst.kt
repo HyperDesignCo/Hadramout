@@ -10,4 +10,6 @@ object ScreensConst {
     const val FORGOT_PASSWORD_SCREEN = "forgot_password_screen"
     const val Verify_Screen = "verify_screen"
     const val RESET_PASSWORD_SCREEN = "reset_password_screen"
+
+    const val Sign_Up_Screen = "sign_up_screen"
 }

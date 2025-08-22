@@ -61,10 +61,13 @@ class LoginViewModel(
 
         val hasError = listOf(phoneResult, passwordResult).any { !it.successful }
 
+        val phoneError = if (phoneResult.successful) null else context.getString(R.string.please_enter_your_email_or_phone_number)
+        val passwordError = if (passwordResult.successful) null else context.getString(R.string.please_enter_your_password)
+
         if (hasError) {
             _state.value = _state.value.copy(
-                phoneNumberError = context.getString(R.string.please_enter_your_email_or_phone_number),
-                passwordError = context.getString(R.string.please_enter_your_password),
+                phoneNumberError = phoneError,
+                passwordError = passwordError,
                 isLoading = false
             )
             return

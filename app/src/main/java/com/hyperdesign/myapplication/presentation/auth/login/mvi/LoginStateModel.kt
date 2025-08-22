@@ -1,6 +1,5 @@
 package com.hyperdesign.myapplication.presentation.auth.login.mvi
 
-import com.hyperdesign.myapplication.data.remote.model.LoginResponse
 import com.hyperdesign.myapplication.domain.Entity.LoginEntity
 
 data class LoginStateModel(

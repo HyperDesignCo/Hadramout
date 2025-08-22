@@ -5,9 +5,7 @@ import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
-import com.hyperdesign.myapplication.data.remote.model.User
 import com.hyperdesign.myapplication.domain.Entity.UserEntity
-import java.util.Locale
 
 class TokenManager(private val context: Context) {
 

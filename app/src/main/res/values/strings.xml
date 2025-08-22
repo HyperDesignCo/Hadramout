@@ -44,4 +44,18 @@
     <string name="create_new_account">Create New Account</string>
     <string name="please_enter_your_email_or_phone_number">"please Enter Your Email or Phone Number "</string>
     <string name="please_enter_your_password">Please Enter Your Password</string>
+    <string name="user_name">User Name</string>
+    <string name="enter_your_name">Enter Your Name</string>
+    <string name="email_address">Email Address</string>
+    <string name="enter_email_address">Enter Your Email Address</string>
+    <string name="enter_phone_number">Enter Your Phone Number</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="enter_your_confirm_password">Enter Your Confirm Password</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="email_is_required">Email is required</string>
+    <string name="password_is_required">Password is required</string>
+    <string name="user_name_is_required">User name is required</string>
+    <string name="mobile_number_is_required">Mobile number is required</string>
+    <string name="confirm_password_is_should_be_same_as_password">Confirm password is should be same as password</string>
+    <string name="email_is_already_used">email is already used</string>
 </resources>

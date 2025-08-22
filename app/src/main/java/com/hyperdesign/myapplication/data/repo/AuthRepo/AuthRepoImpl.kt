@@ -1,8 +1,11 @@
 package com.hyperdesign.myapplication.data.repo.AuthRepo
 import com.hyperdesign.myapplication.data.mapper.auth.toLoginDomain
+import com.hyperdesign.myapplication.data.mapper.auth.toRegisterDomain
 import com.hyperdesign.myapplication.data.remote.auth.NetworkingApiServices
 import com.hyperdesign.myapplication.domain.Entity.LoginEntity
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest
+import com.hyperdesign.myapplication.domain.Entity.RegisterModelEntity
+import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
 import com.hyperdesign.myapplication.domain.repo.AuthRepo
 
 class AuthRepoImpl(
@@ -13,5 +16,11 @@ class AuthRepoImpl(
 
         return response.toLoginDomain()
 
+    }
+
+    override suspend fun register(registerRequest: RegisterRequst): RegisterModelEntity {
+        val response = authService.register(registerRequest)
+
+        return response.toRegisterDomain()
     }
 }

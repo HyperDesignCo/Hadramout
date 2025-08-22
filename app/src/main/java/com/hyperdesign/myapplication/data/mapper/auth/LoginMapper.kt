@@ -1,7 +1,7 @@
 package com.hyperdesign.myapplication.data.mapper.auth
 
-import com.hyperdesign.myapplication.data.remote.model.LoginResponse
-import com.hyperdesign.myapplication.data.remote.model.User
+import com.hyperdesign.myapplication.data.remote.dto.LoginResponse
+import com.hyperdesign.myapplication.data.remote.dto.User
 import com.hyperdesign.myapplication.domain.Entity.LoginEntity
 import com.hyperdesign.myapplication.domain.Entity.UserEntity
 

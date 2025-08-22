@@ -40,7 +40,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
     val navController = LocalNavController.current
-
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -60,8 +59,11 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
         }
     }
 
+    //
+
     LoginScreenContent(
         phoneNumber = state.phoneNumber,
+
         password = state.password,
         phoneNumberError = state.phoneNumberError,
         passwordError = state.passwordError,
@@ -73,7 +75,7 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
             // TODO: Navigate to forget password screen
         },
         onCreateAccountClick = {
-            navController.navigate(Screen.HomeScreen.route) // Adjust as needed
+            navController.navigate(Screen.SignUpScreen.route)
         },
         onGuestLoginClick = {
             // TODO: Handle login as guest
@@ -109,7 +111,7 @@ fun LoginScreenContent(
         Column(
             modifier = Modifier.padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = stringResource(id = R.string.email_or_phoneNumber),
