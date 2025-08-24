@@ -8,9 +8,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.ForgotPasswordScreen
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.ResetPasswordScreen
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.VerifyScreen
@@ -18,6 +20,7 @@ import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScr
 import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreenStepTwo
 import com.hyperdesign.myapplication.presentation.auth.signup.ui.SignUpScreen
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
+import com.hyperdesign.myapplication.presentation.menu.ui.MealDetails
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.MenuScreen
 import com.hyperdesign.myapplication.presentation.profile.ui.screens.ProfileScreen
 
@@ -62,6 +65,15 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.HomeScreen.route) { HomeScreen() }
                 composable(Screen.ProfileScreen.route) { ProfileScreen() }
                 composable(Screen.MenueScreen.route) { MenuScreen() }
+                composable(
+                    Screen.MealDetailsScreen.route,
+                    arguments = listOf(navArgument("mealJson") { type = NavType.StringType })
+                ) {backStackEntry ->
+                    val mealJson = backStackEntry.arguments?.getString("mealJson")
+                    MealDetails(mealJson = mealJson)
+
+
+                }
                 composable(Screen.SignUpScreen.route) { SignUpScreen() }
             }
         }

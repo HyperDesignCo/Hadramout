@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.main.navcontroller.AppNavigation
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.HadramoutTheme
@@ -48,7 +49,8 @@ class MainActivity : ComponentActivity() {
                 if (showSplash) {
                     CustomSplashScreen { showSplash = false }
                 } else {
-                    AppNavigation(startDestination = Screen.LoginInScreen.route)
+//                    HomeScreen()
+                    AppNavigation(startDestination = Screen.HomeScreen.route)
                 }
 
 

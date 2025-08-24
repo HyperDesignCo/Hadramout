@@ -42,7 +42,9 @@ data class Featured(
     val id: Int ,
     val title: String,
     val description: String,
-    val price: String
+    val price: String,
+    val quantity: Int = 1
+
 )
 
 @Composable
@@ -52,7 +54,7 @@ fun FeaturedWedgits(
 ) {
     Card(
         modifier = Modifier
-            .padding(vertical = 5.dp)
+            .padding(horizontal = 10.dp)
             .fillMaxWidth()
 //            .height(180.dp)
             .clip(RoundedCornerShape(8.dp)),

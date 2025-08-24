@@ -57,63 +57,58 @@ fun OffersScreen() {
 @Composable
 fun OffersScreenContent(offers:List<offers>,fetured: List<Featured>) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
 
-        Column(
-            modifier = Modifier
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+                .background(Color.White)
         ) {
-            Spacer(modifier = Modifier.height(15.dp))
+            item {
+                Column(
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(15.dp))
 
-            Text(
-                stringResource(R.string.offers),
-                color = Secondry,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-
-
-            LazyRow() {
-                items(items = offers, key = {offer -> offer.id}
-                ) { offer ->
-
-                    OffersList(offers = offer)
-                }
-
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                stringResource(R.string.featured),
-                color = Secondry,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LazyColumn {
-                items(items = fetured, key = {featured -> featured.id}) { featured ->
-                    FeaturedWedgits(
-                        featured = featured,
-                        onItemClick = { /* Handle click */ }
+                    Text(
+                        stringResource(R.string.offers),
+                        color = Secondry,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
                     )
-
-
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
+            item {
+                OffersList(offers = offers)
+            }
 
+            item {
+                Column(
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
 
+                    Text(
+                        stringResource(R.string.featured),
+                        color = Secondry,
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(top = 10.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
 
+            items(items = fetured, key = { featured -> featured.id }) { featured ->
+                FeaturedWedgits(
+                    featured = featured,
+                    onItemClick = { /* Handle click */ }
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
-    }
+
 
 
 }
