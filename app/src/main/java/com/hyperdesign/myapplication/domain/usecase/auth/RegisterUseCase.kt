@@ -1,7 +1,7 @@
 package com.hyperdesign.myapplication.domain.usecase.auth
 
 import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
-import com.hyperdesign.myapplication.domain.repo.AuthRepo
+import com.hyperdesign.myapplication.domain.repo.auth.AuthRepo
 
 class RegisterUseCase(
     private val authRepository: AuthRepo

@@ -3,6 +3,8 @@ package com.example.doctorona.data.di
 import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.data.remote.auth.NetworkingApiServices
 import com.hyperdesign.myapplication.data.remote.auth.NetworkingApiServicesImpl
+import com.hyperdesign.myapplication.data.remote.home.HomeApiServices
+import com.hyperdesign.myapplication.data.remote.home.HomeApiServicesImpl
 import com.hyperdesign.myapplication.presentation.utilies.Constants.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -49,6 +51,10 @@ val networkingModule = module {
 
         NetworkingApiServicesImpl(get())
 
+    }
+
+    single<HomeApiServices> {
+        HomeApiServicesImpl(get())
     }
 
 

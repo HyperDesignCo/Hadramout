@@ -1,4 +1,4 @@
-package com.hyperdesign.myapplication.domain.repo
+package com.hyperdesign.myapplication.domain.repo.auth
 
 import com.hyperdesign.myapplication.domain.Entity.LoginEntity
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest

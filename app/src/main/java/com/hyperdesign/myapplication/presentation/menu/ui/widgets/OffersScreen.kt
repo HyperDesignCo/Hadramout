@@ -22,9 +22,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.gms.common.Feature
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
-import com.hyperdesign.myapplication.presentation.home.ui.wedgit.Featured
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.FeaturedWedgits
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.OffersList
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.offers
@@ -36,16 +36,16 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 fun OffersScreen() {
 
     OffersScreenContent(offers = listOf(
-        offers(R.drawable.test_food, 1),
-        offers(R.drawable.test_food, 2),
-        offers(R.drawable.test_food, 3),
-        offers(R.drawable.test_food, 4),
-        offers(R.drawable.test_food, 5)
+//        offers(R.drawable.test_food, 1),
+//        offers(R.drawable.test_food, 2),
+//        offers(R.drawable.test_food, 3),
+//        offers(R.drawable.test_food, 4),
+//        offers(R.drawable.test_food, 5)
     ),
         fetured = listOf(
-            Featured(R.drawable.featured, 1, "Charcoal Grills", "Lorem ipsum dolor sitamet, Lorem ipsum dolor sitamet,", "$10.00"),
-            Featured(R.drawable.featured, 2, "Charcoal Grills", "Lorem ipsum dolor sitamet, Lorem ipsum dolor sitamet", "$12.00"),
-            Featured(R.drawable.featured, 3, "Charcoal Grills", "Lorem ipsum dolor sitamet, Lorem ipsum dolor sitamet", "$15.00")
+//            Featured(R.drawable.featured, 1, "Charcoal Grills", "Lorem ipsum dolor sitamet, Lorem ipsum dolor sitamet,", "$10.00"),
+//            Featured(R.drawable.featured, 2, "Charcoal Grills", "Lorem ipsum dolor sitamet, Lorem ipsum dolor sitamet", "$12.00"),
+//            Featured(R.drawable.featured, 3, "Charcoal Grills", "Lorem ipsum dolor sitamet, Lorem ipsum dolor sitamet", "$15.00")
 
         )
     )
@@ -55,7 +55,7 @@ fun OffersScreen() {
 
 
 @Composable
-fun OffersScreenContent(offers:List<offers>,fetured: List<Featured>) {
+fun OffersScreenContent(offers:List<offers>,fetured: List<Feature>) {
 
 
 
@@ -80,7 +80,7 @@ fun OffersScreenContent(offers:List<offers>,fetured: List<Featured>) {
             }
 
             item {
-                OffersList(offers = offers)
+//                OffersList(offers = offers)
             }
 
             item {
@@ -100,13 +100,13 @@ fun OffersScreenContent(offers:List<offers>,fetured: List<Featured>) {
                 }
             }
 
-            items(items = fetured, key = { featured -> featured.id }) { featured ->
-                FeaturedWedgits(
-                    featured = featured,
-                    onItemClick = { /* Handle click */ }
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-            }
+//            items(items = fetured, key = { featured -> featured.id }) { featured ->
+////                FeaturedWedgits(
+////                    featured = featured,
+////                    onItemClick = { /* Handle click */ }
+////                )
+//                Spacer(modifier = Modifier.height(10.dp))
+//            }
         }
 
 

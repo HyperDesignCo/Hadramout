@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,10 +26,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.google.gson.Gson
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
-import com.hyperdesign.myapplication.presentation.home.ui.wedgit.Featured
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SizeOption
 
@@ -36,7 +39,7 @@ import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SizeOption
 @Composable
 fun MealDetails(mealJson: String?) {
     val navController = LocalNavController.current
-    val featured = mealJson?.let { Gson().fromJson(it, Featured::class.java) }
+    val featured = mealJson?.let { Gson().fromJson(it, Meal::class.java) }
 
     featured?.let {
         var selectedSize by androidx.compose.runtime.mutableStateOf("small")
@@ -56,7 +59,7 @@ fun MealDetails(mealJson: String?) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealDetailsContent(
-    featured: Featured,
+    featured: Meal,
     selectedSize: String,
     scrollBehavior: TopAppBarScrollBehavior,
     onSizeSelected: (String) -> Unit,
@@ -97,8 +100,13 @@ fun MealDetailsContent(
                         .background(Color.Transparent),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(featured.image),
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(featured.image)
+                            .crossfade(true)
+                            .error(R.drawable.test_food)
+                            .placeholder(R.drawable.test_food)
+                            .build(),
                         contentDescription = featured.title,
                         modifier = Modifier
                             .fillMaxWidth(0.7f)
@@ -208,16 +216,16 @@ fun MealDetailsContent(
     }
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun MealDetailsScreenPreview() {
-    val sampleFeatured = Featured(
-        image = R.drawable.featured,
-        id = 1,
-        title = "Charcoal Grills",
-        description = "Lorem ipsum dolor sit amet",
-        price = "$10.00"
-    )
-    val mealJson = Gson().toJson(sampleFeatured)
-    MealDetails(mealJson)
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun MealDetailsScreenPreview() {
+//    val sampleFeatured = Featured(
+//        image = R.drawable.featured,
+//        id = 1,
+//        title = "Charcoal Grills",
+//        description = "Lorem ipsum dolor sit amet",
+//        price = "$10.00"
+//    )
+//    val mealJson = Gson().toJson(sampleFeatured)
+//    MealDetails(mealJson)
+//}

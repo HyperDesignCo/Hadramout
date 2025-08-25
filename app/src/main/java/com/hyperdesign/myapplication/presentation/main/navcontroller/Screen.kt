@@ -3,7 +3,8 @@ package com.hyperdesign.myapplication.presentation.main.navcontroller
 import android.net.Uri
 import com.google.gson.Gson
 import com.hyperdesign.myapplication.R
-import com.hyperdesign.myapplication.presentation.home.ui.wedgit.Featured
+import com.hyperdesign.myapplication.domain.Entity.HomeMenu
+import com.hyperdesign.myapplication.domain.Entity.Meal
 
 
 // Sealed class for all screens
@@ -25,7 +26,7 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
 
 
 
-fun goToScreenMealDetails(meal: Featured): String {
+fun goToScreenMealDetails(meal: Meal): String {
     val json = Uri.encode(Gson().toJson(meal))
     return "${ScreensConst.MEAL_DETAILS_SCREEN}/$json"
 }

@@ -1,6 +1,5 @@
 package com.hyperdesign.myapplication.presentation.home.ui.wedgit
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,70 +13,66 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.domain.Entity.Meal
 import kotlinx.coroutines.delay
 
 data class offers(
-    val image: Int,
-    val id: Int,
+    val image: String, // Changed from Int to String for URL
+    val id: Int
 )
 
 @Composable
-fun OffersList(offers: List<offers>) {
+fun OffersList(offers: List<Meal>) {
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { offers.size }
     )
 
-    // Auto-scroll every 3 seconds
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(3000) // Wait for 3 seconds
-            val nextPage = (pagerState.currentPage + 1) % offers.size
-            pagerState.animateScrollToPage(nextPage)
+    // Auto-scroll only if offers is not empty
+    LaunchedEffect(offers) {
+        if (offers.isNotEmpty()) {
+            while (true) {
+                delay(3000) // Wait for 3 seconds
+                val nextPage = (pagerState.currentPage + 1) % offers.size
+                pagerState.animateScrollToPage(nextPage)
+            }
         }
     }
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp) // Adjust height as needed
-            .padding(horizontal = 4.dp)
-    ) { page ->
-        Box(
+    if (offers.isEmpty()) {
+
+    } else {
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(150.dp)
                 .padding(horizontal = 4.dp)
-        ) {
-            Image(
-                painter = painterResource(id = offers[page].image),
-                contentDescription = "offer image ${offers[page].id}",
+        ) { page ->
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(10.dp)),
-                contentScale = ContentScale.Crop
-            )
+                    .padding(horizontal = 4.dp)
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(offers[page].image)
+                        .crossfade(true)
+                        .error(R.drawable.test_food)
+                        .placeholder(R.drawable.test_food)
+                        .build(),
+                    contentDescription = "Offer image ${offers[page].id}",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            }
         }
     }
-}
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun OffersListPreview() {
-    OffersList(
-        offers = listOf(
-            offers(
-                image = R.drawable.test_food,
-                id = 1
-            ),
-            offers(
-                image = R.drawable.test_food,
-                id = 2
-            )
-        )
-    )
 }

@@ -1,10 +1,8 @@
-package com.hyperdesign.myapplication.data.remote.dto
+package com.hyperdesign.myapplication.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-
-
-data class LoginResponse(
+data class RegisterResponse(
     @SerializedName("access_token")
     val accessToken: String,
     @SerializedName("token_type")
@@ -13,12 +11,5 @@ data class LoginResponse(
     val message : String,
 
 
-)
+    )
 
-data class User(
-    val id: Int,
-    val name : String,
-    val email : String,
-    val image : String,
-    val mobile : String
-)

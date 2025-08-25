@@ -1,12 +1,12 @@
 package com.hyperdesign.myapplication.presentation.home.ui.wedgit
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,132 +28,102 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 
-data class Featured(
-    val image: Int,
-    val id: Int ,
-    val title: String,
-    val description: String,
-    val price: String,
-    val quantity: Int = 1
-
-)
-
 @Composable
 fun FeaturedWedgits(
-    featured: Featured,
-    onItemClick: (Featured) -> Unit
+    meal: Meal,
+    onItemClick: (Meal) -> Unit
 ) {
     Card(
         modifier = Modifier
             .padding(horizontal = 10.dp)
             .fillMaxWidth()
-//            .height(180.dp)
+            .height(180.dp) // Fixed height for consistent card size
             .clip(RoundedCornerShape(8.dp)),
-        colors = cardColors(
-            containerColor = Gray
-        ),
-        onClick = { onItemClick(featured) }
+        colors = cardColors(containerColor = Gray),
+        onClick = { onItemClick(meal) }
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(meal.image)
+                    .crossfade(true)
+                    .error(R.drawable.test_food)
+                    .placeholder(R.drawable.test_food)
+                    .build(),
+                contentDescription = "Meal image ${meal.title}",
+                modifier = Modifier
+                    .width(140.dp)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .fillMaxHeight()
+                    .weight(1f)
             ) {
-                Image(
-                    painter = painterResource(id = featured.image),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(140.dp)
-                        .height(160.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+                Text(
+                    text = meal.title,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Secondry,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-
-                Column(
-                    modifier = Modifier.padding(start = 4.dp)
-                        .fillMaxSize()
+                Text(
+                    text = meal.description,
+                    fontSize = 14.sp,
+                    color = Color.LightGray,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "EGY ${meal.price}",
+                    fontSize = 14.sp,
+                    color = Secondry
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .background(color = Primary, shape = CircleShape)
+                        .align(Alignment.End),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = featured.title,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondry
-                    )
-                    Text(
-                        text = featured.description,
-                        fontSize = 14.sp,
-                        color = Color.LightGray
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = "EGY ${featured.price}",
-                        fontSize = 14.sp,
-                        color = Secondry
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-
-                    Box(
-                        modifier = Modifier
-
-                            .size(30.dp)
-                            .background(color = Primary, shape = CircleShape)
-                            .align(Alignment.End)
-
-                        ,
-                        contentAlignment = Alignment.BottomEnd
-
+                    IconButton(
+                        onClick = { /* Handle add to cart */ },
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        IconButton(
-                            onClick = { /* Handle click */ },
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add to Cart",
-                                tint = Color.White,
-                                modifier = Modifier.size(15.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add to Cart",
+                            tint = Color.White,
+                            modifier = Modifier.size(15.dp)
+                        )
                     }
-
                 }
-
-
-
             }
         }
     }
-}
-
-@Composable
-@Preview(
-    showBackground = true,
-    showSystemUi = true
-)
-fun FeaturedWedgitsPreview() {
-    FeaturedWedgits(
-        featured = Featured(
-            image = com.hyperdesign.myapplication.R.drawable.featured,
-            title = "Featured Item",
-            description = "This is a description of the featured item.",
-            price = "100.00"
-            , id = 1
-        ),
-        onItemClick = {}
-    )
 }

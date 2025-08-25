@@ -4,6 +4,7 @@ package com.hyperdesign.myapplication.presentation.di
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
 import com.hyperdesign.myapplication.presentation.auth.signup.mvi.RegisterViewModel
+import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
 import com.hyperdesign.myapplication.presentation.utilies.ValidatePhoneNumber
 import com.hyperdesign.myapplication.presentation.utilies.ValidateText
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -23,5 +24,10 @@ val viewModels = module {
     viewModel<RegisterViewModel>{
         RegisterViewModel(get(),get(),get(),get(),get())
     }
+
+    viewModel<HomeViewModel> {
+        HomeViewModel(get(),get())
+    }
 }
+
 

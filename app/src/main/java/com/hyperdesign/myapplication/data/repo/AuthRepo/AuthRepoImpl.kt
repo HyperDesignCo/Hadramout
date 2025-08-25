@@ -6,7 +6,7 @@ import com.hyperdesign.myapplication.domain.Entity.LoginEntity
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest
 import com.hyperdesign.myapplication.domain.Entity.RegisterModelEntity
 import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
-import com.hyperdesign.myapplication.domain.repo.AuthRepo
+import com.hyperdesign.myapplication.domain.repo.auth.AuthRepo
 
 class AuthRepoImpl(
     private val authService: NetworkingApiServices
