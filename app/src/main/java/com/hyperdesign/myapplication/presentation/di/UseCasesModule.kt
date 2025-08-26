@@ -4,6 +4,7 @@ import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.RegisterUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
+import com.hyperdesign.myapplication.domain.usecase.menu.GetMenuUseCase
 import org.koin.dsl.module
 
 
@@ -23,5 +24,9 @@ val useCasesModule = module {
 
     single<GetHomeMenueUseCase> {
         GetHomeMenueUseCase(get())
+    }
+
+    single<GetMenuUseCase> {
+        GetMenuUseCase(get())
     }
 }

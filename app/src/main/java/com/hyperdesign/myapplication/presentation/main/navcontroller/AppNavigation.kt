@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.main.navcontroller
 
+import MenuScreen
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -21,7 +22,6 @@ import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScr
 import com.hyperdesign.myapplication.presentation.auth.signup.ui.SignUpScreen
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.MealDetails
-import com.hyperdesign.myapplication.presentation.menu.ui.screens.MenuScreen
 import com.hyperdesign.myapplication.presentation.profile.ui.screens.ProfileScreen
 
 val bottomNavScreens = listOf(

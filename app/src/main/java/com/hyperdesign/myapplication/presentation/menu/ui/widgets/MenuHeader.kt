@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.domain.Entity.MenuEntity
 
 @Composable
 fun MenuHeader(
@@ -39,9 +40,10 @@ fun MenuHeader(
     onCartPressed: () -> Unit = {},
     cardCount: String? = "7",
     selectedTab: Int = 0,
-    onTabSelected: (Int) -> Unit = {}
+    onTabSelected: (Int) -> Unit = {},
+    menuTabs:List<MenuEntity>
 ) {
-    val tabs = listOf("Offers", "Chickens", "Meat", "Charcoal Grills")
+    val tabs = menuTabs
 
     Box(
         modifier = Modifier
@@ -155,7 +157,7 @@ fun MenuHeader(
                             ),
                             text = {
                                 Text(
-                                    text = title,
+                                    text = title.title,
                                     textAlign = TextAlign.Center,
                                     color = if (selectedTab == index) Color.White else Color.White.copy(
                                         alpha = 0.7f
@@ -171,14 +173,14 @@ fun MenuHeader(
     }
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun MenuHeaderPreview() {
-    MenuHeader(
-        onBackPressed = {},
-        onCartPressed = {},
-        cardCount = "3",
-        selectedTab = 0,
-        onTabSelected = {}
-    )
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun MenuHeaderPreview() {
+//    MenuHeader(
+//        onBackPressed = {},
+//        onCartPressed = {},
+//        cardCount = "3",
+//        selectedTab = 0,
+//        onTabSelected = {}
+//    )
+//}

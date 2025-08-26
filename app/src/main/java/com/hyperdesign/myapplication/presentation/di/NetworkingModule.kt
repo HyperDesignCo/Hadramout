@@ -5,6 +5,8 @@ import com.hyperdesign.myapplication.data.remote.auth.NetworkingApiServices
 import com.hyperdesign.myapplication.data.remote.auth.NetworkingApiServicesImpl
 import com.hyperdesign.myapplication.data.remote.home.HomeApiServices
 import com.hyperdesign.myapplication.data.remote.home.HomeApiServicesImpl
+import com.hyperdesign.myapplication.data.remote.menu.MenuApiServices
+import com.hyperdesign.myapplication.data.remote.menu.MenuApiServicesImpl
 import com.hyperdesign.myapplication.presentation.utilies.Constants.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -55,6 +57,10 @@ val networkingModule = module {
 
     single<HomeApiServices> {
         HomeApiServicesImpl(get())
+    }
+
+    single<MenuApiServices> {
+        MenuApiServicesImpl(get())
     }
 
 

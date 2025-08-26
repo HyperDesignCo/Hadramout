@@ -208,10 +208,10 @@ fun HomeScreenContent(
                                 modifier = Modifier.background(Color.White)
                             ) {
                                 if (branches.isEmpty()) {
-                                    DropdownMenuItem(
-                                        text = { Text("No branches available") },
-                                        onClick = { expanded = false }
-                                    )
+//                                    DropdownMenuItem(
+//                                        text = { Text("No branches available") },
+//                                        onClick = { expanded = false }
+//                                    )
                                 } else {
                                     branches.forEach { branch ->
                                         DropdownMenuItem(

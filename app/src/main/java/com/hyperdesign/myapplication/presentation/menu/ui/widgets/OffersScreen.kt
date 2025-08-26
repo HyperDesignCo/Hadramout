@@ -101,7 +101,7 @@ fun OffersScreenContent(offers:List<offers>,fetured: List<Feature>) {
             }
 
 //            items(items = fetured, key = { featured -> featured.id }) { featured ->
-////                FeaturedWedgits(
+//                FeaturedWedgits(
 ////                    featured = featured,
 ////                    onItemClick = { /* Handle click */ }
 ////                )
