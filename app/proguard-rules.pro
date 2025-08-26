@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.hyperdesign.myapplication.data.dto.MealDTO { *; }
+-keepclassmembers class com.hyperdesign.myapplication.data.dto.MealDTO { *; }
+-keep class com.hyperdesign.myapplication.data.dto.** { *; }

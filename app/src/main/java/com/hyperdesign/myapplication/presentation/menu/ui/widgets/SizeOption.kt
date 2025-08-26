@@ -6,16 +6,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hyperdesign.myapplication.domain.Entity.SubChoiceEntity
 
 @Composable
 fun SizeOption(size: String, price: String, selectedSize: String, onSelected: (String) -> Unit) {
@@ -24,17 +27,52 @@ fun SizeOption(size: String, price: String, selectedSize: String, onSelected: (S
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (selectedSize == size) Color(0xFFFFE3CC) else Color(0xFFF8F8F8))
+            .background(if (selectedSize == size)  Brush.linearGradient(
+                listOf(Color(0xFFF15A25), Color(0xFFFCB203))
+            ) else Brush.linearGradient(
+                listOf(Color(0xFFF8F8F8), Color(0xFFF8F8F8))
+            ) )
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(size, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Text(size, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = if (selectedSize == size) Color.White else Color.Black)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("ج.م$price", fontSize = 14.sp, color = Color.Gray)
+            Text("ج.م$price", fontSize = 14.sp, color = if (selectedSize == size) Color.White else Color.Black)
             RadioButton(
                 selected = selectedSize == size,
                 onClick = { onSelected(size) }
+            )
+        }
+    }
+}
+
+@Composable
+fun SubChoiceOption(
+    subChoice: SubChoiceEntity,
+    isSelected: Boolean,
+    onSelected: (String, Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected)  Brush.linearGradient(
+                listOf(Color(0xFFF15A25), Color(0xFFFCB203))
+            ) else Brush.linearGradient(
+                listOf(Color(0xFFF8F8F8), Color(0xFFF8F8F8))
+            ))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(subChoice.title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = if (isSelected) Color.White else Color.Black)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("ج.م${subChoice.price}", fontSize = 14.sp, color = if (isSelected) Color.White else Color.Black)
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = { onSelected(subChoice.id, it) }
             )
         }
     }

@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.data.remote.menu
 
 import android.util.Log
+import com.hyperdesign.myapplication.data.dto.MealDetailResponseDto
 import com.hyperdesign.myapplication.data.dto.MenuResponseDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -27,6 +28,25 @@ class MenuApiServicesImpl(
 
         }
 
+    }
+
+    override suspend fun showMealDetails(
+        branchId: Int,
+        mealId: Int
+    ): MealDetailResponseDto {
+        return try {
+            val response = client.get("show_meal") {
+                contentType(ContentType.Application.Json)
+                parameter("branch_id", branchId)
+                parameter("meal_id", mealId)
+            }.body<MealDetailResponseDto>()
+            Log.d("MenuApiServices", "Menu Response for branchId=$branchId: $response")
+            response
+
+        }catch (e:Exception){
+            Log.e("MenuApiServices", "getMenus failed for branchId=$branchId: ${e.message}")
+            throw e
+        }
     }
 
 

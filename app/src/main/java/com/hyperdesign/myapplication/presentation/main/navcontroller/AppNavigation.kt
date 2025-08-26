@@ -21,7 +21,7 @@ import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScr
 import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreenStepTwo
 import com.hyperdesign.myapplication.presentation.auth.signup.ui.SignUpScreen
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
-import com.hyperdesign.myapplication.presentation.menu.ui.MealDetails
+import com.hyperdesign.myapplication.presentation.menu.ui.MealDetailsScreen
 import com.hyperdesign.myapplication.presentation.profile.ui.screens.ProfileScreen
 
 val bottomNavScreens = listOf(
@@ -70,7 +70,7 @@ fun AppNavigation(startDestination: String) {
                     arguments = listOf(navArgument("mealJson") { type = NavType.StringType })
                 ) {backStackEntry ->
                     val mealJson = backStackEntry.arguments?.getString("mealJson")
-                    MealDetails(mealJson = mealJson)
+                    MealDetailsScreen(mealJson = mealJson)
 
 
                 }

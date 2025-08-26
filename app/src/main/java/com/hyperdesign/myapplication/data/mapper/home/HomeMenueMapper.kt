@@ -2,12 +2,12 @@ package com.hyperdesign.myapplication.data.mapper.home
 
 import com.hyperdesign.myapplication.data.dto.HomeMenuDTO
 import com.hyperdesign.myapplication.data.dto.HomeResponseDTO
-import com.hyperdesign.myapplication.data.dto.MealDTO
+import com.hyperdesign.myapplication.data.dto.MealMenuDto
 import com.hyperdesign.myapplication.domain.Entity.HomeMenu
 import com.hyperdesign.myapplication.domain.Entity.HomeResponse
 import com.hyperdesign.myapplication.domain.Entity.Meal
 
-fun MealDTO.toDomain(): Meal {
+fun MealMenuDto.toDomain(): Meal {
     return Meal(
         id = id.toIntOrNull() ?: 0,
         title = title,

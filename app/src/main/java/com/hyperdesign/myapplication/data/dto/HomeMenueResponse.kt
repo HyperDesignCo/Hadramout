@@ -7,17 +7,17 @@ data class HomeResponseDTO(
     @SerializedName("home_menus")
     val homeMenus: List<HomeMenuDTO>,
     @SerializedName("best_sales_meals")
-    val bestSalesMeals: List<MealDTO>,
+    val bestSalesMeals: List<MealMenuDto>,
     val message: String
 )
 
 data class HomeMenuDTO(
     val id: String,
     val title: String,
-    val meals: List<MealDTO>
+    val meals: List<MealMenuDto>
 )
 
-data class MealDTO(
+data class MealMenuDto(
     val id: String,
     val title: String,
     val description: String,
