@@ -34,7 +34,7 @@ val viewModels = module {
     viewModel<MenuViewModel> { MenuViewModel(get()) }
 
     viewModel<MealDetailsViewModel> {
-        MealDetailsViewModel(get())
+        MealDetailsViewModel(get(),get())
     }
 }
 

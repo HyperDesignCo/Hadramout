@@ -46,3 +46,8 @@ data class SubChoiceDto(
     val price: String
 )
 
+
+data class AddToCartResponseDto(
+    val message: String
+)
+

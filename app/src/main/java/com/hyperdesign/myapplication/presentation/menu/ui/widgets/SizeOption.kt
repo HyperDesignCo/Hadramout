@@ -47,32 +47,46 @@ fun SizeOption(size: String, price: String, selectedSize: String, onSelected: (S
     }
 }
 
+
+
 @Composable
 fun SubChoiceOption(
     subChoice: SubChoiceEntity,
+    choiceId: String, // Added to pass the parent choice ID
     isSelected: Boolean,
-    onSelected: (String, Boolean) -> Unit
+    onSelected: (String, String, Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected)  Brush.linearGradient(
-                listOf(Color(0xFFF15A25), Color(0xFFFCB203))
-            ) else Brush.linearGradient(
-                listOf(Color(0xFFF8F8F8), Color(0xFFF8F8F8))
-            ))
+            .background(
+                if (isSelected) Brush.linearGradient(
+                    listOf(Color(0xFFF15A25), Color(0xFFFCB203))
+                ) else Brush.linearGradient(
+                    listOf(Color(0xFFF8F8F8), Color(0xFFF8F8F8))
+                )
+            )
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(subChoice.title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = if (isSelected) Color.White else Color.Black)
+        Text(
+            text = subChoice.title,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isSelected) Color.White else Color.Black
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("ج.م${subChoice.price}", fontSize = 14.sp, color = if (isSelected) Color.White else Color.Black)
+            Text(
+                text = "ج.م${subChoice.price}",
+                fontSize = 14.sp,
+                color = if (isSelected) Color.White else Color.Black
+            )
             Checkbox(
                 checked = isSelected,
-                onCheckedChange = { onSelected(subChoice.id, it) }
+                onCheckedChange = { onSelected(choiceId, subChoice.id, it) }
             )
         }
     }

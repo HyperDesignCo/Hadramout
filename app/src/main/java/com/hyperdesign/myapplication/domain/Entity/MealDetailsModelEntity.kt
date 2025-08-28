@@ -1,5 +1,7 @@
 package com.hyperdesign.myapplication.domain.Entity
 
+import com.google.gson.annotations.SerializedName
+
 
 data class MealDetailsResponseEntity(
     val meal: MealDetailsEntity,
@@ -37,4 +39,16 @@ data class SubChoiceEntity(
     val id: String,
     val title: String,
     val price: Double
+)
+
+data class AddToCartResponseEntity(
+    val message: String
+)
+
+data class AddOrderRequest(
+    @SerializedName("branch_id") val branchId: String,
+    @SerializedName("meal_id") val mealId: String,
+    @SerializedName("quantity") val quantity: String,
+    @SerializedName("size_id") val sizeId: String,
+    @SerializedName("choices") val choices: Map<String, List<String>>
 )

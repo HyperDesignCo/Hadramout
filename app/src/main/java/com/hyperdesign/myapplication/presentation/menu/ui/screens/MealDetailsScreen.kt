@@ -2,9 +2,11 @@
 
 package com.hyperdesign.myapplication.presentation.menu.ui
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,13 +38,13 @@ import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.ChoiceEntity
 import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsEntity
-import com.hyperdesign.myapplication.domain.Entity.MealEntity
 import com.hyperdesign.myapplication.domain.Entity.SubChoiceEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetailsViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetialsIntents
+import com.hyperdesign.myapplication.presentation.menu.ui.widgets.FoodCardDesign
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SizeOption
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SubChoiceOption
 import org.koin.androidx.compose.koinViewModel
@@ -53,7 +55,9 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
     val mealDetailsState by mealDetailsViewModel.MealDetailsState.collectAsStateWithLifecycle()
     val featured = mealJson?.let { Gson().fromJson(it, Meal::class.java) }
 
+    val context = LocalContext.current
     var mealDetails by remember { mutableStateOf<MealDetailsEntity?>(null) }
+    var addCartMessage by remember { mutableStateOf("") }
 
     // Trigger API call only once when the composable is first composed
     LaunchedEffect(Unit) {
@@ -67,13 +71,23 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
     // Update mealDetails when state changes
     LaunchedEffect(mealDetailsState) {
         mealDetails = mealDetailsState.MealDetailsData?.meal
+        addCartMessage = mealDetailsState.AddToCartData?.message.orEmpty()
+        if (mealDetailsState.AddToCartData?.message== "Meal Added successfully") {
+            Toast.makeText(context, "Meal Added successfully", Toast.LENGTH_SHORT).show()
+
+        }else if (mealDetailsState.AddToCartData?.message != null) {
+            Toast.makeText(context, mealDetailsState.AddToCartData?.message, Toast.LENGTH_SHORT).show()
+        }
     }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Show content only when data is available
         mealDetails?.let { meal ->
             var selectedSize by remember { mutableStateOf(meal.sizes.firstOrNull()?.sizeTitle ?: "") }
-            var selectedSubChoices by remember { mutableStateOf(setOf<String>()) }
+            var selectedSizeId by remember { mutableStateOf(meal.sizes.firstOrNull()?.id ?: "") }
+            var selectedChoiceId by remember { mutableStateOf<String?>(null) }
+            var selectedSubChoices by remember { mutableStateOf<Map<String, List<String>>>(emptyMap()) }
             val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
             MealDetailsContent(
@@ -82,16 +96,52 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 selectedSubChoices = selectedSubChoices,
                 scrollBehavior = scrollBehavior,
                 onSizeSelected = { size -> selectedSize = size },
-                onSubChoiceSelected = { subChoiceId, isSelected ->
-                    selectedSubChoices = if (isSelected) {
-                        selectedSubChoices + subChoiceId
-                    } else {
-                        selectedSubChoices - subChoiceId
+                onSubChoiceSelected = { choiceId, subChoiceId, isSelected ->
+                    selectedSubChoices = selectedSubChoices.toMutableMap().apply {
+                        val currentList = this[choiceId]?.toMutableList() ?: mutableListOf()
+                        if (isSelected) {
+                            if (!currentList.contains(subChoiceId)) {
+                                currentList.add(subChoiceId)
+                            }
+                        } else {
+                            currentList.remove(subChoiceId)
+                        }
+                        this[choiceId] = currentList
                     }
                 },
                 onBackPressed = { navController.popBackStack() },
-                onAddToCart = { /* TODO: Implement add to cart */ }
+                onSelectedSizeId = { sizeId -> selectedSizeId = sizeId },
+                onSelectedChoiceId = { choiceId -> selectedChoiceId = choiceId },
+                selectedChoiceId = selectedChoiceId,
+                onAddToCart = {
+                    mealDetailsViewModel.handleIntents(
+                        MealDetialsIntents.addMealToCart(
+                            mealId = featured?.id.toString(),
+                            quantity = "2",
+                            sizeId = selectedSizeId,
+                            branchId = "2",
+                            choices = selectedSubChoices
+                        )
+                    )
+                }
             )
+        }
+
+        if (addCartMessage.isNotEmpty() && addCartMessage == "Meal Added successfully") {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .clickable { }
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    FoodCardDesign(
+                        imageUrl = featured?.image.orEmpty(),
+                        onGoToCart = { navController.navigate("cart") }, // Navigate to cart screen
+                        onGoToMenu = { navController.navigate("menu") }  // Navigate to menu screen
+                    )
+                }
+            }
         }
 
         // Show loading indicator when isLoading is true or data is not yet loaded
@@ -138,12 +188,15 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
 fun MealDetailsContent(
     meal: MealDetailsEntity?,
     selectedSize: String,
-    selectedSubChoices: Set<String>,
+    selectedSubChoices: Map<String, List<String>>,
     scrollBehavior: TopAppBarScrollBehavior,
     onSizeSelected: (String) -> Unit,
-    onSubChoiceSelected: (String, Boolean) -> Unit,
+    onSubChoiceSelected: (String, String, Boolean) -> Unit,
     onBackPressed: () -> Unit,
     onAddToCart: () -> Unit,
+    onSelectedSizeId: (String) -> Unit,
+    onSelectedChoiceId: (String) -> Unit,
+    selectedChoiceId: String?,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -157,7 +210,9 @@ fun MealDetailsContent(
         derivedStateOf {
             val selectedSizePrice = meal?.sizes?.find { it.sizeTitle == selectedSize }?.price ?: meal?.price ?: 0.0
             val subChoicesPrice = meal?.choices?.flatMap { it.subChoices }
-                ?.filter { selectedSubChoices.contains(it.id) }
+                ?.filter { subChoice ->
+                    selectedSubChoices.any { entry -> entry.value.contains(subChoice.id) }
+                }
                 ?.sumOf { it.price } ?: 0.0
             selectedSizePrice + subChoicesPrice
         }
@@ -253,10 +308,7 @@ fun MealDetailsContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-//                .padding(bottom = bottomBarHeight + 16.dp) // Dynamic padding + extra margin
-
-                ,
+                .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 80.dp)
         ) {
             item {
@@ -288,7 +340,8 @@ fun MealDetailsContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, Color.Black),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.Black),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
@@ -304,7 +357,10 @@ fun MealDetailsContent(
                                     size = size.sizeTitle,
                                     price = String.format("%.2f", size.price),
                                     selectedSize = selectedSize,
-                                    onSelected = onSizeSelected
+                                    onSelected = { selected ->
+                                        onSizeSelected(selected)
+                                        onSelectedSizeId(size.id)
+                                    }
                                 )
                             }
                         }
@@ -315,34 +371,42 @@ fun MealDetailsContent(
 
             // Choices Section
             meal?.choices?.forEach { choice ->
-                if (choice.subChoices.isNotEmpty()) {
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, Color.Black),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(8.dp)) {
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.Black),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp)) {
+
                                 Text(
                                     text = choice.choiceTitle,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                    color = if (selectedChoiceId == choice.id) Color.White else Color.Black
                                 )
-                                choice.subChoices.forEach { subChoice ->
-                                    SubChoiceOption(
-                                        subChoice = subChoice,
-                                        isSelected = selectedSubChoices.contains(subChoice.id),
-                                        onSelected = onSubChoiceSelected
-                                    )
+
+
+                            // SubChoices
+                            if (choice.subChoices.isNotEmpty()) {
+                                Column(modifier = Modifier.padding(start = 16.dp)) {
+                                    choice.subChoices.forEach { subChoice ->
+                                        SubChoiceOption(
+                                            subChoice = subChoice,
+                                            choiceId = choice.id,
+                                            isSelected = selectedSubChoices[choice.id]?.contains(subChoice.id) == true,
+                                            onSelected = onSubChoiceSelected
+                                        )
+                                    }
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

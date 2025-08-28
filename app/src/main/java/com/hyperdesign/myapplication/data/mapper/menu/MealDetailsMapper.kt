@@ -1,10 +1,12 @@
 package com.hyperdesign.myapplication.data.mapper.menu
 
+import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
 import com.hyperdesign.myapplication.data.dto.ChoiceDto
 import com.hyperdesign.myapplication.data.dto.MealDetailResponseDto
 import com.hyperdesign.myapplication.data.dto.MealDetailsDto
 import com.hyperdesign.myapplication.data.dto.SizeDto
 import com.hyperdesign.myapplication.data.dto.SubChoiceDto
+import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.ChoiceEntity
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsEntity
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsResponseEntity
@@ -61,5 +63,11 @@ fun SubChoiceDto.toDomain(): SubChoiceEntity {
         id = id,
         title = title,
         price = price.toDoubleOrNull() ?: 0.0,
+    )
+}
+
+fun AddToCartResponseDto.toDomain(): AddToCartResponseEntity {
+    return AddToCartResponseEntity(
+        message = message
     )
 }
