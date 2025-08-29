@@ -2,9 +2,11 @@ package com.hyperdesign.myapplication.data.remote.menu
 
 import android.util.Log
 import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
+import com.hyperdesign.myapplication.data.dto.CartResponseDto
 import com.hyperdesign.myapplication.data.dto.MealDetailResponseDto
 import com.hyperdesign.myapplication.data.dto.MenuResponseDto
 import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
+import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -63,6 +65,20 @@ class MenuApiServicesImpl(
             response
         }catch (e:Exception){
             Log.e("MenuApiServices", "getMenus failed for branchId=$addToCartRequest: ${e.message}")
+            throw e
+        }
+    }
+
+    override suspend fun showCart(showCartRequest: ShowCartRequest): CartResponseDto {
+        return try {
+            val response =client.post("showCart"){
+                contentType(ContentType.Application.Json)
+                setBody(showCartRequest)
+            }.body<CartResponseDto>()
+            Log.d("MenuApiServices", "Menu Response for branchId=$showCartRequest: $response")
+            response
+        }catch (e:Exception){
+            Log.e("MenuApiServices", "getMenus failed for branchId=$showCartRequest: ${e.message}")
             throw e
         }
     }

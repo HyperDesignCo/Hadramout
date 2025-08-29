@@ -15,6 +15,7 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
     object VerifyScreen : Screen(ScreensConst.Verify_Screen)
 
     object SignUpScreen : Screen(ScreensConst.Sign_Up_Screen)
+    object CartScreen : Screen(ScreensConst.Cart_Screen)
 
     object MealDetailsScreen : Screen("${ScreensConst.MEAL_DETAILS_SCREEN}/{mealJson}")
     object ResetPasswordScreen : Screen(ScreensConst.RESET_PASSWORD_SCREEN)

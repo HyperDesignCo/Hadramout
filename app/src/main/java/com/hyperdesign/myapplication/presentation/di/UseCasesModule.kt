@@ -2,11 +2,13 @@ package com.hyperdesign.myapplication.presentation.di
 
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.RegisterUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.AddMealToCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMealDetailsUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMenuUseCase
+import io.ktor.http.auth.HttpAuthHeader
 import org.koin.dsl.module
 
 
@@ -38,5 +40,9 @@ val useCasesModule = module {
 
     single<AddMealToCartUseCase> {
         AddMealToCartUseCase(get())
+    }
+
+    single<ShowCartUseCase> {
+        ShowCartUseCase(get())
     }
 }

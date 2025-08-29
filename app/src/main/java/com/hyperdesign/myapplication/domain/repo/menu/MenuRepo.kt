@@ -2,8 +2,10 @@ package com.hyperdesign.myapplication.domain.repo.menu
 
 import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.CartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.MenueResponse
+import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 
 interface MenuRepo {
     suspend fun getMenus(branchId: Int): MenueResponse
@@ -11,4 +13,6 @@ interface MenuRepo {
     suspend fun showMealDetails(branchId: Int, mealId: Int): MealDetailsResponseEntity
 
     suspend fun addMealToCart(addToCartRequest: AddOrderRequest): AddToCartResponseEntity
+
+    suspend fun showCart(showCartRequest: ShowCartRequest): CartResponseEntity
 }

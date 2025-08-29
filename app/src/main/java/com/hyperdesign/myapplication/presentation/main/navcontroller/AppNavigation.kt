@@ -22,6 +22,7 @@ import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScr
 import com.hyperdesign.myapplication.presentation.auth.signup.ui.SignUpScreen
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.MealDetailsScreen
+import com.hyperdesign.myapplication.presentation.menu.ui.screens.CartScreen
 import com.hyperdesign.myapplication.presentation.profile.ui.screens.ProfileScreen
 
 val bottomNavScreens = listOf(
@@ -74,6 +75,7 @@ fun AppNavigation(startDestination: String) {
 
 
                 }
+                composable(Screen.CartScreen.route) { CartScreen() }
                 composable(Screen.SignUpScreen.route) { SignUpScreen() }
             }
         }

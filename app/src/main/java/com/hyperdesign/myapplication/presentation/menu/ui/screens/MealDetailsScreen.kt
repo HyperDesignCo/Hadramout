@@ -41,6 +41,7 @@ import com.hyperdesign.myapplication.domain.Entity.MealDetailsEntity
 import com.hyperdesign.myapplication.domain.Entity.SubChoiceEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetailsViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetialsIntents
@@ -137,8 +138,11 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     FoodCardDesign(
                         imageUrl = featured?.image.orEmpty(),
-                        onGoToCart = { navController.navigate("cart") }, // Navigate to cart screen
-                        onGoToMenu = { navController.navigate("menu") }  // Navigate to menu screen
+                        onGoToCart = { navController.navigate(Screen.CartScreen.route){
+                            popUpTo(Screen.MealDetailsScreen.route) { inclusive = true }
+
+                        } },
+                        onGoToMenu = { navController.popBackStack() }
                     )
                 }
             }

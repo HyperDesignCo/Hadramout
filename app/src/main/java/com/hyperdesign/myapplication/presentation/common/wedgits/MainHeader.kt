@@ -42,12 +42,13 @@ fun MainHeader(
     showIcon: Boolean = false,
     cardCount: String? = "7",
     showLogo: Boolean = false,
+    height: Int = 140,
     showTitle: Boolean = false
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp)
+            .height(height.dp)
     ) {
         Image(
             painter = painterResource(R.drawable.menueheader),

@@ -13,5 +13,6 @@ object ScreensConst {
 
     const val MEAL_DETAILS_SCREEN ="meal_details_screen"
 
+    const val Cart_Screen = "cart_screen"
     const val Sign_Up_Screen = "sign_up_screen"
 }
