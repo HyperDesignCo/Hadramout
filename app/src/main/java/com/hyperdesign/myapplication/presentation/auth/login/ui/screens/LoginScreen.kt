@@ -72,7 +72,7 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
         onPasswordChange = { viewModel.onIntent(LoginIntents.PasswordChanged(it)) },
         onLoginClick = { viewModel.onIntent(LoginIntents.LoginEvent(state.phoneNumber, state.password)) },
         onGoToForgetPasswordScreen = {
-            // TODO: Navigate to forget password screen
+           navController.navigate(Screen.ForgotPasswordScreen.route)
         },
         onCreateAccountClick = {
             navController.navigate(Screen.SignUpScreen.route)

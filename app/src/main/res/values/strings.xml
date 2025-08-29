@@ -71,4 +71,6 @@
     <string name="price">Price</string>
     <string name="delivery">Delivery</string>
     <string name="total_price">Total Price</string>
+    <string name="please_enter_your_email_to_receive_the_verification_code">Please enter your email to receive the verification code.</string>
+    <string name="send">Send</string>
 </resources>

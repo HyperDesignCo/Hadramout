@@ -160,7 +160,7 @@ fun SwipeToDismissCartItem(
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart) {
+            if (it == SwipeToDismissBoxValue.StartToEnd) {
                 onDelete()
                 true
             } else {
@@ -174,7 +174,7 @@ fun SwipeToDismissCartItem(
         state = dismissState,
         backgroundContent = {
             val color by animateColorAsState(
-                if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color.Red else Color.Transparent
+                if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Color.Red else Color.Transparent
             )
             Box(
                 Modifier

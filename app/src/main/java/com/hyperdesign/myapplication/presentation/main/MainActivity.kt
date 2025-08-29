@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,36 +29,78 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
+import com.hyperdesign.myapplication.presentation.main.mvi.AuthViewModel
 import com.hyperdesign.myapplication.presentation.main.navcontroller.AppNavigation
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.HadramoutTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import kotlin.getValue
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
+    private val authViewModel: AuthViewModel by viewModel()
+
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.O)
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-        setContent {
-            HadramoutTheme {
+        lifecycleScope.launch {
+            setContent {
+                HadramoutTheme {
 
-                var showSplash by remember { mutableStateOf(true) }
-                if (showSplash) {
-                    CustomSplashScreen { showSplash = false }
-                } else {
+                    var destination by remember { mutableStateOf<String?>(null) }
+
+                    var showSplash by remember { mutableStateOf(true) }
+                    if (showSplash) {
+
+                        LaunchedEffect(Unit) {
+                            destination = authViewModel.checkUserState()
+                        }
+                        CustomSplashScreen(onTimeout = {
+                            if (destination != null) {
+                                showSplash = false
+                            } else {
+                                showSplash = true
+                            }
+
+                        }
+                        )
+                    } else {
 //                    HomeScreen()
-                    AppNavigation(startDestination = Screen.HomeScreen.route)
+                        if (destination == null) {
+//
+                        } else {
+                            val startDestination = when (destination) {
+                                "home" -> {
+                                    Screen.HomeScreen.route
+                                }
+
+                                "login" -> Screen.LoginInScreen.route
+//                                "status" -> ScreenRoutes.SignUpScreenStep4.route
+//                                "verify" -> ScreenRoutes.OtpScreen.route
+                                else -> Screen.LoginInScreen.route
+                            }
+
+                            AppNavigation(startDestination = startDestination)
+                        }
+
+
+                    }
                 }
-
-
             }
         }
     }
 }
+
 
 
 @Composable
@@ -81,8 +124,12 @@ fun CustomSplashScreen(onTimeout: () -> Unit) {
                 .align(Alignment.Center)
         )
     }
+
     LaunchedEffect(Unit) {
         delay(2000)
         onTimeout()
     }
 }
+
+
+

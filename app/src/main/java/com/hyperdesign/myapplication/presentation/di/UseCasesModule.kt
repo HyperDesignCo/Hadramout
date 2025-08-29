@@ -1,6 +1,8 @@
 package com.hyperdesign.myapplication.presentation.di
 
+import com.hyperdesign.myapplication.domain.usecase.auth.ForgetPasswordUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
+import com.hyperdesign.myapplication.domain.usecase.auth.RefreshTokenUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.RegisterUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
@@ -44,5 +46,13 @@ val useCasesModule = module {
 
     single<ShowCartUseCase> {
         ShowCartUseCase(get())
+    }
+
+    single<ForgetPasswordUseCase>{
+        ForgetPasswordUseCase(get())
+    }
+
+    single<RefreshTokenUseCase> {
+        RefreshTokenUseCase(get())
     }
 }

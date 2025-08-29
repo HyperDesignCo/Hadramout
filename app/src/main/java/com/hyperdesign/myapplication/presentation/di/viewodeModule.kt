@@ -2,9 +2,11 @@ package com.hyperdesign.myapplication.presentation.di
 
 
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
+import com.hyperdesign.myapplication.presentation.auth.forgotpassword.mvi.ForgetPasswordViewModel
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
 import com.hyperdesign.myapplication.presentation.auth.signup.mvi.RegisterViewModel
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
+import com.hyperdesign.myapplication.presentation.main.mvi.AuthViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetailsViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
@@ -40,6 +42,14 @@ val viewModels = module {
 
     viewModel<CartViewModel>{
         CartViewModel(get())
+    }
+
+    viewModel<ForgetPasswordViewModel>{
+        ForgetPasswordViewModel(get(),get(),get())
+    }
+
+    viewModel<AuthViewModel>{
+        AuthViewModel(get(),get())
     }
 }
 
