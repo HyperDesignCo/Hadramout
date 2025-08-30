@@ -60,15 +60,32 @@ fun AppNavigation(startDestination: String) {
             ) {
                 composable(Screen.LoginInScreen.route) { LoginScreen() }
                 composable(Screen.LoginStepTwoScreen.route) { LoginScreenStepTwo() }
-                composable(Screen.ForgotPasswordScreen.route) { ForgotPasswordScreen() }
-                composable(Screen.VerifyScreen.route) { VerifyScreen() }
-                composable(Screen.ResetPasswordScreen.route) { ResetPasswordScreen() }
+                composable(Screen.ForgotPasswordScreen.route)
+                {
+                    ForgotPasswordScreen()
+                }
+                composable(Screen.VerifyScreen.route, arguments = listOf(navArgument("verifyJson"){type=
+                    NavType.StringType},navArgument("email"){type=NavType.StringType}))
+                {backStackEntry ->
+                    val verifyJson = backStackEntry.arguments?.getString("verifyJson")
+                    val email = backStackEntry.arguments?.getString("email")
+                    VerifyScreen(verifyJson = verifyJson, email = email)
+                }
+                composable(Screen.ResetPasswordScreen.route, arguments =
+                    listOf(navArgument("email"){
+                        type= NavType.StringType
+                    })
+                ){backStack->
+                    val email = backStack.arguments?.getString("email")
+                    ResetPasswordScreen(email = email)
+                }
                 composable(Screen.HomeScreen.route) { HomeScreen() }
                 composable(Screen.ProfileScreen.route) { ProfileScreen() }
                 composable(Screen.MenueScreen.route) { MenuScreen() }
                 composable(
                     Screen.MealDetailsScreen.route,
-                    arguments = listOf(navArgument("mealJson") { type = NavType.StringType })
+                    arguments = listOf(navArgument("mealJson") { type = NavType.StringType }),
+
                 ) {backStackEntry ->
                     val mealJson = backStackEntry.arguments?.getString("mealJson")
                     MealDetailsScreen(mealJson = mealJson)

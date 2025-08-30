@@ -32,6 +32,8 @@ import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomTextField
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
+import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDetails
+import com.hyperdesign.myapplication.presentation.main.navcontroller.goToVerifyScreen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.utilies.ValidationEvent
 import kotlinx.coroutines.flow.collectLatest
@@ -47,10 +49,13 @@ fun ForgotPasswordScreen(forgetPasswordViewModel: ForgetPasswordViewModel= koinV
         forgetPasswordViewModel.forgetPasswordChannel.collectLatest { event ->
             when (event) {
                 is ValidationEvent.Success -> {
-                    navController.navigate(Screen.VerifyScreen.route){
+                    val route = forgetPasswordState.ForgetPsasswordResponse?.let { goToVerifyScreen(it, email = forgetPasswordState.email) }
+                    navController.navigate(route.orEmpty()){
                         popUpTo(Screen.ForgotPasswordScreen.route) { inclusive = true }
 
                     }
+
+
                 }
                 is ValidationEvent.Failure -> {
                     Toast.makeText(context,event.errorMessage, Toast.LENGTH_SHORT).show()
@@ -99,7 +104,10 @@ fun ForGotPasswordScreenContent(password: String,passwordError: String?=null,onP
     Column(
         modifier = Modifier.fillMaxSize().background(Color.White)
     ) {
-        ForgetPasswordHeader(onBackPressesd = onBackPressed)
+        ForgetPasswordHeader(
+            title = stringResource(R.string.forgot_my_password),
+            body = stringResource(R.string.please_enter_your_email_to_receive_the_verification_code),
+            onBackPressesd = onBackPressed)
 
         Column(
             modifier = Modifier.padding(horizontal = 20.dp)

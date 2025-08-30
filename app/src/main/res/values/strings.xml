@@ -16,7 +16,7 @@
     <string name="login">Login</string>
     <string name="verify">VERIFY</string>
     <string name="your_identity">YOUR IDENTITY</string>
-    <string name="Enter_your_code">Enter the code we sent to the phone number</string>
+    <string name="Enter_your_code">Enter the code we sent to your email</string>
     <string name="dont_receive_code">Didn’t receive the code?</string>
     <string name="forgot_my_password">Forgot Password</string>
     <string name="enter_new_password">Enter new password</string>
@@ -73,4 +73,7 @@
     <string name="total_price">Total Price</string>
     <string name="please_enter_your_email_to_receive_the_verification_code">Please enter your email to receive the verification code.</string>
     <string name="send">Send</string>
+    <string name="enter_your_new_password">Enter your new password</string>
+    <string name="new_password_is_required">New password is required</string>
+    <string name="password_updated_successfully">password updated successfully</string>
 </resources>

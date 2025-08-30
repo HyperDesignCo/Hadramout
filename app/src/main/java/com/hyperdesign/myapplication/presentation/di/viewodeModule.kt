@@ -2,7 +2,9 @@ package com.hyperdesign.myapplication.presentation.di
 
 
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
+import com.hyperdesign.myapplication.presentation.auth.forgotpassword.mvi.CreatePasswordViewModel
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.mvi.ForgetPasswordViewModel
+import com.hyperdesign.myapplication.presentation.auth.forgotpassword.mvi.VerifyViewModel
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
 import com.hyperdesign.myapplication.presentation.auth.signup.mvi.RegisterViewModel
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
@@ -50,6 +52,14 @@ val viewModels = module {
 
     viewModel<AuthViewModel>{
         AuthViewModel(get(),get())
+    }
+
+    viewModel<VerifyViewModel>{
+        VerifyViewModel()
+    }
+
+    viewModel<CreatePasswordViewModel>{
+        CreatePasswordViewModel(get(),get(),get())
     }
 }
 

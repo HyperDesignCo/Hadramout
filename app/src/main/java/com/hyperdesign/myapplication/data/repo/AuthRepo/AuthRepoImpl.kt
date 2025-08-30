@@ -7,6 +7,7 @@ import com.hyperdesign.myapplication.domain.Entity.ForgetPasswordModeEntity
 import com.hyperdesign.myapplication.domain.Entity.ForgetPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.LoginEntity
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest
+import com.hyperdesign.myapplication.domain.Entity.NewPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.RegisterModelEntity
 import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
 import com.hyperdesign.myapplication.domain.repo.auth.AuthRepo
@@ -35,5 +36,10 @@ class AuthRepoImpl(
     override suspend fun refreshToken(refreshTokenRequest: ForgetPasswordRequest): LoginEntity {
         val response = authService.refreshToken(refreshTokenRequest)
         return response.toLoginDomain()
+    }
+
+    override suspend fun createNewPassword(newPasswordRequest: NewPasswordRequest): LoginEntity {
+        val response = authService.crateNewPassword(newPasswordRequest)
+        return  response.toLoginDomain()
     }
 }

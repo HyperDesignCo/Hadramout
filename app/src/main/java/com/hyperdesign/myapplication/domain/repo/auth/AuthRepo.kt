@@ -4,6 +4,7 @@ import com.hyperdesign.myapplication.domain.Entity.ForgetPasswordModeEntity
 import com.hyperdesign.myapplication.domain.Entity.ForgetPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.LoginEntity
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest
+import com.hyperdesign.myapplication.domain.Entity.NewPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.RegisterModelEntity
 import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
 
@@ -15,4 +16,6 @@ interface AuthRepo {
     suspend fun forgetPassword(forgetPasswordRequest: ForgetPasswordRequest): ForgetPasswordModeEntity
 
     suspend fun refreshToken(refreshTokenRequest: ForgetPasswordRequest): LoginEntity
+
+    suspend fun createNewPassword(newPasswordRequest: NewPasswordRequest): LoginEntity
 }

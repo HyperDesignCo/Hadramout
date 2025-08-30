@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.hyperdesign.myapplication.R
 
 @Composable
-fun ForgetPasswordHeader(onBackPressesd: () -> Unit) {
+fun ForgetPasswordHeader(title: String?=null,body:String?=null, onBackPressesd: () -> Unit) {
 
     Box(
         modifier = Modifier
@@ -81,7 +81,7 @@ fun ForgetPasswordHeader(onBackPressesd: () -> Unit) {
             )
 
             Text(
-                text =stringResource(id = R.string.forgot_my_password),
+                text =title?:"",
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .fillMaxWidth(),
@@ -93,7 +93,7 @@ fun ForgetPasswordHeader(onBackPressesd: () -> Unit) {
 
 
             Text(
-                text = stringResource(R.string.please_enter_your_email_to_receive_the_verification_code),
+                text = body?:"",
                 modifier = Modifier
                     .padding(top = 15.dp)
                     .fillMaxWidth(),

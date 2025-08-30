@@ -6,6 +6,7 @@ import com.hyperdesign.myapplication.data.dto.LoginResponse
 import com.hyperdesign.myapplication.data.dto.RegisterResponse
 import com.hyperdesign.myapplication.domain.Entity.ForgetPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest
+import com.hyperdesign.myapplication.domain.Entity.NewPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -61,6 +62,22 @@ class NetworkingApiServicesImpl(
 
         }catch (e:Exception){
             Log.e("NetworkingApiServices", "refreshToken failed for refreshTokenRequest=$refreshTokenRequest: ${e.message}", e)
+            throw e
+        }
+    }
+
+    override suspend fun crateNewPassword(newPasswordRequest: NewPasswordRequest): LoginResponse {
+        return try {
+            val response = client.post("user/new_password") {
+                contentType(ContentType.Application.Json)
+                setBody(newPasswordRequest)
+            }.body<LoginResponse>()
+            Log.d("NetworkingApiServices", "createPassword Response for createPasswordRequest=$newPasswordRequest: $response")
+
+            response
+
+        }catch (e: Exception){
+            Log.e("NetworkingApiServices", "createPassword failed for createPasswordRequest=$newPasswordRequest: ${e.message}", e)
             throw e
         }
     }

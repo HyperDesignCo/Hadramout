@@ -5,6 +5,7 @@ import com.hyperdesign.myapplication.data.dto.LoginResponse
 import com.hyperdesign.myapplication.data.dto.RegisterResponse
 import com.hyperdesign.myapplication.domain.Entity.ForgetPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest
+import com.hyperdesign.myapplication.domain.Entity.NewPasswordRequest
 import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
 
 interface NetworkingApiServices {
@@ -16,4 +17,6 @@ interface NetworkingApiServices {
     suspend fun forgetPassword(forgetPasswordRequest : ForgetPasswordRequest): ForgetPasswordResponseDto
 
     suspend fun refreshToken(refreshTokenRequest:ForgetPasswordRequest):LoginResponse
+
+    suspend fun crateNewPassword(newPasswordRequest: NewPasswordRequest):LoginResponse
 }

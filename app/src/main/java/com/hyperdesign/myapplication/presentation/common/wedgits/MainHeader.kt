@@ -35,7 +35,7 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 @Composable
 fun MainHeader(
     modifier: Modifier= Modifier,
-    title: String,
+    title: String?=null,
     showBackPressedIcon: Boolean = false,
     onBackPressesd: () -> Unit,
     onCartPressed: () -> Unit = {},
@@ -81,7 +81,7 @@ fun MainHeader(
 
             if (showTitle) {
                 Text(
-                    text = title,
+                    text = title?:"",
                     color = Color.White,
                     modifier = Modifier
                         .padding(top = 35.dp)

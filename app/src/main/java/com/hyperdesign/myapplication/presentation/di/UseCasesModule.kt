@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.di
 
+import com.hyperdesign.myapplication.domain.usecase.auth.CreateNewPasswordUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.ForgetPasswordUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.RefreshTokenUseCase
@@ -54,5 +55,9 @@ val useCasesModule = module {
 
     single<RefreshTokenUseCase> {
         RefreshTokenUseCase(get())
+    }
+
+    single<CreateNewPasswordUseCase> {
+        CreateNewPasswordUseCase(get())
     }
 }
