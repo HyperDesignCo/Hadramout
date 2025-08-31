@@ -43,7 +43,7 @@ val viewModels = module {
     }
 
     viewModel<CartViewModel>{
-        CartViewModel(get())
+        CartViewModel(get(),get(),get(),get())
     }
 
     viewModel<ForgetPasswordViewModel>{

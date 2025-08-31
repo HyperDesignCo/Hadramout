@@ -5,7 +5,10 @@ import com.hyperdesign.myapplication.domain.usecase.auth.ForgetPasswordUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.RefreshTokenUseCase
 import com.hyperdesign.myapplication.domain.usecase.auth.RegisterUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.CheckCouponUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.DeleteCartItemUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.UpdateCartItemQuantityUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.AddMealToCartUseCase
@@ -60,4 +63,16 @@ val useCasesModule = module {
     single<CreateNewPasswordUseCase> {
         CreateNewPasswordUseCase(get())
     }
-}
+
+    single<DeleteCartItemUseCase> {
+        DeleteCartItemUseCase(get())
+    }
+    single<UpdateCartItemQuantityUseCase> {
+        UpdateCartItemQuantityUseCase(get())
+    }
+
+    single<CheckCouponUseCase> {
+        CheckCouponUseCase(get())
+    }
+
+    }

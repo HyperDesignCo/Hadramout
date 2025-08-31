@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.widgets
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,58 +33,75 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
+import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PromoCodeInput() {
-    var promoCode by remember { mutableStateOf("") }
+fun PromoCodeInput(onClickCoponCkeck:()->Unit,copoun:String, copounMessage:String?=null, onCopounChange:(String)->Unit,) {
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .background(Gray, shape = RoundedCornerShape(8.dp))
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Button(
-            onClick = { /* Handle promo code activation */ },
+    Column() {
+        Row(
             modifier = Modifier
-                .size(100.dp, 48.dp)
-                .background(brush = Brush.horizontalGradient(listOf(Color(0xFFF15A25), Color(0xFFFCB203))), shape = RoundedCornerShape(24.dp)),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            shape = RoundedCornerShape(24.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .background(Gray, shape = RoundedCornerShape(8.dp))
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = stringResource(R.string.add),
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+            Button(
+                onClick = { onClickCoponCkeck() },
+                modifier = Modifier
+                    .size(100.dp, 48.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            listOf(
+                                Color(0xFFF15A25),
+                                Color(0xFFFCB203)
+                            )
+                        ), shape = RoundedCornerShape(24.dp)
+                    ),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.add),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+
+
+            OutlinedTextField(
+                value = copoun,
+                onValueChange = { onCopounChange(it) },
+
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Color.White, shape = RoundedCornerShape(8.dp)),
+                placeholder = {
+                    Text(
+                        text = stringResource(R.string.enter_promo_code),
+                        color = Color.Gray
+                    )
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Color.Black
+                )
             )
+
         }
-        Spacer(modifier = Modifier.width(8.dp))
-
-        OutlinedTextField(
-            value = promoCode,
-            onValueChange = { promoCode = it },
-            modifier = Modifier
-                .weight(1f)
-                .background(Color.White, shape = RoundedCornerShape(8.dp)),
-            placeholder = { Text(text = stringResource(R.string.enter_promo_code), color = Color.Gray) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            singleLine = true,
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                cursorColor = Color.Black
-            )
-        )
-
+        Text(copounMessage ?:"", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Secondry, modifier = Modifier.padding(horizontal = 16.dp))
     }
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun PromoCodeInputPreview() {
-    PromoCodeInput()
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun PromoCodeInputPreview() {
+//    PromoCodeInput(""){}
+//}

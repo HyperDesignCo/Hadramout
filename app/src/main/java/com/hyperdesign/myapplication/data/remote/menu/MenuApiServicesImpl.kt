@@ -6,7 +6,10 @@ import com.hyperdesign.myapplication.data.dto.CartResponseDto
 import com.hyperdesign.myapplication.data.dto.MealDetailResponseDto
 import com.hyperdesign.myapplication.data.dto.MenuResponseDto
 import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
+import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
+import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
+import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -79,6 +82,58 @@ class MenuApiServicesImpl(
             response
         }catch (e:Exception){
             Log.e("MenuApiServices", "getMenus failed for branchId=$showCartRequest: ${e.message}")
+            throw e
+        }
+    }
+
+    override suspend fun deleteCartItem(deleteCartRequest: DeleteCartRequest): CartResponseDto {
+        return try {
+            val response = client.post("deleteCartItem") {
+                contentType(ContentType.Application.Json)
+                setBody(deleteCartRequest)
+            }.body<CartResponseDto>()
+            Log.d("MenuApiServices", "deleteCart Response for branchId=$deleteCartRequest: $response")
+
+            response
+
+        }catch (e: Exception){
+            Log.e("MenuApiServices", "deleteCart failed for branchId=$deleteCartRequest: ${e.message}")
+
+            throw e
+        }
+    }
+
+    override suspend fun updateCartItemQuantity(updateCartItemQuantityRequest: UpdateCartItemQuantityRequest): CartResponseDto {
+        return try {
+            val response =client.post("updateCartItemQuantity") {
+                contentType(ContentType.Application.Json)
+                setBody(updateCartItemQuantityRequest)
+            }.body<CartResponseDto>()
+            Log.d("MenuApiServices", "updateCartItemQuantity Response for branchId=$updateCartItemQuantityRequest: $response")
+
+            response
+
+        }catch (e: Exception){
+            Log.e("MenuApiServices", "updateCartItem failed for branchId=$updateCartItemQuantityRequest: ${e.message}")
+
+            throw e
+        }
+    }
+
+    override suspend fun checkCouponCode(checkCouponRequest: CheckCouponRequest): AddToCartResponseDto {
+        return try {
+            val response = client.post("checkCoupon") {
+                contentType(ContentType.Application.Json)
+                setBody(checkCouponRequest)
+            }.body<AddToCartResponseDto>()
+
+            Log.d("MenuApiServices", "checkCoupon Response for branchId=$checkCouponRequest: $response")
+
+            response
+
+        }catch (e: Exception){
+            Log.e("MenuApiServices", "checkCoupon failed for branchId=$checkCouponRequest: ${e.message}")
+
             throw e
         }
     }

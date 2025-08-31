@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +44,8 @@ fun CartScreen(
     val cartMealState by cartViewModel.cartState.collectAsStateWithLifecycle()
 
     var cartMeals by remember { mutableStateOf(listOf<CartMealEntity>()) }
+    var cartId by remember { mutableStateOf("") }
+    var quantity by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         cartViewModel.handleIntent(CartIntents.GetCart(2))
@@ -49,18 +53,79 @@ fun CartScreen(
 
     LaunchedEffect(cartMealState) {
         cartMeals = cartMealState.showCartDate?.cart?.cartMeals.orEmpty()
+        cartId = cartMealState.showCartDate?.cart?.id.orEmpty()
         Log.d("CartScreen", "Updated cartMeals: $cartMeals")
     }
 
-    Log.d("CartScreen", "cartMealState: $cartMealState")
+    Log.d("CartScreen", "cartMealState: ${cartMealState.quantity}")
 
-    CartScreenContent(
-        onBackPressesd = { navController.popBackStack() },
-        cartMeals = cartMeals,
-        deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
-        totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString() ?: "0", // Placeholder for total items
-        totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString() ?: "0.00" // Placeholder for total price
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        CartScreenContent(
+            onBackPressesd = { navController.popBackStack() },
+            cartMeals = cartMeals,
+            cartId = cartId,
+            copoun = cartMealState.copoun,
+            onCheckCoponClick = {
+                cartViewModel.handleIntent(
+                    CartIntents.OnCkeckCopounClick(
+                        cartId = cartId,
+                        promoCode = cartMealState.copoun
+                    )
+                )
+            },
+            onCopounChange = { cartViewModel.handleIntent(CartIntents.OnChangeCopounText(it)) },
+            copounMessage = cartMealState.copounMessage,
+            onChangeQuantity = { quntity ->
+                cartViewModel.handleIntent(
+                    CartIntents.OnChangeQuantity(
+                        quntity
+                    )
+                )
+            },
+            onDecreaseQuantity = { cardId, cartItemId ->
+                cartViewModel.handleIntent(
+                    CartIntents.DecreaseCartItemQuantity(
+                        cardId,
+                        cartItemId,
+                        cartMealState.quantity
+                    )
+                )
+            },
+            onIncreaseQuantity = { cardId, cartItemId ->
+                cartViewModel.handleIntent(
+                    CartIntents.IncreaseCartItemQuantity(
+                        cardId,
+                        cartItemId,
+                        cartMealState.quantity
+                    )
+                )
+            },
+            onDeleteItem = { cardId, cartItemId ->
+                cartViewModel.handleIntent(
+                    CartIntents.deleteCartItem(
+                        cardId,
+                        cartItemId
+                    )
+                )
+            },
+            deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
+            totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString()
+                ?: "0", // Placeholder for total items
+            totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString()
+                ?: "0.00" // Placeholder for total price
+
+        )
+        if (cartMealState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Secondry)
+            }
+        }
+    }
 }
 
 @Composable
@@ -69,7 +134,16 @@ fun CartScreenContent(
     cartMeals: List<CartMealEntity>,
     totalItems: String,
     totalPrice: String,
-    deliveryPrice: String
+    copoun:String,
+    copounMessage:String?=null,
+    onCopounChange:(String)->Unit,
+    onChangeQuantity:(String)->Unit,
+    onDeleteItem:(String,String)->Unit,
+    onIncreaseQuantity:(String,String)->Unit,
+    onDecreaseQuantity:(String,String)->Unit,
+    deliveryPrice: String,
+    cartId:String,
+    onCheckCoponClick:()->Unit
 ) {
     Column(
         modifier = Modifier
@@ -98,7 +172,15 @@ fun CartScreenContent(
                 SwipeToDismissCartItem(
                     cartMeal = cartMeal,
                     onDelete = {
-//                        onDeleteItem(cartMeal)
+                        onDeleteItem(cartId,cartMeal.id)
+                    },
+                    onDecrease = {
+                        onChangeQuantity(cartMeal.quantity.toString())
+                        onDecreaseQuantity(cartId,cartMeal.id)
+                                 },
+                    onIncrease = {
+                        onChangeQuantity(cartMeal.quantity.toString())
+                        onIncreaseQuantity(cartId,cartMeal.id)
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -112,7 +194,7 @@ fun CartScreenContent(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                PromoCodeInput()
+                PromoCodeInput(onClickCoponCkeck = onCheckCoponClick,copoun = copoun,onCopounChange = onCopounChange, copounMessage = copounMessage)
             }
         }
 

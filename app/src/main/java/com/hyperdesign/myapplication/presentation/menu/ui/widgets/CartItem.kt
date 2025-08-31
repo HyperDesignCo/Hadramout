@@ -52,6 +52,9 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
 @Composable
 fun CartItem(
     cartItem: CartMealEntity,
+    onDecrease:()->Unit,
+    onIncrease:()->Unit
+
 ) {
     Card(
         modifier = Modifier
@@ -110,7 +113,7 @@ fun CartItem(
                             modifier = Modifier
                                 .size(20.dp)
                                 .background(Color.White, shape = CircleShape)
-                                .clickable { },
+                                .clickable { onDecrease()},
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -132,7 +135,7 @@ fun CartItem(
                             modifier = Modifier
                                 .size(20.dp)
                                 .background(color = Primary, shape = CircleShape)
-                                .clickable { },
+                                .clickable {onIncrease() },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -156,7 +159,9 @@ fun CartItem(
 @Composable
 fun SwipeToDismissCartItem(
     cartMeal: CartMealEntity,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onDecrease:()->Unit,
+    onIncrease:()->Unit
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
@@ -181,7 +186,7 @@ fun SwipeToDismissCartItem(
                     .fillMaxSize()
                     .background(color)
                     .padding(16.dp),
-                contentAlignment = Alignment.CenterEnd
+                contentAlignment = Alignment.CenterStart
             ) {
                 Icon(
                     Icons.Default.Delete,
@@ -191,31 +196,33 @@ fun SwipeToDismissCartItem(
             }
         },
         content = {
-            CartItem(cartItem = cartMeal)
+            CartItem(cartItem = cartMeal, onIncrease =onIncrease, onDecrease = onDecrease)
         }
     )
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun CartItemPreview() {
-    CartItem(
-        cartItem = CartMealEntity(
-            mealTitle = "Test Meal",
-            mealImage = "",
-            price = 10.0,
-            quantity = 1,
-            id = "1",
-            sizeId = "2",
-            sizeTitle = "Small",
-            cartItemId = "3",
-            subChoicesPrice = 0.0,
-            netPrice = 0.0,
-            primaryPrice = 0.0,
-            totalPrice = 0.0,
-            choices = emptyList(),
-            mealId = "4",
-            comment = "",
-        )
-    )
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun CartItemPreview() {
+//    CartItem(
+//        cartItem = CartMealEntity(
+//            mealTitle = "Test Meal",
+//            mealImage = "",
+//            onIncrease = {},
+//            onDecrease = {},
+//            price = 10.0,
+//            quantity = 1,
+//            id = "1",
+//            sizeId = "2",
+//            sizeTitle = "Small",
+//            cartItemId = "3",
+//            subChoicesPrice = 0.0,
+//            netPrice = 0.0,
+//            primaryPrice = 0.0,
+//            totalPrice = 0.0,
+//            choices = emptyList(),
+//            mealId = "4",
+//            comment = "",
+//        )
+//    )
+//}

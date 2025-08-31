@@ -48,3 +48,28 @@ data class ShowCartRequest(
     @SerializedName("branch_id")
     val branchId: String
 )
+
+data class DeleteCartRequest(
+    @SerializedName("cart_id")
+    val cartId : String,
+    @SerializedName("item_id")
+    val itemId:String
+
+)
+
+data class UpdateCartItemQuantityRequest(
+    @SerializedName("cart_id")
+    val cartId : String,
+    @SerializedName("item_id")
+    val itemId:String,
+    @SerializedName("new_quantity")
+    val newQuantity:String
+)
+
+data class CheckCouponRequest(
+    @SerializedName("cart_id")
+    val cartId : String,
+    @SerializedName("promo_code")
+    val promoCode:String
+)
+

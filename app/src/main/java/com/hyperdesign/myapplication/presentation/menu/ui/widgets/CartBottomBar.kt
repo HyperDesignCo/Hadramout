@@ -62,12 +62,14 @@ fun CartBottomBar(
                     Text(
                         text = priceItems,
                         fontSize = 16.sp,
-                        color = Color.Gray
+                        fontWeight = FontWeight.Bold,
+                        color = Secondry
                     )
                     Text(
                         text = deliveryPrice,
                         fontSize = 16.sp,
-                        color = Color.Gray
+                        fontWeight = FontWeight.Bold,
+                        color = Secondry
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {

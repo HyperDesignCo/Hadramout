@@ -6,9 +6,12 @@ import com.hyperdesign.myapplication.data.remote.menu.MenuApiServices
 import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.CartResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
+import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.MenueResponse
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
+import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
 import com.hyperdesign.myapplication.domain.repo.menu.MenuRepo
 
 class MenuRepoImpl(
@@ -35,5 +38,20 @@ class MenuRepoImpl(
     override suspend fun showCart(showCartRequest: ShowCartRequest): CartResponseEntity {
         val response = menuApiServices.showCart(showCartRequest)
         return response.toEntity()
+    }
+
+    override suspend fun deleteCartItem(deleteCartRequest: DeleteCartRequest): CartResponseEntity {
+        val response = menuApiServices.deleteCartItem(deleteCartRequest)
+        return response.toEntity()
+    }
+
+    override suspend fun updateCartItemQuantity(updateCartItemQuantityRequest: UpdateCartItemQuantityRequest): CartResponseEntity {
+        val response = menuApiServices.updateCartItemQuantity(updateCartItemQuantityRequest)
+        return response.toEntity()
+    }
+
+    override suspend fun checkCouponCode(checkCouponRequest: CheckCouponRequest): AddToCartResponseEntity {
+        val response = menuApiServices.checkCouponCode(checkCouponRequest)
+        return response.toDomain()
     }
 }
