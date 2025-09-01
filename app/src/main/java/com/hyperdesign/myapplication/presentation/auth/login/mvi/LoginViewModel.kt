@@ -25,7 +25,7 @@ import kotlin.toString
 class LoginViewModel(
     private val loginUseCase: LoginUseCase,
     private val validateText: ValidateText,
-    private val tokenManager: TokenManager,
+    val tokenManager: TokenManager,
     @ApplicationContext private val context: Context
 
 

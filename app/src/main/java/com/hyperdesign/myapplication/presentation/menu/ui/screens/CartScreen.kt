@@ -26,6 +26,7 @@ import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.CartMealEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartIntents
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartViewModel
@@ -108,6 +109,7 @@ fun CartScreen(
                     )
                 )
             },
+            onGoToCheckOutScreen = {navController.navigate(Screen.CheckOutScreen.route)},
             deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
             totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString()
                 ?: "0", // Placeholder for total items
@@ -143,8 +145,8 @@ fun CartScreenContent(
     onDecreaseQuantity:(String,String)->Unit,
     deliveryPrice: String,
     cartId:String,
-    onCheckCoponClick:()->Unit
-) {
+    onCheckCoponClick:()->Unit,
+    onGoToCheckOutScreen:()->Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -202,7 +204,8 @@ fun CartScreenContent(
             priceItems = totalItems,
             deliveryPrice = deliveryPrice,
             totalPrice = totalPrice,
-            onPayClick = { /* Handle payment action */ }
+            buttonText = stringResource(R.string.complete_order),
+            onPayClick = { onGoToCheckOutScreen() }
         )
 
     }

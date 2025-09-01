@@ -1,13 +1,16 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.widgets
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,6 +43,8 @@ fun SizeOption(size: String, price: String, selectedSize: String, onSelected: (S
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("ج.م$price", fontSize = 14.sp, color = if (selectedSize == size) Color.White else Color.Black)
             RadioButton(
+                colors = RadioButtonDefaults.colors(if (selectedSize == size) Color.White else Color.Black),
+
                 selected = selectedSize == size,
                 onClick = { onSelected(size) }
             )
@@ -85,6 +90,7 @@ fun SubChoiceOption(
                 color = if (isSelected) Color.White else Color.Black
             )
             Checkbox(
+                colors = CheckboxDefaults.colors(checkedColor = if (isSelected) Color(0xFFFCB203) else Color.Black,checkmarkColor = if (isSelected) Color.White else Color.Black),
                 checked = isSelected,
                 onCheckedChange = { onSelected(choiceId, subChoice.id, it) }
             )

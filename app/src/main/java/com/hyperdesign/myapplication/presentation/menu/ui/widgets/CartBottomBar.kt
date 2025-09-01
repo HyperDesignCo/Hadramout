@@ -33,6 +33,7 @@ fun CartBottomBar(
     priceItems: String,
     deliveryPrice: String,
     totalPrice: String,
+    buttonText:String,
     onPayClick: () -> Unit
 ) {
     Card(
@@ -59,6 +60,7 @@ fun CartBottomBar(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+
                     Text(
                         text = priceItems,
                         fontSize = 16.sp,
@@ -119,7 +121,7 @@ fun CartBottomBar(
             CustomButton(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 onClick = onPayClick,
-                text = stringResource(R.string.complete_order),
+                text =buttonText
 
                 )
         }
@@ -129,5 +131,5 @@ fun CartBottomBar(
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
 fun CartBottomBarPreview() {
-    CartBottomBar("3", "1000","1500", onPayClick = {})
+    CartBottomBar("3", "1000","1500", "",onPayClick = {})
 }

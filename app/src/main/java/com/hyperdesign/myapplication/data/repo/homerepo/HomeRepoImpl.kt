@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.data.repo.homerepo
 
 import com.hyperdesign.myapplication.data.mapper.home.toDomain
 import com.hyperdesign.myapplication.data.remote.home.HomeApiServices
+import com.hyperdesign.myapplication.domain.Entity.AddressResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.BranchesResponse
 import com.hyperdesign.myapplication.domain.Entity.HomeResponse
 import com.hyperdesign.myapplication.domain.repo.home.HomeRepo
@@ -16,6 +17,11 @@ class HomeRepoImpl(
 
     override suspend fun getHomeMenues(branchId: Int): HomeResponse {
         val response = homeApiServices.getHomeMenues(branchId)
+        return response.toDomain()
+    }
+
+    override suspend fun getAddress(): AddressResponseEntity {
+        val response = homeApiServices.getAddress()
         return response.toDomain()
     }
 }

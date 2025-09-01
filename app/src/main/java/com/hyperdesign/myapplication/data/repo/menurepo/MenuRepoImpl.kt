@@ -7,6 +7,8 @@ import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.CartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
+import com.hyperdesign.myapplication.domain.Entity.CheckOutRequest
+import com.hyperdesign.myapplication.domain.Entity.CheckOutResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.MenueResponse
@@ -52,6 +54,11 @@ class MenuRepoImpl(
 
     override suspend fun checkCouponCode(checkCouponRequest: CheckCouponRequest): AddToCartResponseEntity {
         val response = menuApiServices.checkCouponCode(checkCouponRequest)
+        return response.toDomain()
+    }
+
+    override suspend fun checkout(checkOutRequest: CheckOutRequest): CheckOutResponseEntity {
+        val response = menuApiServices.checkout(checkOutRequest)
         return response.toDomain()
     }
 }

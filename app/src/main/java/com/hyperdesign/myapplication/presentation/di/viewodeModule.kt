@@ -10,6 +10,7 @@ import com.hyperdesign.myapplication.presentation.auth.signup.mvi.RegisterViewMo
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
 import com.hyperdesign.myapplication.presentation.main.mvi.AuthViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartViewModel
+import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetailsViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
 import com.hyperdesign.myapplication.presentation.utilies.ValidatePhoneNumber
@@ -60,6 +61,10 @@ val viewModels = module {
 
     viewModel<CreatePasswordViewModel>{
         CreatePasswordViewModel(get(),get(),get())
+    }
+
+    viewModel<CheckOutViewModel> {
+        CheckOutViewModel(get(),get())
     }
 }
 

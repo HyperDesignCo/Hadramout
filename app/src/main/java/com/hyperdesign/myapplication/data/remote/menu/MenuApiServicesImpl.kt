@@ -3,10 +3,12 @@ package com.hyperdesign.myapplication.data.remote.menu
 import android.util.Log
 import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
 import com.hyperdesign.myapplication.data.dto.CartResponseDto
+import com.hyperdesign.myapplication.data.dto.CheckOutResponseDto
 import com.hyperdesign.myapplication.data.dto.MealDetailResponseDto
 import com.hyperdesign.myapplication.data.dto.MenuResponseDto
 import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
+import com.hyperdesign.myapplication.domain.Entity.CheckOutRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
@@ -133,6 +135,23 @@ class MenuApiServicesImpl(
 
         }catch (e: Exception){
             Log.e("MenuApiServices", "checkCoupon failed for branchId=$checkCouponRequest: ${e.message}")
+
+            throw e
+        }
+    }
+
+    override suspend fun checkout(checkOutRequest: CheckOutRequest): CheckOutResponseDto {
+        return try {
+            val response = client.post("checkout") {
+                contentType(ContentType.Application.Json)
+                setBody(checkOutRequest)
+            }.body<CheckOutResponseDto>()
+            Log.d("MenuApiServices", "checkout Response for branchId=$checkOutRequest: $response")
+
+            response
+
+        }catch (e: Exception){
+            Log.e("MenuApiServices", "checkOut failed for branchId=$checkOutRequest: ${e.message}")
 
             throw e
         }

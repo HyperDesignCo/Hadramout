@@ -77,4 +77,11 @@
     <string name="enter_your_new_password">Enter your new password</string>
     <string name="new_password_is_required">New password is required</string>
     <string name="password_updated_successfully">password updated successfully</string>
+    <string name="checkout">CheckOut</string>
+    <string name="special_request_optinal">Special request(optinal)</string>
+    <string name="no_extras_are_allowed_as_a_special_request">No extras are allowed as a special request</string>
+    <string name="delivery_to">Delivery to</string>
+    <string name="payment_type">Payment Type</string>
+    <string name="pay_with_card_or_cash">You can pay with cash or by using a credit/debit card</string>
+    <string name="enter_your_request_here">Enter your request here</string>
 </resources>
