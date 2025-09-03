@@ -118,7 +118,7 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                     mealDetailsViewModel.handleIntents(
                         MealDetialsIntents.addMealToCart(
                             mealId = featured?.id.toString(),
-                            quantity = "2",
+                            quantity = mealDetailsState.quantity,
                             sizeId = selectedSizeId,
                             branchId = "2",
                             choices = selectedSubChoices

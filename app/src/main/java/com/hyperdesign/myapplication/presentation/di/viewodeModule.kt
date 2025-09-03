@@ -13,6 +13,7 @@ import com.hyperdesign.myapplication.presentation.menu.mvi.CartViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetailsViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
+import com.hyperdesign.myapplication.presentation.profile.myorders.mvi.MyOrderViewModel
 import com.hyperdesign.myapplication.presentation.utilies.ValidatePhoneNumber
 import com.hyperdesign.myapplication.presentation.utilies.ValidateText
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -64,8 +65,13 @@ val viewModels = module {
     }
 
     viewModel<CheckOutViewModel> {
-        CheckOutViewModel(get(),get())
+        CheckOutViewModel(get(),get(),get())
+    }
+
+    viewModel<MyOrderViewModel>{
+        MyOrderViewModel(get(),get())
     }
 }
+
 
 

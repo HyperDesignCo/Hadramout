@@ -2,9 +2,8 @@ package com.hyperdesign.myapplication.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-
 data class CartResponseDto(
-    val cart: CartDto,
+    val cart: CartDto?, // Made nullable to handle cart=null case
     val message: String
 )
 
@@ -29,7 +28,7 @@ data class CartDto(
     @SerializedName("offer_discount")
     val offerDiscount: String,
     @SerializedName("net_price")
-    val netPrice: String,
+    val netPrice: String?,
     @SerializedName("total_price")
     val totalPrice: String,
     @SerializedName("special_requests")
@@ -37,7 +36,7 @@ data class CartDto(
     @SerializedName("free_delivery")
     val freeDelivery: String,
     @SerializedName("cart_meals")
-    val cartMeals: List<CartMealDto>
+    val cartMeals: List<CartMealDto>?
 )
 
 data class CartMealDto(
@@ -62,8 +61,8 @@ data class CartMealDto(
     @SerializedName("primary_price")
     val primaryPrice: String,
     @SerializedName("net_price")
-    val netPrice: String,
+    val netPrice: String?, // Made nullable to match API response
     @SerializedName("total_price")
     val totalPrice: String,
-    val choices: List<String>
+    val choices: List<String>?
 )

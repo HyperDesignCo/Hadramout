@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.presentation.main.navcontroller
 
 import MenuScreen
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -24,7 +25,8 @@ import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.MealDetailsScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CartScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CheckOutScreen
-import com.hyperdesign.myapplication.presentation.profile.ui.screens.ProfileScreen
+import com.hyperdesign.myapplication.presentation.profile.common.ui.screens.ProfileScreen
+import com.hyperdesign.myapplication.presentation.profile.myorders.ui.screens.MyOrderScreen
 
 val bottomNavScreens = listOf(
     Screen.HomeScreen,
@@ -43,8 +45,11 @@ fun AppNavigation(startDestination: String) {
         .collectAsState(initial = navController.currentBackStackEntry)
         .value?.destination?.route
 
+    Log.i("NavControllerScreen", "Current Route: $currentRoute")
+
     // Determine if the current screen is part of the bottom navigation
     val isBottomNavScreen = bottomNavScreens.any { it.route == currentRoute }
+//            || currentRoute.toString() in Screen.MyOrders.route
 
     CompositionLocalProvider(LocalNavController provides navController) {
         Scaffold(
@@ -96,6 +101,7 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.CheckOutScreen.route) { CheckOutScreen() }
                 composable(Screen.CartScreen.route) { CartScreen() }
                 composable(Screen.SignUpScreen.route) { SignUpScreen() }
+                composable(Screen.MyOrders.route) { MyOrderScreen() }
             }
         }
     }

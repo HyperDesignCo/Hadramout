@@ -8,6 +8,7 @@ import com.hyperdesign.myapplication.domain.usecase.auth.RegisterUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.CheckCouponUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.CheckOutUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.DeleteCartItemUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.FinishOrderUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.UpdateCartItemQuantityUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetAllAddressUseCase
@@ -16,6 +17,8 @@ import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.AddMealToCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMealDetailsUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMenuUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.ReOrderUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.ShowMyOrdersUseCase
 import io.ktor.http.auth.HttpAuthHeader
 import org.koin.dsl.module
 
@@ -85,6 +88,17 @@ val useCasesModule = module {
         CheckOutUseCase(get())
     }
 
+    single<FinishOrderUseCase> {
+        FinishOrderUseCase(get())
+    }
+
+    single<ReOrderUseCase> {
+        ReOrderUseCase(get())
+    }
+
+    single<ShowMyOrdersUseCase> {
+        ShowMyOrdersUseCase(get())
+    }
 
 
 

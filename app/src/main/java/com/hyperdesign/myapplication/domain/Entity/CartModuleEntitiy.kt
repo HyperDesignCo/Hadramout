@@ -2,11 +2,11 @@ package com.hyperdesign.myapplication.domain.Entity
 
 import com.google.gson.annotations.SerializedName
 
-
 data class CartResponseEntity(
-    val cart: CartEntity,
-    val message: String
+    val cart: CartEntity?, // Made nullable to handle cart=null
+    val message: String?
 )
+
 data class CartEntity(
     val id: String,
     val serviceCharge: Double,
@@ -51,25 +51,29 @@ data class ShowCartRequest(
 
 data class DeleteCartRequest(
     @SerializedName("cart_id")
-    val cartId : String,
+    val cartId: String,
     @SerializedName("item_id")
-    val itemId:String
-
+    val itemId: String
 )
 
 data class UpdateCartItemQuantityRequest(
     @SerializedName("cart_id")
-    val cartId : String,
+    val cartId: String,
     @SerializedName("item_id")
-    val itemId:String,
+    val itemId: String,
     @SerializedName("new_quantity")
-    val newQuantity:String
+    val newQuantity: String
 )
 
 data class CheckCouponRequest(
     @SerializedName("cart_id")
-    val cartId : String,
+    val cartId: String,
     @SerializedName("promo_code")
-    val promoCode:String
+    val promoCode: String
 )
 
+data class ReorderRequest(
+    @SerializedName("order_id")
+    val orderId:String
+
+)

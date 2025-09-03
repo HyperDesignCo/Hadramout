@@ -1,8 +1,10 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -17,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,11 +33,10 @@ import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartIntents
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartViewModel
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CartItem
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PromoCodeInput
-import org.koin.androidx.compose.koinViewModel
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CartBottomBar
+import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PromoCodeInput
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SwipeToDismissCartItem
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CartScreen(
@@ -46,7 +48,6 @@ fun CartScreen(
 
     var cartMeals by remember { mutableStateOf(listOf<CartMealEntity>()) }
     var cartId by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         cartViewModel.handleIntent(CartIntents.GetCart(2))
@@ -55,68 +56,95 @@ fun CartScreen(
     LaunchedEffect(cartMealState) {
         cartMeals = cartMealState.showCartDate?.cart?.cartMeals.orEmpty()
         cartId = cartMealState.showCartDate?.cart?.id.orEmpty()
-        Log.d("CartScreen", "Updated cartMeals: $cartMeals")
     }
 
-    Log.d("CartScreen", "cartMealState: ${cartMealState.quantity}")
+//    Log.d("CartScreen", "cartMealState: ${cartMealState.quantity}")
+
+    Log.d("CartScreen", "Updated cartMeals: $cartMeals")
 
     Box(modifier = Modifier.fillMaxSize()) {
-        CartScreenContent(
-            onBackPressesd = { navController.popBackStack() },
-            cartMeals = cartMeals,
-            cartId = cartId,
-            copoun = cartMealState.copoun,
-            onCheckCoponClick = {
-                cartViewModel.handleIntent(
-                    CartIntents.OnCkeckCopounClick(
-                        cartId = cartId,
-                        promoCode = cartMealState.copoun
+        if (cartMeals.isEmpty() && !cartMealState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(modifier = Modifier
+                    .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.shopping_cart),
+                        contentDescription = "shopping Cart"
                     )
-                )
-            },
-            onCopounChange = { cartViewModel.handleIntent(CartIntents.OnChangeCopounText(it)) },
-            copounMessage = cartMealState.copounMessage,
-            onChangeQuantity = { quntity ->
-                cartViewModel.handleIntent(
-                    CartIntents.OnChangeQuantity(
-                        quntity
-                    )
-                )
-            },
-            onDecreaseQuantity = { cardId, cartItemId ->
-                cartViewModel.handleIntent(
-                    CartIntents.DecreaseCartItemQuantity(
-                        cardId,
-                        cartItemId,
-                        cartMealState.quantity
-                    )
-                )
-            },
-            onIncreaseQuantity = { cardId, cartItemId ->
-                cartViewModel.handleIntent(
-                    CartIntents.IncreaseCartItemQuantity(
-                        cardId,
-                        cartItemId,
-                        cartMealState.quantity
-                    )
-                )
-            },
-            onDeleteItem = { cardId, cartItemId ->
-                cartViewModel.handleIntent(
-                    CartIntents.deleteCartItem(
-                        cardId,
-                        cartItemId
-                    )
-                )
-            },
-            onGoToCheckOutScreen = {navController.navigate(Screen.CheckOutScreen.route)},
-            deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
-            totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString()
-                ?: "0", // Placeholder for total items
-            totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString()
-                ?: "0.00" // Placeholder for total price
 
-        )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = "Your Cart Is Empty",
+                        color = Secondry,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+            }
+        } else {
+            CartScreenContent(
+                onBackPressesd = { navController.popBackStack() },
+                cartMeals = cartMeals,
+                cartId = cartId,
+                copoun = cartMealState.copoun,
+                onCheckCoponClick = {
+                    cartViewModel.handleIntent(
+                        CartIntents.OnCkeckCopounClick(
+                            cartId = cartId,
+                            promoCode = cartMealState.copoun
+                        )
+                    )
+                },
+                onCopounChange = { cartViewModel.handleIntent(CartIntents.OnChangeCopounText(it)) },
+                copounMessage = cartMealState.copounMessage,
+                onChangeQuantity = { quntity ->
+                    cartViewModel.handleIntent(
+                        CartIntents.OnChangeQuantity(
+                            quntity
+                        )
+                    )
+                },
+                onDecreaseQuantity = { cardId, cartItemId ->
+                    cartViewModel.handleIntent(
+                        CartIntents.DecreaseCartItemQuantity(
+                            cardId,
+                            cartItemId,
+                            cartMealState.quantity
+                        )
+                    )
+                },
+                onIncreaseQuantity = { cardId, cartItemId ->
+                    cartViewModel.handleIntent(
+                        CartIntents.IncreaseCartItemQuantity(
+                            cardId,
+                            cartItemId,
+                            cartMealState.quantity
+                        )
+                    )
+                },
+                onDeleteItem = { cardId, cartItemId ->
+                    cartViewModel.handleIntent(
+                        CartIntents.deleteCartItem(
+                            cardId,
+                            cartItemId
+                        )
+                    )
+                },
+                onGoToCheckOutScreen = { navController.navigate(Screen.CheckOutScreen.route) },
+                deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
+                totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString() ?: "0",
+                totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString() ?: "0.00"
+            )
+        }
         if (cartMealState.isLoading) {
             Box(
                 modifier = Modifier
@@ -136,17 +164,18 @@ fun CartScreenContent(
     cartMeals: List<CartMealEntity>,
     totalItems: String,
     totalPrice: String,
-    copoun:String,
-    copounMessage:String?=null,
-    onCopounChange:(String)->Unit,
-    onChangeQuantity:(String)->Unit,
-    onDeleteItem:(String,String)->Unit,
-    onIncreaseQuantity:(String,String)->Unit,
-    onDecreaseQuantity:(String,String)->Unit,
+    copoun: String,
+    copounMessage: String? = null,
+    onCopounChange: (String) -> Unit,
+    onChangeQuantity: (String) -> Unit,
+    onDeleteItem: (String, String) -> Unit,
+    onIncreaseQuantity: (String, String) -> Unit,
+    onDecreaseQuantity: (String, String) -> Unit,
     deliveryPrice: String,
-    cartId:String,
-    onCheckCoponClick:()->Unit,
-    onGoToCheckOutScreen:()->Unit) {
+    cartId: String,
+    onCheckCoponClick: () -> Unit,
+    onGoToCheckOutScreen: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -174,15 +203,15 @@ fun CartScreenContent(
                 SwipeToDismissCartItem(
                     cartMeal = cartMeal,
                     onDelete = {
-                        onDeleteItem(cartId,cartMeal.id)
+                        onDeleteItem(cartId, cartMeal.id)
                     },
                     onDecrease = {
                         onChangeQuantity(cartMeal.quantity.toString())
-                        onDecreaseQuantity(cartId,cartMeal.id)
-                                 },
+                        onDecreaseQuantity(cartId, cartMeal.id)
+                    },
                     onIncrease = {
                         onChangeQuantity(cartMeal.quantity.toString())
-                        onIncreaseQuantity(cartId,cartMeal.id)
+                        onIncreaseQuantity(cartId, cartMeal.id)
                     }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -196,7 +225,12 @@ fun CartScreenContent(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                PromoCodeInput(onClickCoponCkeck = onCheckCoponClick,copoun = copoun,onCopounChange = onCopounChange, copounMessage = copounMessage)
+                PromoCodeInput(
+                    onClickCoponCkeck = onCheckCoponClick,
+                    copoun = copoun,
+                    onCopounChange = onCopounChange,
+                    copounMessage = copounMessage
+                )
             }
         }
 
@@ -207,6 +241,5 @@ fun CartScreenContent(
             buttonText = stringResource(R.string.complete_order),
             onPayClick = { onGoToCheckOutScreen() }
         )
-
     }
 }

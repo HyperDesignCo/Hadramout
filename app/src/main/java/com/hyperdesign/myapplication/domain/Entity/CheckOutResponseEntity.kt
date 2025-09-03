@@ -1,5 +1,8 @@
 package com.hyperdesign.myapplication.domain.Entity
 
+import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
+
 
 data class CheckOutResponseEntity(
     val cart: CartEntity,
@@ -18,4 +21,15 @@ data class PaymentMethodEntity(
 
 data class CheckOutRequest(
     val branch_id:String
+)
+
+data class FinishOrderRequest(
+    @SerializedName("cart_id")
+    val cartId:String,
+    @SerializedName("payment_method_id")
+    val paymentMethodId:String,
+    @SerializedName("special_requests")
+    val specialRequest:String,
+    @SerializedName("user_address_id")
+    val userAddressId:String
 )

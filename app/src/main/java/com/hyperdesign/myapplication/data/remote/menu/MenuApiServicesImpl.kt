@@ -10,6 +10,7 @@ import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckOutRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
+import com.hyperdesign.myapplication.domain.Entity.FinishOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
 import io.ktor.client.HttpClient
@@ -153,6 +154,21 @@ class MenuApiServicesImpl(
         }catch (e: Exception){
             Log.e("MenuApiServices", "checkOut failed for branchId=$checkOutRequest: ${e.message}")
 
+            throw e
+        }
+    }
+
+    override suspend fun finishOrder(finishOrderRequest: FinishOrderRequest): AddToCartResponseDto {
+        return try {
+            val response = client.post("finishOrder") {
+                contentType(ContentType.Application.Json)
+                setBody(finishOrderRequest)
+            }.body<AddToCartResponseDto>()
+            Log.d("MenuApiServices", "finishOrder Response for branchId=$finishOrderRequest: $response")
+
+            response
+        }catch (e: Exception){
+            Log.e("MenuApiServices", "finishOrder failed for branchId=$finishOrderRequest: ${e.message}")
             throw e
         }
     }

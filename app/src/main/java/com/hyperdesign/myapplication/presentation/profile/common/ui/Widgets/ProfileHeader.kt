@@ -1,4 +1,4 @@
-package com.hyperdesign.myapplication.presentation.profile.ui.Widgets
+package com.hyperdesign.myapplication.presentation.profile.common.ui.Widgets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -21,18 +22,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ProfileHeader(
-    onBackPressed: () -> Unit = { /* Default no-op */ }
+    onBackPressed: () -> Unit = { /* Default no-op */ },
+    loginViewModel: LoginViewModel= koinViewModel()
 ) {
 
 
@@ -73,12 +81,20 @@ fun ProfileHeader(
 //                horizontalArrangement =Arrangement.,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.person),
-                    contentDescription = "Profile Image",
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(loginViewModel.tokenManager.getUserData()?.image)
+                        .crossfade(true)
+                        .error(R.drawable.test_food)
+                        .placeholder(R.drawable.test_food)
+                        .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                        .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                        .build(),
+                    contentDescription = "image",
                     modifier = Modifier
-                        .size(50.dp)
-                        ,
+                        .padding(start = 10.dp, top = 10.dp)
+                        .size(70.dp).clip(shape = CircleShape),
+                    alignment = Alignment.Center,
                     contentScale = ContentScale.Crop
                 )
 
@@ -89,13 +105,13 @@ fun ProfileHeader(
                     horizontalAlignment = Alignment.Start,
                 ) {
                     Text(
-                        text = "Abdallah Alsayed",
+                        text = loginViewModel.tokenManager.getUserData()?.name.orEmpty(),
                         color = Color.White,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "01151828780",
+                        text = loginViewModel.tokenManager.getUserData()?.mobile.orEmpty(),
                         color = Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold

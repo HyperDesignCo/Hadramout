@@ -9,6 +9,7 @@ import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckOutRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
+import com.hyperdesign.myapplication.domain.Entity.FinishOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
 
@@ -28,5 +29,7 @@ interface MenuApiServices {
     suspend fun checkCouponCode(checkCouponRequest: CheckCouponRequest):AddToCartResponseDto
 
     suspend fun checkout(checkOutRequest: CheckOutRequest): CheckOutResponseDto
+
+    suspend fun finishOrder(finishOrderRequest: FinishOrderRequest):AddToCartResponseDto
 
 }

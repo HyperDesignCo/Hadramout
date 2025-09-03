@@ -8,6 +8,7 @@ import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckOutRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckOutResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
+import com.hyperdesign.myapplication.domain.Entity.FinishOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.MenueResponse
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
@@ -27,6 +28,7 @@ interface MenuRepo {
     suspend fun updateCartItemQuantity(updateCartItemQuantityRequest: UpdateCartItemQuantityRequest):CartResponseEntity
 
     suspend fun checkCouponCode(checkCouponRequest: CheckCouponRequest):AddToCartResponseEntity
-
     suspend fun checkout(checkOutRequest: CheckOutRequest): CheckOutResponseEntity
+
+    suspend fun finishOrder(finishOrderRequest: FinishOrderRequest):AddToCartResponseEntity
 }

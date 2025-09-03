@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.screens
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +40,7 @@ import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
 import com.hyperdesign.myapplication.presentation.auth.login.ui.widgets.HadramoutHeader
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutIntents
@@ -57,6 +60,9 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
     var subRegion by remember { mutableStateOf("") }
     var allAddress by remember { mutableStateOf("") }
     var selectedPayment by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    var finishOrderMsg  by remember { mutableStateOf("") }
+    var paymentId by remember { mutableStateOf("") }
 
 
     LaunchedEffect(Unit) {
@@ -67,10 +73,25 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
             checkState.address?.addresses?.firstOrNull()?.region?.name.orEmpty()}"
         allAddress = "${checkState.address?.addresses?.firstOrNull()?.sub_region.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.street.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.special_sign.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.building_number.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.floor_number.orEmpty()}"
 
+        paymentId = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.id.toString()
         selectedPayment=checkState.checkOutResponse?.payment_methods?.firstOrNull()?.title.toString()
+
+        finishOrderMsg = checkState.finishOrderResponse?.message.orEmpty()
     }
 
-    Log.d("CheckOutScreen",selectedPayment)
+    LaunchedEffect(finishOrderMsg) {
+        if (finishOrderMsg.isNotEmpty()) {
+            if (finishOrderMsg == "Your order has been sent successfully") {
+                Toast.makeText(context, context.getString(R.string.your_order_has_been_sent_successfully), Toast.LENGTH_SHORT).show()
+                navController.navigate(Screen.HomeScreen.route) {
+                    popUpTo(Screen.HomeScreen.route) { inclusive = false }
+                }
+            } else {
+                Toast.makeText(context, finishOrderMsg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         CheckOutScreenContent(
@@ -91,7 +112,9 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
             subRegion = subRegion,
             allAddress = allAddress,
             onSelectedPayemt = { payment -> selectedPayment = payment },
-            selectedPayemnt = selectedPayment.orEmpty()
+            selectedPayemnt = selectedPayment.orEmpty(),
+            onChangePaymentId = {paymentIdd->paymentId=paymentIdd},
+            finishOrder = {cartId->checkOutViewModel.handleIntents(CheckOutIntents.FinishOrder(cartId = cartId, paymentMethodId = paymentId, specialRequest = checkState.specialRequest, userId = loginViewModel.tokenManager.getUserData()?.id.toString()))}
         )
         if (checkState.isLoading) {
             Box(
@@ -110,7 +133,7 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
 
 
 @Composable
-fun CheckOutScreenContent(selectedPayemnt:String,onSelectedPayemt:(String)->Unit,subRegion:String,allAddress:String,state: CheckOutStateModel,onChangeSpecialRequest:(String)->Unit, name:String, phoneNumber:String, image:String?=null, onBackedBresed:()->Unit){
+fun CheckOutScreenContent(finishOrder:(String)->Unit,onChangePaymentId:(String)->Unit,selectedPayemnt:String,onSelectedPayemt:(String)->Unit,subRegion:String,allAddress:String,state: CheckOutStateModel,onChangeSpecialRequest:(String)->Unit, name:String, phoneNumber:String, image:String?=null, onBackedBresed:()->Unit){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -125,7 +148,9 @@ fun CheckOutScreenContent(selectedPayemnt:String,onSelectedPayemt:(String)->Unit
         )
 
         LazyColumn(
-            modifier = Modifier.weight(1f).fillMaxWidth()
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         ) {
             item {
                 Spacer(modifier = Modifier.height(20.dp))
@@ -141,45 +166,48 @@ fun CheckOutScreenContent(selectedPayemnt:String,onSelectedPayemt:(String)->Unit
 
 
 
-                item {
-                    Card (
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(Gray),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(10.dp)) {
-                            Text(
-                                text = stringResource(R.string.payment_type),
-                                fontSize = 16.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                color = Color.Black,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Start,
+            item {
+                Card (
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(Gray),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text(
+                            text = stringResource(R.string.payment_type),
+                            fontSize = 16.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Start,
 
-                                )
-                            Spacer(modifier = Modifier.height(5.dp))
+                            )
+                        Spacer(modifier = Modifier.height(5.dp))
 
-                            Text(
-                                text = stringResource(R.string.pay_with_card_or_cash),
-                                fontSize = 14.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                color = Color.Gray,
-                                textAlign = TextAlign.Start,
+                        Text(
+                            text = stringResource(R.string.pay_with_card_or_cash),
+                            fontSize = 14.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color.Gray,
+                            textAlign = TextAlign.Start,
 
-                                )
-                            Spacer(modifier = Modifier.height(5.dp))
-                            state.checkOutResponse?.payment_methods?.forEach { payment ->
+                            )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        state.checkOutResponse?.payment_methods?.forEach { payment ->
 
-                                PaymentsOption(
-                                    payment = payment.title,
-                                    selectedPayment = selectedPayemnt,
-                                    onSelected = { onSelectedPayemt(it) })
-
-                            }
+                            PaymentsOption(
+                                payment = payment.title,
+                                selectedPayment = selectedPayemnt,
+                                onSelected = {
+                                    onSelectedPayemt(it)
+                                    onChangePaymentId(payment.id)
+                                })
 
                         }
 
                     }
+
+                }
 
 
             }
@@ -191,11 +219,13 @@ fun CheckOutScreenContent(selectedPayemnt:String,onSelectedPayemt:(String)->Unit
         }
 
         CartBottomBar(
-            priceItems = state.checkOutResponse?.cart?.primaryPrice.toString(),
-            deliveryPrice = state.checkOutResponse?.cart?.deliveryCost.toString(),
-            totalPrice = state.checkOutResponse?.cart?.totalPrice.toString(),
+            priceItems = state.checkOutResponse?.cart?.primaryPrice?.toString()?:"0.00",
+            deliveryPrice = state.checkOutResponse?.cart?.deliveryCost?.toString()?:"0.00",
+            totalPrice = state.checkOutResponse?.cart?.totalPrice?.toString()?:"0.00",
             buttonText = stringResource(R.string.checkout),
-            onPayClick = {  }
+            onPayClick = {
+                finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
+            }
         )
 
 

@@ -84,4 +84,9 @@
     <string name="payment_type">Payment Type</string>
     <string name="pay_with_card_or_cash">You can pay with cash or by using a credit/debit card</string>
     <string name="enter_your_request_here">Enter your request here</string>
+    <string name="your_order_has_been_sent_successfully">Your order has been sent successfully</string>
+    <string name="new_orders">New Orders</string>
+    <string name="previous_orders">Previous Orders</string>
+    <string name="reorder">ReOrder</string>
+    <string name="egy">%1$sEGY</string>
 </resources>
