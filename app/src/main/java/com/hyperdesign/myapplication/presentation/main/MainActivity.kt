@@ -24,18 +24,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.main.mvi.AuthViewModel
 import com.hyperdesign.myapplication.presentation.main.navcontroller.AppNavigation
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.HadramoutTheme
+import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -55,6 +58,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         lifecycleScope.launch {
             setContent {
+                rememberSystemUiController().setStatusBarColor(
+                    color = Secondry,
+                    darkIcons = false
+                )
                 HadramoutTheme {
 
                     var destination by remember { mutableStateOf<String?>(null) }

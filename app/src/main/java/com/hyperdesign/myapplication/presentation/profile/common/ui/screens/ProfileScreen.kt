@@ -25,12 +25,14 @@ fun ProfileScreen() {
         navController.popBackStack()
     }, onGoToMyOrdersScreen = {
         navController.navigate(Screen.MyOrders.route)
+    }, onGotToSettingsScreen = {
+        navController.navigate(Screen.SettingsScreen.route)
     })
 }
 
 
 @Composable
-fun ProfileScreenCotent(onBackPressed: () -> Unit ,onGoToMyOrdersScreen:()->Unit) {
+fun ProfileScreenCotent(onBackPressed: () -> Unit ,onGoToMyOrdersScreen:()->Unit,onGotToSettingsScreen:()->Unit) {
 
     Column(
         modifier = Modifier
@@ -58,7 +60,7 @@ fun ProfileScreenCotent(onBackPressed: () -> Unit ,onGoToMyOrdersScreen:()->Unit
             SettingItem(
                 title = stringResource(R.string.settings),
                 icon = R.drawable.setting,
-                onClick = { /* Handle My Address Click */ }
+                onClick = { onGotToSettingsScreen() }
             )
 
             SettingItem(

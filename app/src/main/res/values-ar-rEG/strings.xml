@@ -89,4 +89,13 @@
     <string name="previous_orders">Previous Orders</string>
     <string name="reorder">ReOrder</string>
     <string name="egy">%1$sEGY</string>
+    <string name="who_we_are">Who we are</string>
+    <string name="contact_us">Contact us</string>
+    <string name="share_app">Share App</string>
+    <string name="languages">Languages</string>
+    <string name="return_policy">Return Policy</string>
+    <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="log_out">Log Out</string>
+    <string name="delete_account">Delete Account</string>
 </resources>

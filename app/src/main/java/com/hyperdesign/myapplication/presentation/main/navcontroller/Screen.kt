@@ -26,6 +26,8 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
     object HomeScreen : Screen(ScreensConst.HOME_SCREEN, R.string.home, R.drawable.home)
     object ProfileScreen : Screen(ScreensConst.PROFILE_SCREEN, R.string.profile, R.drawable.profile)
     object MenueScreen : Screen(ScreensConst.MENUE_SCREEN, R.string.menu, R.drawable.menu)
+
+    object SettingsScreen:Screen(ScreensConst.SETTINGS_SCREEN)
 }
 
 

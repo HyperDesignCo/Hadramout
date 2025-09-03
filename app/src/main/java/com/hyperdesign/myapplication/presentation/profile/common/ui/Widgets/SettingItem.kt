@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 fun SettingItem(
     title: String,
     description: String? = null,
-    icon: Int,
+    icon: Int?=null,
     onClick: () -> Unit = {}
 ) {
     Column(
@@ -34,37 +34,45 @@ fun SettingItem(
             .padding(vertical = 12.dp, horizontal = 16.dp)
             .clickable(onClick = onClick)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+        if (icon!=null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
 //        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
 //        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
-        ) {
-            Image(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp)
-                    .size(24.dp) // Adjust size as needed
-            )
+            ) {
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(start = 8.dp, end = 8.dp)
+                        .size(24.dp) // Adjust size as needed
+                )
 
+                Text(
+                    text = title,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 5.dp, end = 8.dp),
+                    fontSize = 15.sp
+                )
+
+                description?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier.padding(end = 8.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                }
+
+            }
+        }else{
             Text(
                 text = title,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 5.dp, end = 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 fontSize = 15.sp
             )
-
-            description?.let {
-                Text(
-                    text = it,
-                    modifier = Modifier.padding(end = 8.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
-            }
-
         }
         Divider(
             modifier = Modifier.padding(top = 15.dp).fillMaxWidth(),

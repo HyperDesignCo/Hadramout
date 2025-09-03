@@ -17,4 +17,6 @@ object ScreensConst {
     const val Cart_Screen = "cart_screen"
     const val MY_ORDERS = "my_orders"
     const val Sign_Up_Screen = "sign_up_screen"
+
+    const val SETTINGS_SCREEN ="settings_screen"
 }

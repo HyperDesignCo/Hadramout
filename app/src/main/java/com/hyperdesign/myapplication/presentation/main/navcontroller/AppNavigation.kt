@@ -27,6 +27,7 @@ import com.hyperdesign.myapplication.presentation.menu.ui.screens.CartScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CheckOutScreen
 import com.hyperdesign.myapplication.presentation.profile.common.ui.screens.ProfileScreen
 import com.hyperdesign.myapplication.presentation.profile.myorders.ui.screens.MyOrderScreen
+import com.hyperdesign.myapplication.presentation.profile.settings.ui.screens.SettingsScreen
 
 val bottomNavScreens = listOf(
     Screen.HomeScreen,
@@ -102,6 +103,7 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.CartScreen.route) { CartScreen() }
                 composable(Screen.SignUpScreen.route) { SignUpScreen() }
                 composable(Screen.MyOrders.route) { MyOrderScreen() }
+                composable(Screen.SettingsScreen.route) { SettingsScreen() }
             }
         }
     }

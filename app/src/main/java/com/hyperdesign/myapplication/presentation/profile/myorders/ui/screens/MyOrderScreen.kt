@@ -69,11 +69,12 @@ fun MyOrderScreen(myOrderViewModel: MyOrderViewModel= koinViewModel()){
         if (reOrderMessage.isNotEmpty()){
             if (reOrderMessage=="meals added to cart"){
                 Toast.makeText(context,context.getString(R.string.the_meal_has_been_added_to_the_cart),Toast.LENGTH_SHORT).show()
-                navController.navigate(Screen.CartScreen.route){
-                    popUpTo(Screen.MyOrders.route) { inclusive = false }
+                navController.navigate(Screen.CartScreen.route)
+                {
+                    popUpTo(Screen.MyOrders.route) { inclusive = true }
                     launchSingleTop = true
-
                 }
+
                 reOrderMessage = ""
 
             }
