@@ -19,4 +19,14 @@ object ScreensConst {
     const val Sign_Up_Screen = "sign_up_screen"
 
     const val SETTINGS_SCREEN ="settings_screen"
+
+    const val WHO_ARE_WE_SCREEN = " who_are_we_Screen"
+
+    const val CONTACT_US_SCREEN ="contact_us_screen"
+
+    const val RETURN_POLICY_SCREEN ="return_policy_screen"
+
+    const val TERMS_AND_CONDITIONS_SCREEN ="termes_and_conditions"
+
+    const val PRIVACY_POLICY_SCREEN ="privacy_policy_screen"
 }

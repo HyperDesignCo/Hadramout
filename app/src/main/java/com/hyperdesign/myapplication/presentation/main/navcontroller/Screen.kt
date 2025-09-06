@@ -28,6 +28,17 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
     object MenueScreen : Screen(ScreensConst.MENUE_SCREEN, R.string.menu, R.drawable.menu)
 
     object SettingsScreen:Screen(ScreensConst.SETTINGS_SCREEN)
+
+    object WhoAreWeScreen:Screen(ScreensConst.WHO_ARE_WE_SCREEN)
+
+    object ContactUsScreen:Screen(ScreensConst.CONTACT_US_SCREEN)
+
+    object ReturnPolicyScreen:Screen(ScreensConst.RETURN_POLICY_SCREEN)
+
+    object TermesAndConditionsScreen:Screen(ScreensConst.TERMS_AND_CONDITIONS_SCREEN)
+
+    object PrivacyPolicyScreen:Screen(ScreensConst.PRIVACY_POLICY_SCREEN)
+
 }
 
 

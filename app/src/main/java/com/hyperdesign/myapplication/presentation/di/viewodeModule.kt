@@ -1,7 +1,6 @@
 package com.hyperdesign.myapplication.presentation.di
 
 
-import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.mvi.CreatePasswordViewModel
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.mvi.ForgetPasswordViewModel
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.mvi.VerifyViewModel
@@ -14,6 +13,9 @@ import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetailsViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
 import com.hyperdesign.myapplication.presentation.profile.myorders.mvi.MyOrderViewModel
+import com.hyperdesign.myapplication.presentation.profile.settings.common.mvi.SettingViewModel
+import com.hyperdesign.myapplication.presentation.profile.settings.common.mvi.StaticPagesViewModel
+import com.hyperdesign.myapplication.presentation.profile.settings.whoarewe.mvi.WhoAreWeViewModel
 import com.hyperdesign.myapplication.presentation.utilies.ValidatePhoneNumber
 import com.hyperdesign.myapplication.presentation.utilies.ValidateText
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -70,6 +72,18 @@ val viewModels = module {
 
     viewModel<MyOrderViewModel>{
         MyOrderViewModel(get(),get())
+    }
+
+    viewModel<WhoAreWeViewModel>{
+        WhoAreWeViewModel(get())
+    }
+
+    viewModel<SettingViewModel>{
+        SettingViewModel(get(),get(),get())
+    }
+
+    viewModel<StaticPagesViewModel>{
+        StaticPagesViewModel(get())
     }
 }
 

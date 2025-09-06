@@ -27,7 +27,12 @@ import com.hyperdesign.myapplication.presentation.menu.ui.screens.CartScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CheckOutScreen
 import com.hyperdesign.myapplication.presentation.profile.common.ui.screens.ProfileScreen
 import com.hyperdesign.myapplication.presentation.profile.myorders.ui.screens.MyOrderScreen
-import com.hyperdesign.myapplication.presentation.profile.settings.ui.screens.SettingsScreen
+import com.hyperdesign.myapplication.presentation.profile.settings.contactus.ui.screens.ContactUsScreen
+import com.hyperdesign.myapplication.presentation.profile.settings.common.ui.screens.SettingsScreen
+import com.hyperdesign.myapplication.presentation.profile.settings.privacypolicy.ui.screens.PrivacyPolicyScreen
+import com.hyperdesign.myapplication.presentation.profile.settings.returnpolicy.ui.screens.ReturnPolicyScreen
+import com.hyperdesign.myapplication.presentation.profile.settings.termsandconditions.ui.screens.TermsAndConditionsScreen
+import com.hyperdesign.myapplication.presentation.profile.settings.whoarewe.ui.screens.WhoAreWeScreen
 
 val bottomNavScreens = listOf(
     Screen.HomeScreen,
@@ -104,8 +109,15 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.SignUpScreen.route) { SignUpScreen() }
                 composable(Screen.MyOrders.route) { MyOrderScreen() }
                 composable(Screen.SettingsScreen.route) { SettingsScreen() }
+                composable(Screen.WhoAreWeScreen.route) { WhoAreWeScreen() }
+                composable(Screen.ContactUsScreen.route) { ContactUsScreen() }
+                composable(Screen.ReturnPolicyScreen.route) { ReturnPolicyScreen() }
+                composable(Screen.TermesAndConditionsScreen.route) { TermsAndConditionsScreen() }
+                composable(Screen.PrivacyPolicyScreen.route) { PrivacyPolicyScreen() }
+
             }
         }
     }
 }
+
 

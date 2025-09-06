@@ -17,8 +17,12 @@ import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.AddMealToCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMealDetailsUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMenuUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.DisplayAboutUsUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.GetLagugaueUsecase
 import com.hyperdesign.myapplication.domain.usecase.profile.ReOrderUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.SetLagugaueUsecase
 import com.hyperdesign.myapplication.domain.usecase.profile.ShowMyOrdersUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.ShowStaticPageUseCase
 import io.ktor.http.auth.HttpAuthHeader
 import org.koin.dsl.module
 
@@ -101,6 +105,20 @@ val useCasesModule = module {
     }
 
 
+    single<DisplayAboutUsUseCase> {
+        DisplayAboutUsUseCase(get())
+    }
 
+    single<SetLagugaueUsecase> {
+        SetLagugaueUsecase(get())
+    }
+
+    single<GetLagugaueUsecase> {
+        GetLagugaueUsecase(get())
+    }
+
+    single<ShowStaticPageUseCase> {
+        ShowStaticPageUseCase(get())
+    }
 
     }

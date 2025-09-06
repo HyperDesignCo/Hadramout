@@ -1,10 +1,14 @@
 package com.hyperdesign.myapplication.data.repo.profilerepo
 
 import com.hyperdesign.myapplication.data.mapper.menu.toDomain
+import com.hyperdesign.myapplication.data.mapper.profile.setting.toDomain
+import com.hyperdesign.myapplication.data.mapper.profile.setting.toEntity
 import com.hyperdesign.myapplication.data.mapper.profile.toEntity
 import com.hyperdesign.myapplication.data.remote.profile.ProfileApiServices
+import com.hyperdesign.myapplication.domain.Entity.AboutUsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.OrdersResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.PagesResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.ReorderRequest
 import com.hyperdesign.myapplication.domain.repo.profile.ProfileRepo
 
@@ -18,6 +22,16 @@ class ProfileRepoImpl(
 
     override suspend fun reOrder(reOrderRequest: ReorderRequest): AddToCartResponseEntity {
         val response = profileApiServices.reOrder(reOrderRequest)
+        return response.toDomain()
+    }
+
+    override suspend fun displayAboutUS(): AboutUsResponseEntity {
+        val response = profileApiServices.displayAbouUS()
+        return response.toEntity()
+    }
+
+    override suspend fun showPage(page: Int): PagesResponseEntity {
+        val response =profileApiServices.showPage(page)
         return response.toDomain()
     }
 }

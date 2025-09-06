@@ -1,8 +1,10 @@
 package com.hyperdesign.myapplication.data.remote.profile
 
 import android.util.Log
+import com.hyperdesign.myapplication.data.dto.AboutUsResponseDTO
 import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
 import com.hyperdesign.myapplication.data.dto.OrdersResponseDTO
+import com.hyperdesign.myapplication.data.dto.PagesResponseDto
 import com.hyperdesign.myapplication.domain.Entity.ReorderRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -43,6 +45,35 @@ class ProfileApiServicesImpl(
         }catch (e: Exception){
             Log.e("ProfileApiServices","reOrderFaild ,reOrderRequest:$reOrderRequest :${e.message.toString()}")
            throw e
+        }
+    }
+
+    override suspend fun displayAbouUS(): AboutUsResponseDTO {
+        return try {
+            val response = client.get("about_us") {
+                contentType(ContentType.Application.Json)
+
+            }.body<AboutUsResponseDTO>()
+            Log.d("ProfileApiServices","aboutUSSuccess ,Response:${response}")
+
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","aboutUSFaild:${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun showPage(page: Int): PagesResponseDto {
+        return try {
+            val response = client.get("show_page/$page}") {
+                contentType(ContentType.Application.Json)
+
+            }.body<PagesResponseDto>()
+            Log.d("ProfileApiServices","showPageSuccess ,Response:${response}")
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","showPageFaild:${e.message.toString()}")
+            throw e
         }
     }
 

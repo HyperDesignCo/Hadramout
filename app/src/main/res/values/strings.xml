@@ -97,4 +97,8 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="log_out">Log Out</string>
     <string name="delete_account">Delete Account</string>
+    <string name="faceBook_page">Facebook Page</string>
+    <string name="insta_page">Instagram Page</string>
+    <string name="english">English</string>
+    <string name="arabic">Arabic</string>
 </resources>
