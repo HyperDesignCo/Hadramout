@@ -29,4 +29,6 @@ object ScreensConst {
     const val TERMS_AND_CONDITIONS_SCREEN ="termes_and_conditions"
 
     const val PRIVACY_POLICY_SCREEN ="privacy_policy_screen"
+
+    const val ALL_ADDRESSES_SCREEN="all_address_screen"
 }

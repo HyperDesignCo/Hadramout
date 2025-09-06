@@ -101,4 +101,6 @@
     <string name="insta_page">Instagram Page</string>
     <string name="english">English</string>
     <string name="arabic">Arabic</string>
+    <string name="Addresses">Addresses</string>
+    <string name="add_new_address">Add New Address</string>
 </resources>

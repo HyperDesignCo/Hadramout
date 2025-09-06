@@ -39,6 +39,8 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
 
     object PrivacyPolicyScreen:Screen(ScreensConst.PRIVACY_POLICY_SCREEN)
 
+    object AllAddressesScreen: Screen(ScreensConst.ALL_ADDRESSES_SCREEN)
+
 }
 
 

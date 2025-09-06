@@ -27,12 +27,12 @@ fun ProfileScreen() {
         navController.navigate(Screen.MyOrders.route)
     }, onGotToSettingsScreen = {
         navController.navigate(Screen.SettingsScreen.route)
-    })
+    }, onGoToAllAddressesScreen = {navController.navigate(Screen.AllAddressesScreen.route)})
 }
 
 
 @Composable
-fun ProfileScreenCotent(onBackPressed: () -> Unit ,onGoToMyOrdersScreen:()->Unit,onGotToSettingsScreen:()->Unit) {
+fun ProfileScreenCotent(onBackPressed: () -> Unit,onGoToAllAddressesScreen:()->Unit ,onGoToMyOrdersScreen:()->Unit,onGotToSettingsScreen:()->Unit) {
 
     Column(
         modifier = Modifier
@@ -66,7 +66,7 @@ fun ProfileScreenCotent(onBackPressed: () -> Unit ,onGoToMyOrdersScreen:()->Unit
             SettingItem(
                 title = stringResource(R.string.Saved_addresses),
                 icon = R.drawable.shop_location,
-                onClick = { /* Handle Help and Support Click */ }
+                onClick = { onGoToAllAddressesScreen() }
             )
 
             SettingItem(
