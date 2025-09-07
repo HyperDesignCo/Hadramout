@@ -13,6 +13,7 @@ import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MealDetailsViewModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.AddressesViewModel
+import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.UpdateAddressViewModel
 import com.hyperdesign.myapplication.presentation.profile.myorders.mvi.MyOrderViewModel
 import com.hyperdesign.myapplication.presentation.profile.settings.common.mvi.SettingViewModel
 import com.hyperdesign.myapplication.presentation.profile.settings.common.mvi.StaticPagesViewModel
@@ -89,6 +90,10 @@ val viewModels = module {
 
     viewModel<AddressesViewModel>{
         AddressesViewModel(get(),get(),get(),get(),get(),get(),get(),get())
+    }
+
+    viewModel<UpdateAddressViewModel>{
+        UpdateAddressViewModel(get(),get(),get(),get(),get())
     }
 }
 

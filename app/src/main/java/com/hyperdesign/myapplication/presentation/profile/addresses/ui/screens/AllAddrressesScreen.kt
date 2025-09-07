@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -44,6 +45,7 @@ import com.hyperdesign.myapplication.domain.Entity.AddressEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.AddressesIntents
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.AddressesViewModel
@@ -73,6 +75,7 @@ fun AllAddressesScreen(addressViewModel: AddressesViewModel = koinViewModel()) {
         }
     }
 
+    // Listen to addressState for updates and channel events
     LaunchedEffect(addressState) {
         addresses = addressState.addresses?.addresses.orEmpty()
         Log.d("AllAddressesScreen", "AddressState updated: deleteAddressResponse=${addressState.deleteAddressRespnse?.message}")
@@ -89,6 +92,11 @@ fun AllAddressesScreen(addressViewModel: AddressesViewModel = koinViewModel()) {
                 }
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+
+        addressViewModel.handleIntents(AddressesIntents.GetAddress)
     }
 
     // Check and request permission when screen is entered
@@ -138,6 +146,12 @@ fun AllAddressesScreen(addressViewModel: AddressesViewModel = koinViewModel()) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         AllAddressesScreenContent(
+            onGoToUpdateAddressId = { id ->
+                val addressId = Uri.encode(id ?: "")
+                val lat = Uri.encode(addressState.lat ?: "")
+                val long = Uri.encode(addressState.long ?: "")
+                navController.navigate("${Screen.UpdateAddressScreen.route.replace("{addressId}/{lat}/{long}", "$addressId/$lat/$long")}")
+            },
             onDeleteAddress = { id -> addressViewModel.handleIntents(AddressesIntents.DeleteAddress(id)) },
             onBackPressed = { navController.popBackStack() },
             addresses = addresses,
@@ -168,7 +182,13 @@ fun AllAddressesScreen(addressViewModel: AddressesViewModel = koinViewModel()) {
 }
 
 @Composable
-fun AllAddressesScreenContent(onDeleteAddress: (String) -> Unit, onBackPressed: () -> Unit, addresses: List<AddressEntity>, onAddNewAddressClick: () -> Unit) {
+fun AllAddressesScreenContent(
+    onGoToUpdateAddressId: (String) -> Unit,
+    onDeleteAddress: (String) -> Unit,
+    onBackPressed: () -> Unit,
+    addresses: List<AddressEntity>,
+    onAddNewAddressClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -193,7 +213,11 @@ fun AllAddressesScreenContent(onDeleteAddress: (String) -> Unit, onBackPressed: 
             }
 
             items(addresses, key = { address -> address.id }) { address ->
-                AddressItem(address = address, onDeleteAddress = { onDeleteAddress(address.id) })
+                AddressItem(
+                    address = address,
+                    onDeleteAddress = { onDeleteAddress(address.id) },
+                    onGoToUpdateAddress = { onGoToUpdateAddressId(address.id) }
+                )
                 Spacer(modifier = Modifier.height(10.dp))
                 Divider(
                     modifier = Modifier.fillMaxWidth(),

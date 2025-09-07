@@ -5,6 +5,10 @@ data class AddressResponseDto(
     val addresses: List<AddressDto>
 )
 
+
+data class ShowAddressResponseDto (
+    val address :AddressDto
+)
 data class AddressDto(
     val id: String,
     val region: RegionDto,

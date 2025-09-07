@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.domain.repo.profile
 
 import com.hyperdesign.myapplication.domain.Entity.AboutUsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.AddressEntity
 import com.hyperdesign.myapplication.domain.Entity.AreaResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.CreateNewAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteAddressRequest
@@ -9,6 +10,8 @@ import com.hyperdesign.myapplication.domain.Entity.OrdersResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.PagesResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.RegionResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.ReorderRequest
+import com.hyperdesign.myapplication.domain.Entity.ShowAddressResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.updateAddressRequest
 
 interface ProfileRepo {
 
@@ -26,4 +29,9 @@ interface ProfileRepo {
     suspend fun createNewAddress(createNewAddressRequest: CreateNewAddressRequest):AddToCartResponseEntity
 
     suspend fun deleteAddress(deleteAddressRequest: DeleteAddressRequest):AddToCartResponseEntity
+
+    suspend fun showAddress(addressId:Int): ShowAddressResponseEntity
+
+    suspend fun updateAddress(updateAddressRequest: updateAddressRequest):AddToCartResponseEntity
+
 }

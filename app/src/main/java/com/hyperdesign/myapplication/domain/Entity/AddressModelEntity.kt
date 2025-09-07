@@ -8,6 +8,10 @@ data class AddressResponseEntity(
     val addresses: List<AddressEntity>
 )
 
+data class ShowAddressResponseEntity(
+    val address :AddressEntity
+)
+
 data class AddressEntity(
     val id: String,
     val region: RegionEntity,

@@ -31,4 +31,6 @@ object ScreensConst {
     const val PRIVACY_POLICY_SCREEN ="privacy_policy_screen"
 
     const val ALL_ADDRESSES_SCREEN="all_address_screen"
+
+    const val UPDATE_ADDRESS_SCREEN="update_address_screen"
 }

@@ -4,10 +4,12 @@ import com.hyperdesign.myapplication.data.dto.AddressDto
 import com.hyperdesign.myapplication.data.dto.AddressResponseDto
 import com.hyperdesign.myapplication.data.dto.AreaDto
 import com.hyperdesign.myapplication.data.dto.RegionDto
+import com.hyperdesign.myapplication.data.dto.ShowAddressResponseDto
 import com.hyperdesign.myapplication.domain.Entity.AddressEntity
 import com.hyperdesign.myapplication.domain.Entity.AddressResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.AreaEntity
 import com.hyperdesign.myapplication.domain.Entity.RegionEntity
+import com.hyperdesign.myapplication.domain.Entity.ShowAddressResponseEntity
 
 fun AddressResponseDto.toDomain() : AddressResponseEntity {
     return AddressResponseEntity(
@@ -16,6 +18,11 @@ fun AddressResponseDto.toDomain() : AddressResponseEntity {
 
 }
 
+fun ShowAddressResponseDto.toDomain(): ShowAddressResponseEntity{
+    return ShowAddressResponseEntity(
+        address = address.toDomain()
+    )
+}
 fun AddressDto.toDomain(): AddressEntity{
 
     return AddressEntity(

@@ -3,13 +3,16 @@ package com.hyperdesign.myapplication.data.remote.profile
 import android.util.Log
 import com.hyperdesign.myapplication.data.dto.AboutUsResponseDTO
 import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
+import com.hyperdesign.myapplication.data.dto.AddressDto
 import com.hyperdesign.myapplication.data.dto.AreaResponseDto
 import com.hyperdesign.myapplication.data.dto.OrdersResponseDTO
 import com.hyperdesign.myapplication.data.dto.PagesResponseDto
 import com.hyperdesign.myapplication.data.dto.RegionResponseDto
+import com.hyperdesign.myapplication.data.dto.ShowAddressResponseDto
 import com.hyperdesign.myapplication.domain.Entity.CreateNewAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.ReorderRequest
+import com.hyperdesign.myapplication.domain.Entity.updateAddressRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -136,6 +139,35 @@ class ProfileApiServicesImpl(
             response
         }catch (e: Exception){
             Log.e("ProfileApiServices","deleteAddressFaild:${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun showAddress(addressId: Int): ShowAddressResponseDto {
+        return try {
+            val response = client.post("show_address/${addressId}") {
+                contentType(ContentType.Application.Json)
+
+            }.body<ShowAddressResponseDto>()
+            Log.d("ProfileApiServices","showAddressSuccess ,addressID:${addressId} Response:${response}")
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","showAddressFaild ,,addressID:${addressId},${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun updateAddress(updateAddressRequest: updateAddressRequest): AddToCartResponseDto {
+        return try {
+            val response = client.post("update_address") {
+                contentType(ContentType.Application.Json)
+                setBody(updateAddressRequest)
+
+            }.body<AddToCartResponseDto>()
+            Log.d("ProfileApiServices","updateAddressSuccess,request:${updateAddressRequest} ,Response:${response}")
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","updateAddressFaild:,request:${updateAddressRequest}, ${e.message.toString()}")
             throw e
         }
     }

@@ -41,6 +41,7 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
 
     object AllAddressesScreen: Screen(ScreensConst.ALL_ADDRESSES_SCREEN)
 
+    object UpdateAddressScreen:Screen("${ScreensConst.UPDATE_ADDRESS_SCREEN}/{addressId}/{lat}/{long}")
 }
 
 

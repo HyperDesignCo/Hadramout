@@ -54,7 +54,8 @@ fun SettingItem(
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 5.dp, end = 8.dp),
-                    fontSize = 15.sp
+                    fontSize = 15.sp,
+                    color = Color.Black
                 )
 
                 description?.let {
@@ -62,7 +63,9 @@ fun SettingItem(
                         text = it,
                         modifier = Modifier.padding(end = 8.dp),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontSize = 13.sp,
+                        color = Color.Black
+
                     )
                 }
 
@@ -71,7 +74,9 @@ fun SettingItem(
             Text(
                 text = title,
                 modifier = Modifier.fillMaxWidth(),
-                fontSize = 15.sp
+                fontSize = 15.sp,
+                color = Color.Black
+
             )
         }
         Divider(

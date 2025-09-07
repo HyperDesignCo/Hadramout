@@ -120,4 +120,6 @@
     <string name="your_street_requied">Your Street is required</string>
     <string name="allow">Allow</string>
     <string name="deny">Deny</string>
+    <string name="update_address">Update Address</string>
+    <string name="update">Update</string>
 </resources>

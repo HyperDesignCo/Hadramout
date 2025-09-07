@@ -26,6 +26,7 @@ import com.hyperdesign.myapplication.presentation.menu.ui.MealDetailsScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CartScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CheckOutScreen
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens.AllAddressesScreen
+import com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens.UpdateAddressScreen
 import com.hyperdesign.myapplication.presentation.profile.common.ui.screens.ProfileScreen
 import com.hyperdesign.myapplication.presentation.profile.myorders.ui.screens.MyOrderScreen
 import com.hyperdesign.myapplication.presentation.profile.settings.contactus.ui.screens.ContactUsScreen
@@ -116,6 +117,19 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.TermesAndConditionsScreen.route) { TermsAndConditionsScreen() }
                 composable(Screen.PrivacyPolicyScreen.route) { PrivacyPolicyScreen() }
                 composable(Screen.AllAddressesScreen.route) { AllAddressesScreen() }
+                composable(Screen.UpdateAddressScreen.route, arguments = listOf(navArgument("addressId"){type=
+                    NavType.StringType},navArgument("lat"){NavType.StringType},navArgument("long"){NavType.StringType}))
+                {navBackStack->
+                    val addressId = navBackStack.arguments?.getString("addressId")
+                    val lat =  navBackStack.arguments?.getString("lat")
+                    val long = navBackStack.arguments?.getString("long")
+
+                    UpdateAddressScreen(addressId = addressId.orEmpty(), lat = lat.orEmpty(), long = long.orEmpty())
+
+
+
+
+                }
 
             }
         }

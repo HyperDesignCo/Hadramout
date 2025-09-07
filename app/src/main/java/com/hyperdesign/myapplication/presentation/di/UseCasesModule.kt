@@ -25,8 +25,10 @@ import com.hyperdesign.myapplication.domain.usecase.profile.GetLagugaueUsecase
 import com.hyperdesign.myapplication.domain.usecase.profile.GetRegionsUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.ReOrderUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.SetLagugaueUsecase
+import com.hyperdesign.myapplication.domain.usecase.profile.ShowAddressUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.ShowMyOrdersUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.ShowStaticPageUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.UpdateAddressUseCase
 import io.ktor.http.auth.HttpAuthHeader
 import org.koin.dsl.module
 
@@ -139,6 +141,14 @@ val useCasesModule = module {
 
     single<DeleteAddressUseCase> {
         DeleteAddressUseCase(get())
+    }
+
+    single<ShowAddressUseCase> {
+        ShowAddressUseCase(get())
+    }
+
+    single<UpdateAddressUseCase> {
+        UpdateAddressUseCase(get())
     }
 
     }
