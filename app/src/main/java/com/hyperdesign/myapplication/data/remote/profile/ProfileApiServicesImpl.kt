@@ -3,8 +3,12 @@ package com.hyperdesign.myapplication.data.remote.profile
 import android.util.Log
 import com.hyperdesign.myapplication.data.dto.AboutUsResponseDTO
 import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
+import com.hyperdesign.myapplication.data.dto.AreaResponseDto
 import com.hyperdesign.myapplication.data.dto.OrdersResponseDTO
 import com.hyperdesign.myapplication.data.dto.PagesResponseDto
+import com.hyperdesign.myapplication.data.dto.RegionResponseDto
+import com.hyperdesign.myapplication.domain.Entity.CreateNewAddressRequest
+import com.hyperdesign.myapplication.domain.Entity.DeleteAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.ReorderRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -73,6 +77,65 @@ class ProfileApiServicesImpl(
             response
         }catch (e: Exception){
             Log.e("ProfileApiServices","showPageFaild:${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun getRegions(): RegionResponseDto {
+        return try {
+            val response = client.get("get_regions") {
+                contentType(ContentType.Application.Json)
+
+            }.body<RegionResponseDto>()
+            Log.d("ProfileApiServices","getRegionsSuccess ,Response:${response}")
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","getRegionsFaild:${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun getArea(regionId: Int): AreaResponseDto {
+        return try {
+            val response = client.get("get_areas") {
+                contentType(ContentType.Application.Json)
+                parameter("region_id",regionId)
+
+            }.body<AreaResponseDto>()
+            Log.d("ProfileApiServices","getAreaSuccess ,Response:${response}")
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","getAreaFaild:${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun createNewAddress(createNewAddressRequest: CreateNewAddressRequest): AddToCartResponseDto {
+        return try {
+            val response = client.post("create_address") {
+                contentType(ContentType.Application.Json)
+                setBody(createNewAddressRequest)
+
+            }.body<AddToCartResponseDto>()
+            Log.d("ProfileApiServices","createNewAddressSuccess ,Response:${response}")
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","createNewAddressFaild:${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun deleteAddress(deleteAddressRequest: DeleteAddressRequest): AddToCartResponseDto {
+        return try {
+            val response = client.post("delete_address") {
+                contentType(ContentType.Application.Json)
+                setBody(deleteAddressRequest)
+
+            }.body<AddToCartResponseDto>()
+            Log.d("ProfileApiServices","deleteAddressSuccess ,Response:${response}")
+            response
+        }catch (e: Exception){
+            Log.e("ProfileApiServices","deleteAddressFaild:${e.message.toString()}")
             throw e
         }
     }

@@ -88,7 +88,7 @@ val viewModels = module {
     }
 
     viewModel<AddressesViewModel>{
-        AddressesViewModel(get())
+        AddressesViewModel(get(),get(),get(),get(),get(),get(),get(),get())
     }
 }
 

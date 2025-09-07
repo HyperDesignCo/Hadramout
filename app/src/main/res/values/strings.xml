@@ -103,4 +103,21 @@
     <string name="arabic">Arabic</string>
     <string name="Addresses">Addresses</string>
     <string name="add_new_address">Add New Address</string>
+    <string name="region">Region</string>
+    <string name="area">Area</string>
+    <string name="district">District</string>
+    <string name="street">Street</string>
+    <string name="building_number">Building Number</string>
+    <string name="floor_number">Floor Number</string>
+    <string name="apartment_number">Apartment Number</string>
+    <string name="special_sign">Special Sign</string>
+    <string name="extra_info">Extra Info</string>
+    <string name="save">Save</string>
+    <string name="second_phone_number">Second Phone Number</string>
+    <string name="region_is_requierd">Region is required</string>
+    <string name="area_is_requied">Area is required</string>
+    <string name="your_district_required">Your district is required</string>
+    <string name="your_street_requied">Your Street is required</string>
+    <string name="allow">Allow</string>
+    <string name="deny">Deny</string>
 </resources>

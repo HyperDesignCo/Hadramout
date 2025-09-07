@@ -17,8 +17,12 @@ import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.AddMealToCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMealDetailsUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMenuUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.CreateNewAddressUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.DeleteAddressUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.DisplayAboutUsUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.GetAreaUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.GetLagugaueUsecase
+import com.hyperdesign.myapplication.domain.usecase.profile.GetRegionsUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.ReOrderUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.SetLagugaueUsecase
 import com.hyperdesign.myapplication.domain.usecase.profile.ShowMyOrdersUseCase
@@ -119,6 +123,22 @@ val useCasesModule = module {
 
     single<ShowStaticPageUseCase> {
         ShowStaticPageUseCase(get())
+    }
+
+    single<GetRegionsUseCase> {
+        GetRegionsUseCase(get())
+    }
+
+    single<GetAreaUseCase> {
+        GetAreaUseCase(get())
+    }
+
+    single<CreateNewAddressUseCase> {
+        CreateNewAddressUseCase(get())
+    }
+
+    single<DeleteAddressUseCase> {
+        DeleteAddressUseCase(get())
     }
 
     }

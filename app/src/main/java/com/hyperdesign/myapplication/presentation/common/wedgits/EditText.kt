@@ -50,13 +50,14 @@ fun CustomTextField(
     placeholder: String = "",
     textColor: Color = Color.Black,
     borderColor: Color = Color(0xFFFCB203),
-    errorBorderColor: Color = Color.Red, // Added for error state
+    errorBorderColor: Color = Color.Red,
     borderWidth: Float = 2f,
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     maxLines: Int = 1,
     onNext: () -> Unit = {},
     focusRequester: FocusRequester = FocusRequester(),
+    nextFocusRequester: FocusRequester? = null, // Added for next field focus
     isError: Boolean = false,
     errorMessage: String? = null,
     validator: ((String) -> String?)? = null
@@ -72,7 +73,7 @@ fun CustomTextField(
         }
     }
 
-    Column { // Wrap in Column to display error message below
+    Column {
         BasicTextField(
             value = textFieldValue,
             onValueChange = {
@@ -98,11 +99,12 @@ fun CustomTextField(
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = keyboardType,
-                imeAction = ImeAction.Done
+                imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done
             ),
-            keyboardActions = KeyboardActions(onDone = {
-                onNext()
-            }),
+            keyboardActions = KeyboardActions(
+                onNext = { nextFocusRequester?.requestFocus() ?: onNext() },
+                onDone = { onNext() }
+            ),
             maxLines = maxLines,
             visualTransformation = visualTransformation,
             decorationBox = { innerTextField ->
@@ -136,7 +138,6 @@ fun CustomTextField(
             }
         )
 
-        // Display error message if isError is true or validator returns an error
         if (isError || validationError != null) {
             Text(
                 text = validationError ?: errorMessage.orEmpty(),
@@ -152,6 +153,8 @@ fun CustomTextField(
 @Composable
 fun CustomTextFieldPreview() {
     var text by remember { mutableStateOf("") }
+    val focusRequester1 = remember { FocusRequester() }
+    val focusRequester2 = remember { FocusRequester() }
     Column(modifier = Modifier.padding(16.dp)) {
         CustomTextField(
             value = text,
@@ -159,7 +162,9 @@ fun CustomTextFieldPreview() {
             placeholder = "Enter text",
             textColor = Color.Black,
             borderWidth = 2f,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            focusRequester = focusRequester1,
+            nextFocusRequester = focusRequester2
         )
         Spacer(modifier = Modifier.height(16.dp))
         CustomTextField(
@@ -169,6 +174,7 @@ fun CustomTextFieldPreview() {
             textColor = Color.Black,
             borderWidth = 2f,
             modifier = Modifier.fillMaxWidth(),
+            focusRequester = focusRequester2,
             isPassword = true
         )
     }
