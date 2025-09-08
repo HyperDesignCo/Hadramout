@@ -27,12 +27,14 @@ fun ProfileScreen() {
         navController.navigate(Screen.MyOrders.route)
     }, onGotToSettingsScreen = {
         navController.navigate(Screen.SettingsScreen.route)
-    }, onGoToAllAddressesScreen = {navController.navigate(Screen.AllAddressesScreen.route)})
+    }, onGoToAllAddressesScreen = {navController.navigate(Screen.AllAddressesScreen.route)}
+    , onGoToCartScreen = {navController.navigate(Screen.CartScreen.route)}
+    )
 }
 
 
 @Composable
-fun ProfileScreenCotent(onBackPressed: () -> Unit,onGoToAllAddressesScreen:()->Unit ,onGoToMyOrdersScreen:()->Unit,onGotToSettingsScreen:()->Unit) {
+fun ProfileScreenCotent(onGoToCartScreen:()->Unit,onBackPressed: () -> Unit,onGoToAllAddressesScreen:()->Unit ,onGoToMyOrdersScreen:()->Unit,onGotToSettingsScreen:()->Unit) {
 
     Column(
         modifier = Modifier
@@ -72,11 +74,11 @@ fun ProfileScreenCotent(onBackPressed: () -> Unit,onGoToAllAddressesScreen:()->U
             SettingItem(
                 title = stringResource(R.string.Cart),
                 icon = R.drawable.bxs_cart,
-                onClick = { /* Handle Help and Support Click */ }
+                onClick = { onGoToCartScreen() }
             )
 
             SettingItem(
-                title = stringResource(R.string.Pick_up),
+                title = stringResource(R.string.pick_up),
                 icon = R.drawable.ic_pickup,
                 onClick = { /* Handle Logout Click */ }
             )

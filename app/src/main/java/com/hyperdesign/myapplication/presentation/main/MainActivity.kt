@@ -62,7 +62,10 @@ class MainActivity : ComponentActivity() {
                     color = Secondry,
                     darkIcons = false
                 )
-                HadramoutTheme {
+                HadramoutTheme (
+                    darkTheme = false,
+                    dynamicColor = false
+                ){
 
                     var destination by remember { mutableStateOf<String?>(null) }
 

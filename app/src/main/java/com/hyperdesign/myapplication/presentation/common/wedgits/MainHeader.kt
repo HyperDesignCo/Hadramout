@@ -2,7 +2,10 @@ package com.hyperdesign.myapplication.presentation.common.wedgits
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,15 +18,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,8 +43,8 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 
 @Composable
 fun MainHeader(
-    modifier: Modifier= Modifier,
-    title: String?=null,
+    modifier: Modifier = Modifier,
+    title: String? = null,
     showBackPressedIcon: Boolean = false,
     onBackPressesd: () -> Unit,
     onCartPressed: () -> Unit = {},
@@ -43,8 +52,13 @@ fun MainHeader(
     cardCount: String? = "7",
     showLogo: Boolean = false,
     height: Int = 140,
-    showTitle: Boolean = false
+    showTitle: Boolean = false,
+    showStatus: Boolean = false,
+    onClickChangStatus: (Boolean) -> Unit = {} // Updated to pass the new status
 ) {
+    var statusState by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -81,7 +95,7 @@ fun MainHeader(
 
             if (showTitle) {
                 Text(
-                    text = title?:"",
+                    text = title ?: "",
                     color = Color.White,
                     modifier = Modifier
                         .padding(top = 35.dp)
@@ -93,41 +107,63 @@ fun MainHeader(
             }
 
             if (showIcon) {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 26.dp, end = 10.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
+                Column {
                     Box(
                         modifier = Modifier
-                            .padding(bottom = 27.dp, end = 3.dp)
-                            .size(17.dp)
-                            .background(color = Color.Red, shape = CircleShape),
-                        contentAlignment = Alignment.Center
+                            .padding(top = 26.dp, end = 10.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd
                     ) {
-                        Text(
-                            text = cardCount ?: "",
+                        Box(
                             modifier = Modifier
-                                .padding(bottom = 2.dp)
-                                .fillMaxSize(),
-                            textAlign = TextAlign.Center,
-                            color = Color.White,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                                .padding(bottom = 27.dp, end = 3.dp)
+                                .size(17.dp)
+                                .background(color = Color.Red, shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = cardCount ?: "",
+                                modifier = Modifier
+                                    .padding(bottom = 2.dp)
+                                    .fillMaxSize(),
+                                textAlign = TextAlign.Center,
+                                color = Color.White,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
-                    IconButton(
-                        onClick = onCartPressed,
-                        modifier = Modifier.size(30.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.cart),
-                            tint = Color.LightGray,
-                            contentDescription = "cart",
-                            modifier = Modifier.size(24.dp)
-                        )
+                        IconButton(
+                            onClick = onCartPressed,
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.cart),
+                                tint = Color.LightGray,
+                                contentDescription = "cart",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                    if (showStatus) {
+                        Row(
+                            modifier = Modifier
+                                .padding(end = 5.dp, top = 15.dp)
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .clickable {
+                                    showDialog = true // Show dialog on click
+                                },
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = if (!statusState) painterResource(R.drawable.ic_pickup) else painterResource(R.drawable.delivery),
+                                contentDescription = ""
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery), color = Color.White)
+                        }
                     }
                 }
             } else {
@@ -145,6 +181,71 @@ fun MainHeader(
                 contentScale = ContentScale.Fit
             )
         }
+
+        // Custom-designed Dialog
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                modifier = Modifier
+                    .background(Color.White, RoundedCornerShape(16.dp))
+                    .padding(16.dp),
+                title = {
+                   Image(
+                       painter = painterResource(R.drawable.warning),
+                       contentDescription = ""
+
+                   )
+                },
+                text = {
+                    Text(
+                        text = stringResource(
+                            R.string.are_you_sure_you_want_to_change_to,
+                            if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery)
+                        ),
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
+                },
+                confirmButton = {
+                    Row(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(), horizontalArrangement =Arrangement.SpaceBetween ) {
+                        Text(
+                            text = if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Secondry,
+                            modifier = Modifier
+                                .clickable {
+                                    statusState = !statusState
+                                    onClickChangStatus(statusState) // Pass the new status
+                                    showDialog = false
+                                }
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+
+                        Text(
+                            text = stringResource(R.string.no),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Secondry,
+                            modifier = Modifier
+                                .clickable { showDialog = false }
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+
+                },
+                dismissButton = {
+
+                },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(16.dp),
+                tonalElevation = 8.dp
+            )
+        }
     }
 }
 
@@ -156,6 +257,8 @@ fun MainHeaderPreview() {
         onBackPressesd = {},
         showIcon = true,
         showLogo = true,
-        showBackPressedIcon = true
+        showBackPressedIcon = true,
+        showStatus = true,
+        onClickChangStatus = {}
     )
 }

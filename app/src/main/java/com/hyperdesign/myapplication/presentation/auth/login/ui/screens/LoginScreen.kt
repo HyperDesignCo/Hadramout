@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginIntents
@@ -47,13 +48,12 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
         viewModel.validationEvents.collectLatest { event ->
             when (event) {
                 is ValidationEvent.Success -> {
-                    navController.navigate(Screen.HomeScreen.route){
+                    navController.navigate(Screen.HomeScreen.route) {
                         popUpTo(Screen.LoginInScreen.route) { inclusive = true }
-
                     }
                 }
                 is ValidationEvent.Failure -> {
-                    Toast.makeText(context,event.errorMessage, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, event.errorMessage, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -63,7 +63,6 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
 
     LoginScreenContent(
         phoneNumber = state.phoneNumber,
-
         password = state.password,
         phoneNumberError = state.phoneNumberError,
         passwordError = state.passwordError,
@@ -72,7 +71,7 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
         onPasswordChange = { viewModel.onIntent(LoginIntents.PasswordChanged(it)) },
         onLoginClick = { viewModel.onIntent(LoginIntents.LoginEvent(state.phoneNumber, state.password)) },
         onGoToForgetPasswordScreen = {
-           navController.navigate(Screen.ForgotPasswordScreen.route)
+            navController.navigate(Screen.ForgotPasswordScreen.route)
         },
         onCreateAccountClick = {
             navController.navigate(Screen.SignUpScreen.route)
@@ -99,6 +98,8 @@ fun LoginScreenContent(
     onGuestLoginClick: () -> Unit
 ) {
     val verticalScroll = rememberScrollState()
+    val phoneFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
 
     Column(
         modifier = Modifier
@@ -130,7 +131,9 @@ fun LoginScreenContent(
                 errorBorderColor = Color.Red,
                 keyboardType = KeyboardType.Text,
                 isError = phoneNumberError != null,
-                errorMessage = phoneNumberError
+                errorMessage = phoneNumberError,
+                focusRequester = phoneFocusRequester,
+                nextFocusRequester = passwordFocusRequester
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -153,7 +156,8 @@ fun LoginScreenContent(
                 keyboardType = KeyboardType.Password,
                 isPassword = true,
                 isError = passwordError != null,
-                errorMessage = passwordError
+                errorMessage = passwordError,
+                focusRequester = passwordFocusRequester
             )
 
             Spacer(modifier = Modifier.height(10.dp))

@@ -119,6 +119,9 @@ class CartViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val quantity = _cartState.value.quantity.toInt()-1
+                if (quantity<1){
+                    deleteCartItem(cartId,itemId)
+                }
                 val updateRequest = UpdateCartItemQuantityRequest(cartId = cartId, itemId = itemId, newQuantity = quantity.toString())
                 val response = updateCartItemQuantityUseCase.invoke(updateRequest)
                 _cartState.value = _cartState.value.copy(

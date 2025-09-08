@@ -8,8 +8,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -73,14 +71,12 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
     LaunchedEffect(mealDetailsState) {
         mealDetails = mealDetailsState.MealDetailsData?.meal
         addCartMessage = mealDetailsState.AddToCartData?.message.orEmpty()
-        if (mealDetailsState.AddToCartData?.message== "Meal Added successfully") {
+        if (mealDetailsState.AddToCartData?.message == "Meal Added successfully") {
             Toast.makeText(context, "Meal Added successfully", Toast.LENGTH_SHORT).show()
-
-        }else if (mealDetailsState.AddToCartData?.message != null) {
+        } else if (mealDetailsState.AddToCartData?.message != null) {
             Toast.makeText(context, mealDetailsState.AddToCartData?.message, Toast.LENGTH_SHORT).show()
         }
     }
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Show content only when data is available
@@ -89,13 +85,11 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
             var selectedSizeId by remember { mutableStateOf(meal.sizes.firstOrNull()?.id ?: "") }
             var selectedChoiceId by remember { mutableStateOf<String?>(null) }
             var selectedSubChoices by remember { mutableStateOf<Map<String, List<String>>>(emptyMap()) }
-            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
             MealDetailsContent(
                 meal = meal,
                 selectedSize = selectedSize,
                 selectedSubChoices = selectedSubChoices,
-                scrollBehavior = scrollBehavior,
                 onSizeSelected = { size -> selectedSize = size },
                 onSubChoiceSelected = { choiceId, subChoiceId, isSelected ->
                     selectedSubChoices = selectedSubChoices.toMutableMap().apply {
@@ -138,9 +132,8 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     FoodCardDesign(
                         imageUrl = featured?.image.orEmpty(),
-                        onGoToCart = { navController.navigate(Screen.CartScreen.route){
+                        onGoToCart = { navController.navigate(Screen.CartScreen.route) {
                             popUpTo(Screen.MealDetailsScreen.route) { inclusive = true }
-
                         } },
                         onGoToMenu = { navController.popBackStack() }
                     )
@@ -156,14 +149,7 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                     .background(Color.Black.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Secondry)
-                }
+                CircularProgressIndicator(color = Secondry)
             }
         }
 
@@ -193,7 +179,6 @@ fun MealDetailsContent(
     meal: MealDetailsEntity?,
     selectedSize: String,
     selectedSubChoices: Map<String, List<String>>,
-    scrollBehavior: TopAppBarScrollBehavior,
     onSizeSelected: (String) -> Unit,
     onSubChoiceSelected: (String, String, Boolean) -> Unit,
     onBackPressed: () -> Unit,
@@ -204,10 +189,13 @@ fun MealDetailsContent(
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
-    val maxAppBarHeight = 300.dp
-    val minAppBarHeight = 56.dp
-    val appBarHeight = (maxAppBarHeight + density.run { scrollBehavior.state.heightOffset.toDp() })
-        .coerceIn(minAppBarHeight, maxAppBarHeight)
+    var bottomBarHeight by remember { mutableStateOf(0.dp) }
+    val bottomBarModifier = Modifier
+        .fillMaxWidth()
+        .onSizeChanged { size ->
+            bottomBarHeight = with(density) { size.height.toDp() }
+        }
+    val scrollState = rememberScrollState()
 
     // Calculate total price with derivedStateOf
     val totalPrice by remember(meal, selectedSize, selectedSubChoices) {
@@ -222,60 +210,153 @@ fun MealDetailsContent(
         }
     }
 
-    var bottomBarHeight by remember { mutableStateOf(0.dp) }
-    val bottomBarModifier = Modifier
-        .fillMaxWidth()
-        .onSizeChanged { size ->
-            bottomBarHeight = with(density) { size.height.toDp() }
-        }
-    val scrollState = rememberScrollState()
-
-    Scaffold(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
+            .verticalScroll(scrollState)
+    ) {
+        // Fixed App Bar with Image
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .background(Color.Transparent)
+        ) {
+            MainHeader(
+                title = "",
+                showBackPressedIcon = true,
+                onBackPressesd = onBackPressed,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+            )
             Box(
                 modifier = Modifier
-                    .height(appBarHeight)
-                    .fillMaxWidth()
-                    .background(Color.Transparent)
+                    .matchParentSize()
+                    .background(Color.Transparent),
+                contentAlignment = Alignment.Center
             ) {
-                MainHeader(
-                    title = "",
-                    showBackPressedIcon = true,
-                    onBackPressesd = onBackPressed,
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(meal?.imageUrl)
+                        .crossfade(true)
+                        .error(R.drawable.test_food)
+                        .placeholder(R.drawable.test_food)
+                        .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                        .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                        .build(),
+                    contentDescription = meal?.title,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter)
+                        .fillMaxWidth(0.7f)
+                        .height(230.dp)
+                        .clip(RoundedCornerShape(10.dp)),
+                    contentScale = ContentScale.Crop
                 )
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .offset(y = density.run { scrollBehavior.state.heightOffset.toDp() })
-                        .background(Color.Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(meal?.imageUrl)
-                            .crossfade(true)
-                            .error(R.drawable.test_food)
-                            .placeholder(R.drawable.test_food)
-                            .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
-                            .diskCachePolicy(coil.request.CachePolicy.ENABLED)
-                            .build(),
-                        contentDescription = meal?.title,
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .height(230.dp)
-                            .clip(RoundedCornerShape(10.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
             }
-        },
-        bottomBar = {
+        }
+
+        // Content Section
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = bottomBarHeight + 16.dp) // Account for bottom bar
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = meal?.title ?: "",
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                fontSize = 20.sp
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = meal?.description ?: "",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sizes Section
+            if (!meal?.sizes.isNullOrEmpty()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = stringResource(R.string.select_size),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        meal.sizes.forEach { size ->
+                            SizeOption(
+                                size = size.sizeTitle,
+                                price = String.format("%.2f", size.price),
+                                selectedSize = selectedSize,
+                                onSelected = { selected ->
+                                    onSizeSelected(selected)
+                                    onSelectedSizeId(size.id)
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Choices Section
+            meal?.choices?.forEach { choice ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = choice.choiceTitle,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (selectedChoiceId == choice.id) Color.White else Color.Black
+                        )
+
+                        if (choice.subChoices.isNotEmpty()) {
+                            Column(modifier = Modifier.padding(start = 16.dp)) {
+                                choice.subChoices.forEach { subChoice ->
+                                    SubChoiceOption(
+                                        subChoice = subChoice,
+                                        choiceId = choice.id,
+                                        isSelected = selectedSubChoices[choice.id]?.contains(subChoice.id) == true,
+                                        onSelected = onSubChoiceSelected
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
+        // Bottom Bar (fixed at the bottom)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp) // Separation from content
+        ) {
             Button(
                 onClick = onAddToCart,
                 modifier = bottomBarModifier
@@ -305,112 +386,6 @@ fun MealDetailsContent(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-                }
-            }
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 80.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = meal?.title ?: "",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = meal?.description ?: "",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // Sizes Section
-            if (!meal?.sizes.isNullOrEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color.Black),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            Text(
-                                text = stringResource(R.string.select_size),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            meal.sizes.forEach { size ->
-                                SizeOption(
-                                    size = size.sizeTitle,
-                                    price = String.format("%.2f", size.price),
-                                    selectedSize = selectedSize,
-                                    onSelected = { selected ->
-                                        onSizeSelected(selected)
-                                        onSelectedSizeId(size.id)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-
-            // Choices Section
-            meal?.choices?.forEach { choice ->
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color.Black),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-
-                                Text(
-                                    text = choice.choiceTitle,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (selectedChoiceId == choice.id) Color.White else Color.Black
-                                )
-
-
-                            // SubChoices
-                            if (choice.subChoices.isNotEmpty()) {
-                                Column(modifier = Modifier.padding(start = 16.dp)) {
-                                    choice.subChoices.forEach { subChoice ->
-                                        SubChoiceOption(
-                                            subChoice = subChoice,
-                                            choiceId = choice.id,
-                                            isSelected = selectedSubChoices[choice.id]?.contains(subChoice.id) == true,
-                                            onSelected = onSubChoiceSelected
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

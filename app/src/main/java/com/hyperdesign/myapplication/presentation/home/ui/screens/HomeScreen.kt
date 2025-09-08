@@ -62,6 +62,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
     var branchList by remember { mutableStateOf<List<Branch>>(emptyList()) }
     var bestSalesMeals by remember { mutableStateOf<List<Meal>>(emptyList()) }
     var homeMenus by remember { mutableStateOf<List<HomeMenu>>(emptyList()) }
+    var status by remember { mutableStateOf(false) } // Track delivery/pickup status
 
     Log.d("HomeScreen", "bestSalesMeals: ${homeState.homeMenues?.bestSalesMeals}")
     Log.d("HomeScreen", "homeMenus: ${homeState.homeMenues?.homeMenus}")
@@ -84,7 +85,11 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
             onBranchSelected = { branchId ->
                 homeViewModel.handleIntents(HomeIntents.changeBranchId(branchId))
             },
-            onBackPressed = { /* navController.popBackStack() */ }
+            onBackPressed = { /* navController.popBackStack() */ },
+            status = status,
+            onStatusChanged = { newStatus ->
+                status = newStatus // Update status state
+            }
         )
         if (homeState.isLoading) {
             Box(
@@ -105,7 +110,9 @@ fun HomeScreenContent(
     offers: List<Meal>,
     homeMenus: List<HomeMenu>,
     onBranchSelected: (Int) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    status: Boolean,
+    onStatusChanged: (Boolean) -> Unit // Callback to update status
 ) {
     val navController = LocalNavController.current
     var expanded by remember { mutableStateOf(false) }
@@ -131,7 +138,9 @@ fun HomeScreenContent(
             onBackPressesd = { onBackPressed() },
             showIcon = true,
             cardCount = "2",
-            onCartPressed = {}
+            onCartPressed = {},
+            showStatus = true,
+            onClickChangStatus = onStatusChanged // Pass the callback to update status
         )
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -166,7 +175,7 @@ fun HomeScreenContent(
                                 tint = Primary
                             )
                             Text(
-                                stringResource(R.string.delevery_to),
+                                text = if (!status) stringResource(R.string.delevery_to) else stringResource(R.string.pickup_from),
                                 modifier = Modifier.padding(horizontal = 10.dp),
                                 color = Secondry,
                                 fontSize = 15.sp,
@@ -208,10 +217,10 @@ fun HomeScreenContent(
                                 modifier = Modifier.background(Color.White)
                             ) {
                                 if (branches.isEmpty()) {
-//                                    DropdownMenuItem(
-//                                        text = { Text("No branches available") },
-//                                        onClick = { expanded = false }
-//                                    )
+                                    // DropdownMenuItem(
+                                    //     text = { Text("No branches available") },
+                                    //     onClick = { expanded = false }
+                                    // )
                                 } else {
                                     branches.forEach { branch ->
                                         DropdownMenuItem(

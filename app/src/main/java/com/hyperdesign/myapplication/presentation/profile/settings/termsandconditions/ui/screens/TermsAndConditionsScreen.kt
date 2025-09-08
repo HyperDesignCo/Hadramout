@@ -67,7 +67,7 @@ fun TermsAndConditionsScreenContent(page: PageEntity, onBackPressed:()->Unit){
                 Spacer(modifier = Modifier.padding(vertical = 10.dp))
             }
             item {
-                Text(AnnotatedString.fromHtml(page.text))
+                Text(AnnotatedString.fromHtml(page.text),color = Color.Black)
             }
         }
     }

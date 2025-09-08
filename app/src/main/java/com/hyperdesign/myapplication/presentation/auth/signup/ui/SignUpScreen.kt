@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.auth.signup.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.auth.login.ui.widgets.HadramoutHeader
@@ -64,28 +67,26 @@ fun SignUpScreen(registerViewModel: RegisterViewModel = koinViewModel()) {
         }
     }
 
-        SignUpScreenContent(
-            name = state.userName,
-            email = state.email,
-            phone = state.phoneNumber,
-            password = state.password,
-            confirmPassword = state.confirmPassword,
-            onNameChange = { registerViewModel.onIntentEvent(RegisterIntents.NameChanged(it)) },
-            onEmailChange = { registerViewModel.onIntentEvent(RegisterIntents.EmailChanged(it)) },
-            onPhoneChange = { registerViewModel.onIntentEvent(RegisterIntents.MobileChanged(it)) },
-            onPasswordChange = { registerViewModel.onIntentEvent(RegisterIntents.PasswordChanged(it)) },
-            onConfirmPasswordChange = { registerViewModel.onIntentEvent(RegisterIntents.ConfirmPasswordChanged(it)) },
-            onSignUpClick = { registerViewModel.onIntentEvent(RegisterIntents.RegisterClicked(name = state.userName, email = state.email, mobile = state.phoneNumber, password = state.password)) },
-            nameError = state.userNameError,
-            emailError = state.emailError,
-            isLoading = state.isLoading,
-            phoneError = state.phoneNumberError,
-            passwordError = state.passwordError,
-            confirmPasswordError = state.confirmPasswordError,
-        )
-
-
-
+    SignUpScreenContent(
+        name = state.userName,
+        email = state.email,
+        phone = state.phoneNumber,
+        password = state.password,
+        confirmPassword = state.confirmPassword,
+        onNameChange = { registerViewModel.onIntentEvent(RegisterIntents.NameChanged(it)) },
+        onEmailChange = { registerViewModel.onIntentEvent(RegisterIntents.EmailChanged(it)) },
+        onPhoneChange = { registerViewModel.onIntentEvent(RegisterIntents.MobileChanged(it)) },
+        onPasswordChange = { registerViewModel.onIntentEvent(RegisterIntents.PasswordChanged(it)) },
+        onConfirmPasswordChange = { registerViewModel.onIntentEvent(RegisterIntents.ConfirmPasswordChanged(it)) },
+        onSignUpClick = { registerViewModel.onIntentEvent(RegisterIntents.RegisterClicked(name = state.userName, email = state.email, mobile = state.phoneNumber, password = state.password)) },
+        nameError = state.userNameError,
+        emailError = state.emailError,
+        isLoading = state.isLoading,
+        phoneError = state.phoneNumberError,
+        passwordError = state.passwordError,
+        confirmPasswordError = state.confirmPasswordError,
+        onBackToSignInScreen = { navController.popBackStack() }
+    )
 }
 
 @Composable
@@ -107,8 +108,14 @@ fun SignUpScreenContent(
     phoneError: String? = null,
     passwordError: String? = null,
     confirmPasswordError: String? = null,
+    onBackToSignInScreen: () -> Unit
 ) {
     val verticalScroll = rememberScrollState()
+    val nameFocusRequester = remember { FocusRequester() }
+    val emailFocusRequester = remember { FocusRequester() }
+    val phoneFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
+    val confirmPasswordFocusRequester = remember { FocusRequester() }
 
     Column(
         modifier = Modifier
@@ -138,7 +145,9 @@ fun SignUpScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Text,
                 isError = nameError != null,
-                errorMessage = nameError
+                errorMessage = nameError,
+                focusRequester = nameFocusRequester,
+                nextFocusRequester = emailFocusRequester
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -158,7 +167,9 @@ fun SignUpScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Text,
                 isError = emailError != null,
-                errorMessage = emailError
+                errorMessage = emailError,
+                focusRequester = emailFocusRequester,
+                nextFocusRequester = phoneFocusRequester
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -178,7 +189,9 @@ fun SignUpScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Phone,
                 isError = phoneError != null,
-                errorMessage = phoneError
+                errorMessage = phoneError,
+                focusRequester = phoneFocusRequester,
+                nextFocusRequester = passwordFocusRequester
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -199,7 +212,9 @@ fun SignUpScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Text,
                 isError = passwordError != null,
-                errorMessage = passwordError
+                errorMessage = passwordError,
+                focusRequester = passwordFocusRequester,
+                nextFocusRequester = confirmPasswordFocusRequester
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -220,7 +235,8 @@ fun SignUpScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Text,
                 isError = confirmPasswordError != null,
-                errorMessage = confirmPasswordError
+                errorMessage = confirmPasswordError,
+                focusRequester = confirmPasswordFocusRequester
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -254,14 +270,12 @@ fun SignUpScreenContent(
                     text = stringResource(R.string.login),
                     color = Color(0xFFF15A25),
                     fontSize = 13.sp,
+                    modifier = Modifier.clickable {
+                        onBackToSignInScreen()
+                    },
                     fontWeight = FontWeight.Bold
-
                 )
             }
-
-
-
-
         }
     }
     if (isLoading) {
@@ -274,6 +288,4 @@ fun SignUpScreenContent(
             CircularProgressIndicator(color = Secondry)
         }
     }
-
-
 }

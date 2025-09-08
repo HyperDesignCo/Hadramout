@@ -86,7 +86,7 @@ fun WhoAreWeScreenContent(about: AboutEntity, setting: SettingEntity, onBackPres
                 }
                 item {
 
-                    Text(AnnotatedString.fromHtml(about.aboutUs))
+                    Text(AnnotatedString.fromHtml(about.aboutUs),color = Color.Black)
 
 
                 }
