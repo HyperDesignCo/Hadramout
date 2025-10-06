@@ -39,7 +39,7 @@ val viewModels = module {
     }
 
     viewModel<HomeViewModel> {
-        HomeViewModel(get(),get())
+        HomeViewModel(get(),get(),get())
     }
 
     viewModel<MenuViewModel> { MenuViewModel(get()) }

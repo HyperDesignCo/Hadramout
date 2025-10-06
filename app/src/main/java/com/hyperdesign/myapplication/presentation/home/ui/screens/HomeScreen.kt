@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.home.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,7 @@ import com.hyperdesign.myapplication.presentation.home.ui.wedgit.FeaturedWedgits
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.OffersList
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.offers
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDetails
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
@@ -78,19 +80,29 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        HomeScreenContent(
-            branches = branchList,
-            offers = bestSalesMeals,
-            homeMenus = homeMenus,
-            onBranchSelected = { branchId ->
-                homeViewModel.handleIntents(HomeIntents.changeBranchId(branchId))
-            },
-            onBackPressed = { /* navController.popBackStack() */ },
-            status = status,
-            onStatusChanged = { newStatus ->
-                status = newStatus // Update status state
-            }
-        )
+        homeViewModel.tokenManager.getBranchId()?.let {
+            HomeScreenContent(
+                branches = branchList,
+                offers = bestSalesMeals,
+                homeMenus = homeMenus,
+                onBranchSelected = { branchId ->
+                    homeViewModel.handleIntents(HomeIntents.changeBranchId(branchId))
+                    homeViewModel.tokenManager.saveBranchId(branchId)
+                },
+                onBackPressed = { /* navController.popBackStack() */ },
+                status = status,
+                onStatusChanged = { newStatus ->
+                    status = newStatus // Update status state
+                },
+                onCartPressed = {
+                    navController.navigate(Screen.CartScreen.route)
+                },
+                saveBranchId={branchId->
+                    homeViewModel.tokenManager.saveBranchId(branchId)
+                },
+                getBranchId=it
+            )
+        }
         if (homeState.isLoading) {
             Box(
                 modifier = Modifier
@@ -111,17 +123,37 @@ fun HomeScreenContent(
     homeMenus: List<HomeMenu>,
     onBranchSelected: (Int) -> Unit,
     onBackPressed: () -> Unit,
+    onCartPressed:()->Unit,
     status: Boolean,
+    getBranchId:Int,
+    saveBranchId:(Int)->Unit,
     onStatusChanged: (Boolean) -> Unit // Callback to update status
 ) {
     val navController = LocalNavController.current
     var expanded by remember { mutableStateOf(false) }
     var selectedBranch by remember { mutableStateOf("Select Branch") }
 
-    LaunchedEffect(branches) {
-        if (branches.isNotEmpty() && selectedBranch == "Select Branch") {
-            selectedBranch = branches[0].title
-            onBranchSelected(branches[0].id)
+    LaunchedEffect(branches, getBranchId) {
+        if (branches.isNotEmpty()) {
+            if (getBranchId != 0) {
+                val selected = branches.find { it.id == getBranchId }
+                if (selected != null) {
+                    selectedBranch = selected.title
+                    onBranchSelected(selected.id)
+                } else {
+                    // Invalid saved branch ID (not found in current list), reset to default
+                    saveBranchId(0)
+                    selectedBranch = branches[0].title
+                    onBranchSelected(branches[0].id)
+                    saveBranchId(branches[0].id)
+                }
+            } else {
+                if (selectedBranch == "Select Branch") {
+                    selectedBranch = branches[0].title
+                    onBranchSelected(branches[0].id)
+                    saveBranchId(branches[0].id)
+                }
+            }
         }
     }
 
@@ -138,7 +170,10 @@ fun HomeScreenContent(
             onBackPressesd = { onBackPressed() },
             showIcon = true,
             cardCount = "2",
-            onCartPressed = {},
+            onCartPressed = {
+                onCartPressed()
+
+            },
             showStatus = true,
             onClickChangStatus = onStatusChanged // Pass the callback to update status
         )
@@ -191,7 +226,10 @@ fun HomeScreenContent(
                                 text = selectedBranch,
                                 color = Secondry,
                                 fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable{
+                                    expanded = true
+                                }
                             )
                             IconButton(
                                 onClick = { expanded = true },

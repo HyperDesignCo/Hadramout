@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.domain.Entity.MenuEntity
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDetails
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
@@ -49,14 +50,16 @@ fun MenuScreen(menuViewModel: MenuViewModel = koinViewModel()) {
 
     MenuScreenContent(
         onBackPressed = { navController.popBackStack() },
-        menuTabs = menuTabs
+        menuTabs = menuTabs,
+        onCartPressed = {navController.navigate(Screen.CartScreen.route)}
     )
 }
 
 @Composable
 fun MenuScreenContent(
     onBackPressed: () -> Unit,
-    menuTabs: List<MenuEntity>
+    menuTabs: List<MenuEntity>,
+    onCartPressed:()->Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val lazyListState = rememberLazyListState()
@@ -93,7 +96,7 @@ fun MenuScreenContent(
     ) {
         MenuHeader(
             onBackPressed = onBackPressed,
-            onCartPressed = {},
+            onCartPressed = {onCartPressed()},
             cardCount = "22",
             selectedTab = selectedTab,
             onTabSelected = { tab ->

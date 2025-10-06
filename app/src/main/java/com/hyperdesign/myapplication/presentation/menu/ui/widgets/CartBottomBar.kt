@@ -103,7 +103,7 @@ fun CartBottomBar(
             ) {
 
                 Text(
-                    text = " جنيه${totalPrice}",
+                    text = "${totalPrice} ${stringResource(R.string.egy2)}",
                     modifier = Modifier.fillMaxWidth(0.7f),
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp,

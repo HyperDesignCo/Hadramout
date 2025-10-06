@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +36,7 @@ import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.CheckOutResponseEntity
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
 import com.hyperdesign.myapplication.presentation.auth.login.ui.widgets.HadramoutHeader
+import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
@@ -54,28 +53,52 @@ import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SpecialRequest
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginViewModel: LoginViewModel = koinViewModel()){
+fun CheckOutScreen(checkOutViewModel: CheckOutViewModel = koinViewModel(), loginViewModel: LoginViewModel = koinViewModel()) {
     val navController = LocalNavController.current
     val checkState by checkOutViewModel.checkOutState.collectAsStateWithLifecycle()
     var subRegion by remember { mutableStateOf("") }
     var allAddress by remember { mutableStateOf("") }
     var selectedPayment by remember { mutableStateOf("") }
     val context = LocalContext.current
-    var finishOrderMsg  by remember { mutableStateOf("") }
+    var finishOrderMsg by remember { mutableStateOf("") }
     var paymentId by remember { mutableStateOf("") }
 
+    // Create address list from checkState.address?.addresses
+    val addressList = remember(checkState.address?.addresses) {
+        checkState.address?.addresses?.map { address ->
+            val district = listOfNotNull(
+                address.area?.name?.takeIf { it.isNotEmpty() },
+                address.region?.name?.takeIf { it.isNotEmpty() }
+            ).joinToString(separator = ",")
+            val addressDetails = listOfNotNull(
+                address.sub_region?.takeIf { it.isNotEmpty() },
+                address.street?.takeIf { it.isNotEmpty() },
+                address.special_sign?.takeIf { it.isNotEmpty() },
+                address.building_number?.takeIf { it.isNotEmpty() },
+                address.floor_number?.takeIf { it.isNotEmpty() }
+            ).joinToString(separator = ",")
+            Pair(district, addressDetails)
+        } ?: emptyList()
+    }
 
     LaunchedEffect(Unit) {
         checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick("2"))
     }
     LaunchedEffect(checkState) {
-        subRegion = "${checkState.address?.addresses?.firstOrNull()?.area?.name.orEmpty()},${
-            checkState.address?.addresses?.firstOrNull()?.region?.name.orEmpty()}"
-        allAddress = "${checkState.address?.addresses?.firstOrNull()?.sub_region.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.street.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.special_sign.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.building_number.orEmpty()},${checkState.address?.addresses?.firstOrNull()?.floor_number.orEmpty()}"
-
+        val address = checkState.address?.addresses?.firstOrNull()
+        subRegion = listOfNotNull(
+            address?.area?.name?.takeIf { it.isNotEmpty() },
+            address?.region?.name?.takeIf { it.isNotEmpty() }
+        ).joinToString(separator = ",")
+        allAddress = listOfNotNull(
+            address?.sub_region?.takeIf { it.isNotEmpty() },
+            address?.street?.takeIf { it.isNotEmpty() },
+            address?.special_sign?.takeIf { it.isNotEmpty() },
+            address?.building_number?.takeIf { it.isNotEmpty() },
+            address?.floor_number?.takeIf { it.isNotEmpty() }
+        ).joinToString(separator = ",")
         paymentId = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.id.toString()
-        selectedPayment=checkState.checkOutResponse?.payment_methods?.firstOrNull()?.title.toString()
-
+        selectedPayment = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.title.toString()
         finishOrderMsg = checkState.finishOrderResponse?.message.orEmpty()
     }
 
@@ -92,7 +115,6 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
         }
     }
 
-
     Box(modifier = Modifier.fillMaxSize()) {
         CheckOutScreenContent(
             name = loginViewModel.tokenManager.getUserData()?.name.orEmpty(),
@@ -101,9 +123,7 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
             state = checkState,
             onChangeSpecialRequest = {
                 checkOutViewModel.handleIntents(
-                    CheckOutIntents.OnChangeSpecialRequest(
-                        it
-                    )
+                    CheckOutIntents.OnChangeSpecialRequest(it)
                 )
             },
             onBackedBresed = {
@@ -112,9 +132,23 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
             subRegion = subRegion,
             allAddress = allAddress,
             onSelectedPayemt = { payment -> selectedPayment = payment },
-            selectedPayemnt = selectedPayment.orEmpty(),
-            onChangePaymentId = {paymentIdd->paymentId=paymentIdd},
-            finishOrder = {cartId->checkOutViewModel.handleIntents(CheckOutIntents.FinishOrder(cartId = cartId, paymentMethodId = paymentId, specialRequest = checkState.specialRequest, userId = loginViewModel.tokenManager.getUserData()?.id.toString()))}
+            selectedPayemnt = selectedPayment,
+            onChangePaymentId = { paymentIdd -> paymentId = paymentIdd },
+            finishOrder = { cartId ->
+                checkOutViewModel.handleIntents(
+                    CheckOutIntents.FinishOrder(
+                        cartId = cartId,
+                        paymentMethodId = paymentId,
+                        specialRequest = checkState.specialRequest,
+                        userId = loginViewModel.tokenManager.getUserData()?.id.toString()
+                    )
+                )
+            },
+            addressList = addressList,
+            onAddressSelected = { district, details ->
+                subRegion = district
+                allAddress = details
+            }
         )
         if (checkState.isLoading) {
             Box(
@@ -126,25 +160,36 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel =koinViewModel(), loginV
                 CircularProgressIndicator(color = Secondry)
             }
         }
-
     }
-
 }
 
-
 @Composable
-fun CheckOutScreenContent(finishOrder:(String)->Unit,onChangePaymentId:(String)->Unit,selectedPayemnt:String,onSelectedPayemt:(String)->Unit,subRegion:String,allAddress:String,state: CheckOutStateModel,onChangeSpecialRequest:(String)->Unit, name:String, phoneNumber:String, image:String?=null, onBackedBresed:()->Unit){
+fun CheckOutScreenContent(
+    addressList: List<Pair<String, String>>,
+    onAddressSelected: (String, String) -> Unit,
+    finishOrder: (String) -> Unit,
+    onChangePaymentId: (String) -> Unit,
+    selectedPayemnt: String,
+    onSelectedPayemt: (String) -> Unit,
+    subRegion: String,
+    allAddress: String,
+    state: CheckOutStateModel,
+    onChangeSpecialRequest: (String) -> Unit,
+    name: String,
+    phoneNumber: String,
+    image: String? = null,
+    onBackedBresed: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
         CheckOutHeader(
-            userName =name ,
+            userName = name,
             phoneNumber = phoneNumber,
             image = image,
-            onBackPressed =onBackedBresed
-
+            onBackPressed = onBackedBresed
         )
 
         LazyColumn(
@@ -156,18 +201,38 @@ fun CheckOutScreenContent(finishOrder:(String)->Unit,onChangePaymentId:(String)-
                 Spacer(modifier = Modifier.height(20.dp))
                 SpecialRequestEditText(state = state, onChangeSpecialRequest = onChangeSpecialRequest)
                 Spacer(modifier = Modifier.height(10.dp))
-
             }
             item {
-                ShowAddress(subRegion,allAddress)
+                if (allAddress.isNotEmpty() && subRegion.isNotEmpty()) {
+                    ShowAddress(
+                        district = subRegion,
+                        addressDetails = allAddress,
+                        addressList = addressList,
+                        onAddressSelected = onAddressSelected
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    CustomButton(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(horizontal = 15.dp)
+                            .fillMaxWidth(),
+                        text = stringResource(R.string.add_new_address),
+                        onClick = { /* TODO: Implement add new address logic */ }
+                    )
+                } else {
+                    CustomButton(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(horizontal = 15.dp)
+                            .fillMaxWidth(),
+                        text = stringResource(R.string.add_new_address),
+                        onClick = { /* TODO: Implement add new address logic */ }
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
-
             }
-
-
-
             item {
-                Card (
+                Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(Gray),
                     shape = RoundedCornerShape(10.dp)
@@ -179,55 +244,40 @@ fun CheckOutScreenContent(finishOrder:(String)->Unit,onChangePaymentId:(String)-
                             modifier = Modifier.fillMaxWidth(),
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Start,
-
-                            )
+                            textAlign = TextAlign.Start
+                        )
                         Spacer(modifier = Modifier.height(5.dp))
-
                         Text(
                             text = stringResource(R.string.pay_with_card_or_cash),
                             fontSize = 14.sp,
                             modifier = Modifier.fillMaxWidth(),
                             color = Color.Gray,
-                            textAlign = TextAlign.Start,
-
-                            )
+                            textAlign = TextAlign.Start
+                        )
                         Spacer(modifier = Modifier.height(5.dp))
                         state.checkOutResponse?.payment_methods?.forEach { payment ->
-
                             PaymentsOption(
                                 payment = payment.title,
                                 selectedPayment = selectedPayemnt,
                                 onSelected = {
                                     onSelectedPayemt(it)
                                     onChangePaymentId(payment.id)
-                                })
-
+                                }
+                            )
                         }
-
                     }
-
                 }
-
-
             }
-//            items(state.checkOutResponse?.payment_methods.orEmpty(), key = {payment ->payment.id}) {payment->
-//                Spacer(modifier = Modifier.height(10.dp))
-//
-//            }
-
         }
 
         CartBottomBar(
-            priceItems = state.checkOutResponse?.cart?.primaryPrice?.toString()?:"0.00",
-            deliveryPrice = state.checkOutResponse?.cart?.deliveryCost?.toString()?:"0.00",
-            totalPrice = state.checkOutResponse?.cart?.totalPrice?.toString()?:"0.00",
+            priceItems = state.checkOutResponse?.cart?.primaryPrice?.toString() ?: "0.00",
+            deliveryPrice = state.checkOutResponse?.cart?.deliveryCost?.toString() ?: "0.00",
+            totalPrice = state.checkOutResponse?.cart?.totalPrice?.toString() ?: "0.00",
             buttonText = stringResource(R.string.checkout),
             onPayClick = {
                 finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
             }
         )
-
-
     }
 }

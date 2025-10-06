@@ -37,6 +37,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.getValue
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.ArrayList
 
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModel()
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
+        
 
         val selectedLanguge = settingViewModel.getLanguage()
 

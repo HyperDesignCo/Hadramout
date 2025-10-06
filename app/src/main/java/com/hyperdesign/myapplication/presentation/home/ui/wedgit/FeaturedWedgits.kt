@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -93,13 +94,13 @@ fun FeaturedWedgits(
                 Text(
                     text = meal.description,
                     fontSize = 14.sp,
-                    color = Color.LightGray,
+                    color = Color.Gray,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "EGY ${meal.price}",
+                    text = "${meal.price} ${stringResource(R.string.egy2)}",
                     fontSize = 14.sp,
                     color = Secondry
                 )
@@ -112,7 +113,7 @@ fun FeaturedWedgits(
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
-                        onClick = { /* Handle add to cart */ },
+                        onClick = { onItemClick(meal) },
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Icon(

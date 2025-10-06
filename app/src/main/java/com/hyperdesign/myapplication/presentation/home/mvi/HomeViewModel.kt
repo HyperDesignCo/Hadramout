@@ -3,6 +3,7 @@ package com.hyperdesign.myapplication.presentation.home.mvi
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val getBranchesUseCase: GetBranchesUseCase,
-    private val getHomeMenuByIdUseCase: GetHomeMenueUseCase
+    private val getHomeMenuByIdUseCase: GetHomeMenueUseCase,
+    val tokenManager: TokenManager
 ) : ViewModel() {
     private var _homeState = MutableStateFlow(HomeStateModel())
     val homeState: StateFlow<HomeStateModel> = _homeState.asStateFlow()

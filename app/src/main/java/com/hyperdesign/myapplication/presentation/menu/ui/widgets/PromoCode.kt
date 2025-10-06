@@ -49,30 +49,6 @@ fun PromoCodeInput(onClickCoponCkeck:()->Unit,copoun:String, copounMessage:Strin
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = { onClickCoponCkeck() },
-                modifier = Modifier
-                    .size(100.dp, 48.dp)
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFFF15A25),
-                                Color(0xFFFCB203)
-                            )
-                        ), shape = RoundedCornerShape(24.dp)
-                    ),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                shape = RoundedCornerShape(24.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.add),
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-
 
             OutlinedTextField(
                 value = copoun,
@@ -95,6 +71,31 @@ fun PromoCodeInput(onClickCoponCkeck:()->Unit,copoun:String, copounMessage:Strin
                     cursorColor = Color.Black
                 )
             )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Button(
+                onClick = { onClickCoponCkeck() },
+                modifier = Modifier
+                    .size(100.dp, 48.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            listOf(
+                                Color(0xFFF15A25),
+                                Color(0xFFFCB203)
+                            )
+                        ), shape = RoundedCornerShape(24.dp)
+                    ),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.add),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
         }
         Text(copounMessage ?:"", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Secondry, modifier = Modifier.padding(horizontal = 16.dp))

@@ -16,6 +16,8 @@ class TokenManager(private val context: Context) {
         private const val OTP_CODE = "otp_code"
         private const val LANGUAGE = "language"
         private const val FCM_TOKEN = "fcm_token"
+
+        private const val BRANCH_ID = "branch_id"
     }
 
     private val masterKey: MasterKey by lazy {
@@ -65,6 +67,12 @@ class TokenManager(private val context: Context) {
             .apply()
     }
 
+    fun saveBranchId(id:Int){
+        encryptedSharedPreferences.edit()
+            .putInt(BRANCH_ID,id)
+            .apply()
+    }
+
     fun getUserData(): UserEntity? {
         val json = encryptedSharedPreferences.getString(USER_DATA, "") ?: ""
         return if (json.isNotEmpty()) Gson().fromJson(json, UserEntity::class.java) else null
@@ -72,6 +80,8 @@ class TokenManager(private val context: Context) {
 
     fun getAccessToken(): String? =
         encryptedSharedPreferences.getString(ACCESS_TOKEN, null)
+
+    fun getBranchId():Int? = encryptedSharedPreferences.getInt(BRANCH_ID,0)
 
     fun saveOtpCode(otpCode: Int) {
         encryptedSharedPreferences.edit()

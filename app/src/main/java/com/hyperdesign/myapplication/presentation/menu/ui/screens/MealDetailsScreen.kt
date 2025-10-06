@@ -381,7 +381,7 @@ fun MealDetailsContent(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "ج.م${String.format("%.2f", totalPrice)}",
+                        "${String.format("%.2f", totalPrice)} ${stringResource(R.string.egy2)}",
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold

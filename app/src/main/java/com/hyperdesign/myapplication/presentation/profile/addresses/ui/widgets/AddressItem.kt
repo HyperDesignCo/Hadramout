@@ -14,11 +14,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hyperdesign.myapplication.domain.Entity.AddressEntity
 
 @Composable
 fun AddressItem(address: AddressEntity,onDeleteAddress:()->Unit,onGoToUpdateAddress:()->Unit){
+
+    val formattedAddress = listOfNotNull(
+        address.area.name.takeIf { it.isNotEmpty() },
+        address.region.name.takeIf { it.isNotEmpty() },
+        address.sub_region.takeIf { it.isNotEmpty() },
+        address.street.takeIf { it.isNotEmpty() },
+        address.special_sign.takeIf { it.isNotEmpty() },
+        address.building_number.takeIf { it.isNotEmpty() },
+        address.floor_number.takeIf { it.isNotEmpty() }
+    ).joinToString(separator = ",")
+
 
     Row (modifier = Modifier.fillMaxWidth().clickable{
         onGoToUpdateAddress()
@@ -32,7 +44,7 @@ fun AddressItem(address: AddressEntity,onDeleteAddress:()->Unit,onGoToUpdateAddr
             )
         }
 
-        Text("${address.area.name},${address.region.name},${address.sub_region},${address.street},${address.special_sign},${address.building_number},${address.floor_number}")
+        Text(formattedAddress, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Start)
     }
 
 }

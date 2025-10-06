@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.menu.ui.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,9 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
@@ -20,6 +26,10 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,60 +105,101 @@ fun SpecialRequestEditText(state: CheckOutStateModel,onChangeSpecialRequest:(Str
 }
 
 @Composable
-fun ShowAddress(district:String ,addressDetails:String){
-    Card (
+fun ShowAddress(
+    district: String,
+    addressDetails: String,
+    addressList: List<Pair<String, String>>, // List of (district, addressDetails) pairs
+    onAddressSelected: (String, String) -> Unit // Callback for selected address
+) {
+    var expanded by remember { mutableStateOf(false) } // State to control dropdown visibility
+
+    Card(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(Gray),
         shape = RoundedCornerShape(10.dp)
     ) {
-    Column(
-        modifier = Modifier
-            .padding(16.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.delevery_to),
-            color = Color.Gray,
+        Column(
             modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            fontSize = 14.sp,
-        )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            text = district,
-            fontSize = 16.sp,
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .fillMaxWidth(),
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Start,
-
-            )
-        Spacer(modifier = Modifier.height(5.dp))
-
-
-        Text(
-                text = addressDetails,
-                fontSize = 14.sp,
+                .padding(16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.delevery_to),
+                color = Color.Black,
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .fillMaxWidth(),
-                color = Color.Gray,
                 textAlign = TextAlign.Start,
-
+                fontSize = 14.sp,
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = true }, // Open dropdown on click
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 10.dp)
+                ) {
+                    Text(
+                        text = district,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Start,
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        text = addressDetails,
+                        fontSize = 14.sp,
+                        color = Color.Black,
+                        textAlign = TextAlign.Start,
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Select Address",
+                    tint = Color.Black,
+                    modifier = Modifier.padding(end = 10.dp)
                 )
-
-
-
-
-    }
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .background(Color.White)
+            ) {
+                addressList.forEach { (districtItem, addressDetailsItem) ->
+                    DropdownMenuItem(
+                        text = {
+                            Column {
+                                Text(
+                                    text = districtItem,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = addressDetailsItem,
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        },
+                        onClick = {
+                            onAddressSelected(districtItem, addressDetailsItem)
+                            expanded = false
+                        }
+                    )
+                }
+            }
         }
+    }
 }
-
 @Composable
 fun PaymentsOption(payment: String, selectedPayment: String, onSelected: (String) -> Unit) {
 

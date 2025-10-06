@@ -1,9 +1,6 @@
 package com.hyperdesign.myapplication.presentation.auth.login.mvi
 
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.R
@@ -13,6 +10,7 @@ import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.presentation.utilies.ValidateText
 import com.hyperdesign.myapplication.presentation.utilies.ValidationEvent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,16 +18,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlin.toString
+import javax.inject.Inject
+
 
 class LoginViewModel(
     private val loginUseCase: LoginUseCase,
     private val validateText: ValidateText,
     val tokenManager: TokenManager,
-    @ApplicationContext private val context: Context
-
-
-    ) : ViewModel() {
+    @ApplicationContext private val context: Context,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginStateModel())
     val state: StateFlow<LoginStateModel> = _state.asStateFlow()
@@ -51,7 +49,16 @@ class LoginViewModel(
                     passwordError = null
                 )
             }
-            is LoginIntents.LoginEvent -> submitData()
+            is LoginIntents.LoginEvent -> {
+                // Use parameters from LoginEvent to set state
+                _state.value = _state.value.copy(
+                    phoneNumber = intent.phone,
+                    password = intent.pass,
+                    phoneNumberError = null,
+                    passwordError = null
+                )
+                submitData()
+            }
         }
     }
 
@@ -70,6 +77,9 @@ class LoginViewModel(
                 passwordError = passwordError,
                 isLoading = false
             )
+            viewModelScope.launch(dispatcher) {
+                _validationEventChannel.send(ValidationEvent.Failure("Invalid input"))
+            }
             return
         }
 
@@ -80,7 +90,7 @@ class LoginViewModel(
             errorMessage = null
         )
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             try {
                 val response = loginUseCase.invoke(
                     LoginRequest(
@@ -96,11 +106,10 @@ class LoginViewModel(
                 )
 
                 when (response.message) {
-                    "login success" ->{
+                    "login success" -> {
                         _validationEventChannel.send(ValidationEvent.Success)
                         tokenManager.saveAccessToken(response.accessToken)
                         tokenManager.saveUserData(response.user)
-
                     }
                     else -> {
                         _state.value = _state.value.copy(
@@ -118,15 +127,4 @@ class LoginViewModel(
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 }

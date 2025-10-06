@@ -18,9 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.SubChoiceEntity
 
 @Composable
@@ -41,7 +43,7 @@ fun SizeOption(size: String, price: String, selectedSize: String, onSelected: (S
     ) {
         Text(size, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = if (selectedSize == size) Color.White else Color.Black)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("ج.م$price", fontSize = 14.sp, color = if (selectedSize == size) Color.White else Color.Black)
+            Text("$price ${stringResource(R.string.egy2)}", fontSize = 14.sp, color = if (selectedSize == size) Color.White else Color.Black)
             RadioButton(
                 colors = RadioButtonDefaults.colors(if (selectedSize == size) Color.White else Color.Black),
 
@@ -85,7 +87,7 @@ fun SubChoiceOption(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "ج.م${subChoice.price}",
+                text = "${subChoice.price} ${stringResource(R.string.egy2)}",
                 fontSize = 14.sp,
                 color = if (isSelected) Color.White else Color.Black
             )

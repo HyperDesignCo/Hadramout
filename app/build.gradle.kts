@@ -3,7 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
-    id ("kotlin-kapt")//Room
+//    id ("kotlin-kapt")//Room
+    id("com.google.devtools.ksp")
     id ("dagger.hilt.android.plugin")   //dagger_hilt
     id ("com.google.dagger.hilt.android")
     id("kotlin-parcelize")
@@ -89,7 +90,7 @@ dependencies {
     implementation(libs.okhttp)
 
     implementation (libs.androidx.room.runtime)
-    kapt (libs.androidx.room.compiler)
+    ksp (libs.androidx.room.compiler)
     implementation (libs.androidx.room.ktx)
 
     //Coil
@@ -105,8 +106,8 @@ dependencies {
 
     //Dagger Hilt
     implementation ("com.google.dagger:hilt-android:2.51.1")
-    kapt ("com.google.dagger:hilt-android-compiler:2.51.1")
-    kapt ("androidx.hilt:hilt-compiler:1.1.0")
+    ksp ("com.google.dagger:hilt-android-compiler:2.51.1")
+    ksp ("androidx.hilt:hilt-compiler:1.1.0")
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
     implementation ("androidx.activity:activity-ktx:1.8.1")
 
@@ -139,6 +140,16 @@ dependencies {
     //koin
     implementation(libs.bundles.koin)
 
+    // MockK for unit testing
+    testImplementation(libs.mockk)
+    testImplementation( libs.mockk.android)
+    testImplementation (libs.mockk.agent)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockwebserver)
+
+    // Turbine for testing Kotlin Flows
+    testImplementation(libs.turbine)
+    testImplementation(kotlin("test"))
 
 
 }
