@@ -42,14 +42,14 @@ val viewModels = module {
         HomeViewModel(get(),get(),get())
     }
 
-    viewModel<MenuViewModel> { MenuViewModel(get()) }
+    viewModel<MenuViewModel> { MenuViewModel(get(),get()) }
 
     viewModel<MealDetailsViewModel> {
-        MealDetailsViewModel(get(),get())
+        MealDetailsViewModel(get(),get(),get())
     }
 
     viewModel<CartViewModel>{
-        CartViewModel(get(),get(),get(),get())
+        CartViewModel(get(),get(),get(),get(),get())
     }
 
     viewModel<ForgetPasswordViewModel>{

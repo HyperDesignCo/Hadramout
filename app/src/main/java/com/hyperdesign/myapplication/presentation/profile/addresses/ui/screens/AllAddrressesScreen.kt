@@ -56,7 +56,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AllAddressesScreen(addressViewModel: AddressesViewModel = koinViewModel()) {
+fun AllAddressesScreen(type:String?,addressViewModel: AddressesViewModel = koinViewModel()) {
     val navController = LocalNavController.current
     val addressState by addressViewModel.addressState.collectAsStateWithLifecycle()
     var addresses by remember { mutableStateOf<List<AddressEntity>>(emptyList()) }
@@ -175,7 +175,13 @@ fun AllAddressesScreen(addressViewModel: AddressesViewModel = koinViewModel()) {
                 onDismissRequest = { showBottomSheet = false },
                 sheetState = bottomSheetState,
                 lat = addressState.lat,
-                long = addressState.long
+                long = addressState.long,
+                onBackClick = {
+                    if(type=="checkOutScreen"){
+                        navController.previousBackStackEntry?.savedStateHandle?.set("address_added", true)
+                        navController.popBackStack()
+                    }
+                }
             )
         }
     }

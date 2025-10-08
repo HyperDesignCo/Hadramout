@@ -116,7 +116,12 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.ReturnPolicyScreen.route) { ReturnPolicyScreen() }
                 composable(Screen.TermesAndConditionsScreen.route) { TermsAndConditionsScreen() }
                 composable(Screen.PrivacyPolicyScreen.route) { PrivacyPolicyScreen() }
-                composable(Screen.AllAddressesScreen.route) { AllAddressesScreen() }
+                composable(Screen.AllAddressesScreen.route, arguments = listOf(navArgument("screenType"){
+                    type =  NavType.StringType
+                })) {navBackStack->
+                    val screenType = navBackStack.arguments?.getString("screenType")
+                    AllAddressesScreen(screenType)
+                }
                 composable(Screen.UpdateAddressScreen.route, arguments = listOf(navArgument("addressId"){type=
                     NavType.StringType},navArgument("lat"){NavType.StringType},navArgument("long"){NavType.StringType}))
                 {navBackStack->

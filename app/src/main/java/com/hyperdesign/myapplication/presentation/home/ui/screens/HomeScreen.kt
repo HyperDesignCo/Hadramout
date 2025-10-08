@@ -64,7 +64,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
     var branchList by remember { mutableStateOf<List<Branch>>(emptyList()) }
     var bestSalesMeals by remember { mutableStateOf<List<Meal>>(emptyList()) }
     var homeMenus by remember { mutableStateOf<List<HomeMenu>>(emptyList()) }
-    var status by remember { mutableStateOf(false) } // Track delivery/pickup status
+    var status by remember { mutableStateOf(if(homeViewModel.tokenManager.getStatus()==1) true else false) } // Track delivery/pickup status
 
     Log.d("HomeScreen", "bestSalesMeals: ${homeState.homeMenues?.bestSalesMeals}")
     Log.d("HomeScreen", "homeMenus: ${homeState.homeMenues?.homeMenus}")
@@ -93,6 +93,13 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
                 status = status,
                 onStatusChanged = { newStatus ->
                     status = newStatus // Update status state
+                    if(!newStatus){
+                        homeViewModel.tokenManager.saveStatus(0)
+                    }else{
+                        homeViewModel.tokenManager.saveStatus(1)
+                    }
+
+
                 },
                 onCartPressed = {
                     navController.navigate(Screen.CartScreen.route)
@@ -100,7 +107,8 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
                 saveBranchId={branchId->
                     homeViewModel.tokenManager.saveBranchId(branchId)
                 },
-                getBranchId=it
+                getBranchId=it,
+                myStatus = homeViewModel.tokenManager.getStatus()
             )
         }
         if (homeState.isLoading) {
@@ -127,13 +135,14 @@ fun HomeScreenContent(
     status: Boolean,
     getBranchId:Int,
     saveBranchId:(Int)->Unit,
-    onStatusChanged: (Boolean) -> Unit // Callback to update status
+    onStatusChanged: (Boolean) -> Unit, // Callback to update status
+    myStatus:Int?
 ) {
     val navController = LocalNavController.current
     var expanded by remember { mutableStateOf(false) }
     var selectedBranch by remember { mutableStateOf("Select Branch") }
 
-    LaunchedEffect(branches, getBranchId) {
+    LaunchedEffect(branches) {
         if (branches.isNotEmpty()) {
             if (getBranchId != 0) {
                 val selected = branches.find { it.id == getBranchId }
@@ -175,7 +184,8 @@ fun HomeScreenContent(
 
             },
             showStatus = true,
-            onClickChangStatus = onStatusChanged // Pass the callback to update status
+            onClickChangStatus = onStatusChanged, // Pass the callback to update status
+            myStatus = myStatus
         )
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {

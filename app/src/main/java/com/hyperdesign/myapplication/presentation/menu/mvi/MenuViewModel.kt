@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.menu.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMenuUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,15 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MenuViewModel(
-     val getMenusUseCase: GetMenuUseCase
+     val getMenusUseCase: GetMenuUseCase,
+     val tokenManager: TokenManager
 ): ViewModel() {
 
     private var _menuState = MutableStateFlow(MenuStateModel())
     val menuState : StateFlow<MenuStateModel> = _menuState
-
-    init {
-        getMenu()
-    }
 
     fun handleIntent(intent: MenuIntents){
         when(intent){
@@ -38,7 +36,7 @@ class MenuViewModel(
         _menuState.value = _menuState.value.copy(isLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val response = getMenusUseCase(_menuState.value.branchId)
+                val response = getMenusUseCase(tokenManager.getBranchId()?:0)
                 _menuState.value = _menuState.value.copy(
                     isLoading = false,
                     menuData = response

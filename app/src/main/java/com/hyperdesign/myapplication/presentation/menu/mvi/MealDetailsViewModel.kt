@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.menu.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.Entity.AddOrderRequest
 import com.hyperdesign.myapplication.domain.usecase.menu.AddMealToCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.menu.GetMealDetailsUseCase
@@ -12,7 +13,8 @@ import kotlinx.coroutines.launch
 
 class MealDetailsViewModel(
     private val getMealDetailsUseCase: GetMealDetailsUseCase,
-    private val addMealToCartUseCase: AddMealToCartUseCase
+    private val addMealToCartUseCase: AddMealToCartUseCase,
+    val tokenManager: TokenManager
 
 
 ): ViewModel() {

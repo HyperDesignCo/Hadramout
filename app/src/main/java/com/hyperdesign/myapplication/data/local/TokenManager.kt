@@ -18,6 +18,8 @@ class TokenManager(private val context: Context) {
         private const val FCM_TOKEN = "fcm_token"
 
         private const val BRANCH_ID = "branch_id"
+
+        private const val STATUS = "status"
     }
 
     private val masterKey: MasterKey by lazy {
@@ -71,6 +73,18 @@ class TokenManager(private val context: Context) {
         encryptedSharedPreferences.edit()
             .putInt(BRANCH_ID,id)
             .apply()
+    }
+
+    fun saveStatus(status:Int){
+        encryptedSharedPreferences.edit()
+            .putInt(STATUS,status)
+            .apply()
+    }
+
+    fun getStatus():Int{
+
+        return  encryptedSharedPreferences.getInt(STATUS,0)
+
     }
 
     fun getUserData(): UserEntity? {

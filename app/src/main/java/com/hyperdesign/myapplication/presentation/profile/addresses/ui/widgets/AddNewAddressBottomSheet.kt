@@ -42,7 +42,8 @@ fun AddNewAddressBottomSheet(
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
     lat: String,
-    long: String
+    long: String,
+    onBackClick: () -> Unit,
 ) {
     val state by viewModel.addressState.collectAsStateWithLifecycle()
 
@@ -272,6 +273,7 @@ fun AddNewAddressBottomSheet(
                                     )
                                 )
                                 onDismissRequest()
+                                onBackClick()
                             }
                         )
                     }

@@ -50,7 +50,7 @@ fun CartScreen(
     var cartId by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        cartViewModel.handleIntent(CartIntents.GetCart(2))
+        cartViewModel.handleIntent(CartIntents.GetCart(cartViewModel.tokenManager.getBranchId()?:0))
     }
 
     LaunchedEffect(cartMealState) {

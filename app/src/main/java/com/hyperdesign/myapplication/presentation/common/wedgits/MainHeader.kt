@@ -54,9 +54,10 @@ fun MainHeader(
     height: Int = 140,
     showTitle: Boolean = false,
     showStatus: Boolean = false,
-    onClickChangStatus: (Boolean) -> Unit = {} // Updated to pass the new status
+    onClickChangStatus: (Boolean) -> Unit = {}, // Updated to pass the new status
+    myStatus:Int?=null,
 ) {
-    var statusState by remember { mutableStateOf(false) }
+    var statusState by remember { mutableStateOf(if(myStatus==0)false else true) }
     var showDialog by remember { mutableStateOf(false) }
 
     Box(

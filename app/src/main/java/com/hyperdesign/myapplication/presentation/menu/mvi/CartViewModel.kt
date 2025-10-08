@@ -3,6 +3,7 @@ package com.hyperdesign.myapplication.presentation.menu.mvi
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
@@ -21,7 +22,8 @@ class CartViewModel(
     private val showCartUseCase: ShowCartUseCase,
     private val deleteCartItemUseCase: DeleteCartItemUseCase,
     private val updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
-    private val checkCouponUseCase: CheckCouponUseCase
+    private val checkCouponUseCase: CheckCouponUseCase,
+    val tokenManager: TokenManager
 ): ViewModel() {
 
     private var _cartState = MutableStateFlow(MenuStateModel())

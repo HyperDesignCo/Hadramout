@@ -39,7 +39,7 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
 
     object PrivacyPolicyScreen:Screen(ScreensConst.PRIVACY_POLICY_SCREEN)
 
-    object AllAddressesScreen: Screen(ScreensConst.ALL_ADDRESSES_SCREEN)
+    object AllAddressesScreen: Screen("${ScreensConst.ALL_ADDRESSES_SCREEN}/{screenType}")
 
     object UpdateAddressScreen:Screen("${ScreensConst.UPDATE_ADDRESS_SCREEN}/{addressId}/{lat}/{long}")
 }

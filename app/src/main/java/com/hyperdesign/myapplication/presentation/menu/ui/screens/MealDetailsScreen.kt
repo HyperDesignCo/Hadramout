@@ -62,7 +62,7 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
     LaunchedEffect(Unit) {
         if (mealDetailsState.MealDetailsData == null && !mealDetailsState.isLoading) {
             mealDetailsViewModel.handleIntents(
-                MealDetialsIntents.showMealDetails(branchId = 2, mealId = featured?.id ?: 0)
+                MealDetialsIntents.showMealDetails(branchId = mealDetailsViewModel.tokenManager.getBranchId()?:0, mealId = featured?.id ?: 0)
             )
         }
     }
@@ -114,7 +114,7 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                             mealId = featured?.id.toString(),
                             quantity = mealDetailsState.quantity,
                             sizeId = selectedSizeId,
-                            branchId = "2",
+                            branchId = mealDetailsViewModel.tokenManager.getBranchId().toString(),
                             choices = selectedSubChoices
                         )
                     )
@@ -327,7 +327,16 @@ fun MealDetailsContent(
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(
-                            text = choice.choiceTitle,
+                            text = "${choice.choiceTitle} ${if(choice.min!=0){
+                                stringResource(R.string.you_must_choose, choice.min)
+                            }else{
+                                if(choice.max!=0){
+                                    stringResource(R.string.you_can_choose, choice.max)
+                                }else{
+                                    ""
+                                }
+                            }
+                            }",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (selectedChoiceId == choice.id) Color.White else Color.Black
@@ -340,7 +349,7 @@ fun MealDetailsContent(
                                         subChoice = subChoice,
                                         choiceId = choice.id,
                                         isSelected = selectedSubChoices[choice.id]?.contains(subChoice.id) == true,
-                                        onSelected = onSubChoiceSelected
+                                        onSelected = onSubChoiceSelected,
                                     )
                                 }
                             }

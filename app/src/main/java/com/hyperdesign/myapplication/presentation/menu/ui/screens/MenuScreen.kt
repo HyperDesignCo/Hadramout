@@ -33,6 +33,7 @@ import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavCon
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDetails
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
+import com.hyperdesign.myapplication.presentation.menu.mvi.MenuIntents
 import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.MenuHeader
 import kotlinx.coroutines.launch
@@ -44,8 +45,14 @@ fun MenuScreen(menuViewModel: MenuViewModel = koinViewModel()) {
     val menuState by menuViewModel.menuState.collectAsStateWithLifecycle()
     var menuTabs by remember { mutableStateOf(listOf<MenuEntity>()) }
 
+    val branchId by remember { mutableStateOf(menuViewModel.tokenManager.getBranchId()) }
+
     LaunchedEffect(menuState) {
         menuTabs = menuState.menuData?.menus.orEmpty()
+    }
+
+    LaunchedEffect(branchId) {
+        menuViewModel.handleIntent(MenuIntents.getMenus(branchId?:0))
     }
 
     MenuScreenContent(
@@ -65,6 +72,7 @@ fun MenuScreenContent(
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val navController = LocalNavController.current
+
 
     // Create a list of items to display in the LazyColumn (headers and meals)
     val items = mutableListOf<Any>()

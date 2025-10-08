@@ -33,11 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
-import com.hyperdesign.myapplication.domain.Entity.CheckOutResponseEntity
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
-import com.hyperdesign.myapplication.presentation.auth.login.ui.widgets.HadramoutHeader
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
-import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
@@ -50,10 +47,14 @@ import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CheckOutHeader
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PaymentsOption
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.ShowAddress
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SpecialRequestEditText
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CheckOutScreen(checkOutViewModel: CheckOutViewModel = koinViewModel(), loginViewModel: LoginViewModel = koinViewModel()) {
+fun CheckOutScreen(
+    checkOutViewModel: CheckOutViewModel = koinViewModel(),
+    loginViewModel: LoginViewModel = koinViewModel()
+) {
     val navController = LocalNavController.current
     val checkState by checkOutViewModel.checkOutState.collectAsStateWithLifecycle()
     var subRegion by remember { mutableStateOf("") }
@@ -62,29 +63,37 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel = koinViewModel(), login
     val context = LocalContext.current
     var finishOrderMsg by remember { mutableStateOf("") }
     var paymentId by remember { mutableStateOf("") }
+    var addressList by remember { mutableStateOf<List<Pair<String, String>>?>(null) }
+    var justAdded by remember { mutableStateOf(false) }
 
-    // Create address list from checkState.address?.addresses
-    val addressList = remember(checkState.address?.addresses) {
-        checkState.address?.addresses?.map { address ->
-            val district = listOfNotNull(
-                address.area?.name?.takeIf { it.isNotEmpty() },
-                address.region?.name?.takeIf { it.isNotEmpty() }
-            ).joinToString(separator = ",")
-            val addressDetails = listOfNotNull(
-                address.sub_region?.takeIf { it.isNotEmpty() },
-                address.street?.takeIf { it.isNotEmpty() },
-                address.special_sign?.takeIf { it.isNotEmpty() },
-                address.building_number?.takeIf { it.isNotEmpty() },
-                address.floor_number?.takeIf { it.isNotEmpty() }
-            ).joinToString(separator = ",")
-            Pair(district, addressDetails)
-        } ?: emptyList()
+    // Listen for address_added flag from AllAddressesScreen
+    val addressAdded by navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.getStateFlow<Boolean>("address_added", false)
+        ?.collectAsStateWithLifecycle(initialValue = false) ?: remember { mutableStateOf(false) }
+
+    // Refresh data when address_added is true
+    LaunchedEffect(addressAdded) {
+        if (addressAdded) {
+            Log.d("CheckOutScreen", "address_added detected, refreshing data")
+            checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick("2"))
+            checkOutViewModel.handleIntents(CheckOutIntents.GetAddress)
+            delay(1000) // Add delay to account for potential backend synchronization delay
+            justAdded = true
+            navController.currentBackStackEntry?.savedStateHandle?.set("address_added", false)
+        }
     }
 
+    // Initial data fetch
     LaunchedEffect(Unit) {
+        Log.d("CheckOutScreen", "Initial data fetch")
         checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick("2"))
     }
+
+    // Update UI when checkState changes
     LaunchedEffect(checkState) {
+        Log.d("CheckOutScreen", "checkState updated, addresses: ${checkState.address?.addresses?.size}")
+        // Select the most recently added address (last in the list)
         val address = checkState.address?.addresses?.firstOrNull()
         subRegion = listOfNotNull(
             address?.area?.name?.takeIf { it.isNotEmpty() },
@@ -100,10 +109,35 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel = koinViewModel(), login
         paymentId = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.id.toString()
         selectedPayment = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.title.toString()
         finishOrderMsg = checkState.finishOrderResponse?.message.orEmpty()
+
+        addressList = checkState.address?.addresses?.map { addr ->
+            val district = listOfNotNull(
+                addr.area?.name?.takeIf { it.isNotEmpty() },
+                addr.region?.name?.takeIf { it.isNotEmpty() }
+            ).joinToString(separator = ",")
+            val addressDetails = listOfNotNull(
+                addr.sub_region?.takeIf { it.isNotEmpty() },
+                addr.street?.takeIf { it.isNotEmpty() },
+                addr.special_sign?.takeIf { it.isNotEmpty() },
+                addr.building_number?.takeIf { it.isNotEmpty() },
+                addr.floor_number?.takeIf { it.isNotEmpty() }
+            ).joinToString(separator = ",")
+            Pair(district, addressDetails)
+        } ?: emptyList()
+
+        // Auto-select the latest address if a new one was added
+        if (addressList?.isNotEmpty() == true && justAdded) {
+            Log.d("CheckOutScreen", "Auto-selecting latest address: ${addressList!!.last()}")
+            subRegion = addressList!!.last().first
+            allAddress = addressList!!.last().second
+            justAdded = false
+        }
     }
 
+    // Handle order completion messages
     LaunchedEffect(finishOrderMsg) {
         if (finishOrderMsg.isNotEmpty()) {
+            Log.d("CheckOutScreen", "Finish order message: $finishOrderMsg")
             if (finishOrderMsg == "Your order has been sent successfully") {
                 Toast.makeText(context, context.getString(R.string.your_order_has_been_sent_successfully), Toast.LENGTH_SHORT).show()
                 navController.navigate(Screen.HomeScreen.route) {
@@ -116,40 +150,46 @@ fun CheckOutScreen(checkOutViewModel: CheckOutViewModel = koinViewModel(), login
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        CheckOutScreenContent(
-            name = loginViewModel.tokenManager.getUserData()?.name.orEmpty(),
-            phoneNumber = loginViewModel.tokenManager.getUserData()?.mobile.orEmpty(),
-            image = loginViewModel.tokenManager.getUserData()?.image.orEmpty(),
-            state = checkState,
-            onChangeSpecialRequest = {
-                checkOutViewModel.handleIntents(
-                    CheckOutIntents.OnChangeSpecialRequest(it)
-                )
-            },
-            onBackedBresed = {
-                navController.popBackStack()
-            },
-            subRegion = subRegion,
-            allAddress = allAddress,
-            onSelectedPayemt = { payment -> selectedPayment = payment },
-            selectedPayemnt = selectedPayment,
-            onChangePaymentId = { paymentIdd -> paymentId = paymentIdd },
-            finishOrder = { cartId ->
-                checkOutViewModel.handleIntents(
-                    CheckOutIntents.FinishOrder(
-                        cartId = cartId,
-                        paymentMethodId = paymentId,
-                        specialRequest = checkState.specialRequest,
-                        userId = loginViewModel.tokenManager.getUserData()?.id.toString()
+        addressList?.let { addresses ->
+            CheckOutScreenContent(
+                name = loginViewModel.tokenManager.getUserData()?.name.orEmpty(),
+                phoneNumber = loginViewModel.tokenManager.getUserData()?.mobile.orEmpty(),
+                image = loginViewModel.tokenManager.getUserData()?.image.orEmpty(),
+                state = checkState,
+                onChangeSpecialRequest = {
+                    checkOutViewModel.handleIntents(CheckOutIntents.OnChangeSpecialRequest(it))
+                },
+                onBackedBresed = {
+                    navController.popBackStack()
+                },
+                subRegion = subRegion,
+                allAddress = allAddress,
+                onSelectedPayemt = { payment -> selectedPayment = payment },
+                selectedPayemnt = selectedPayment,
+                onChangePaymentId = { paymentIdd -> paymentId = paymentIdd },
+                finishOrder = { cartId ->
+                    checkOutViewModel.handleIntents(
+                        CheckOutIntents.FinishOrder(
+                            cartId = cartId,
+                            paymentMethodId = paymentId,
+                            specialRequest = checkState.specialRequest,
+                            userId = loginViewModel.tokenManager.getUserData()?.id.toString()
+                        )
                     )
-                )
-            },
-            addressList = addressList,
-            onAddressSelected = { district, details ->
-                subRegion = district
-                allAddress = details
-            }
-        )
+                },
+                addressList = addresses,
+                onAddressSelected = { district, details ->
+                    Log.d("CheckOutScreen", "Address selected: $district, $details")
+                    subRegion = district
+                    allAddress = details
+                },
+                onClickToAddNewAddress = {
+                    Log.d("CheckOutScreen", "Navigating to AllAddressesScreen")
+                    val screenType = "checkOutScreen"
+                    navController.navigate(Screen.AllAddressesScreen.route.replace("{screenType}", screenType))
+                }
+            )
+        }
         if (checkState.isLoading) {
             Box(
                 modifier = Modifier
@@ -178,7 +218,8 @@ fun CheckOutScreenContent(
     name: String,
     phoneNumber: String,
     image: String? = null,
-    onBackedBresed: () -> Unit
+    onBackedBresed: () -> Unit,
+    onClickToAddNewAddress: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -217,7 +258,7 @@ fun CheckOutScreenContent(
                             .padding(horizontal = 15.dp)
                             .fillMaxWidth(),
                         text = stringResource(R.string.add_new_address),
-                        onClick = { /* TODO: Implement add new address logic */ }
+                        onClick = onClickToAddNewAddress
                     )
                 } else {
                     CustomButton(
@@ -226,7 +267,7 @@ fun CheckOutScreenContent(
                             .padding(horizontal = 15.dp)
                             .fillMaxWidth(),
                         text = stringResource(R.string.add_new_address),
-                        onClick = { /* TODO: Implement add new address logic */ }
+                        onClick = onClickToAddNewAddress
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))

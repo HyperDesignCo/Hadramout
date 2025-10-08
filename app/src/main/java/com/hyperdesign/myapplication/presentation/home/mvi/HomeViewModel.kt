@@ -80,9 +80,9 @@ class HomeViewModel(
                 )
             }.onSuccess {
                 Log.d("HomeViewModel", "getBranchesSuccess: ${_homeState.value.branches}")
-                if (_homeState.value.branchId != 0) {
-                    getHomeMenuById() // Fetch menu for the first branch
-                }
+//                if (_homeState.value.branchId != 0) {
+//                    getHomeMenuById() // Fetch menu for the first branch
+//                }
             }.onFailure {
                 _homeState.value = _homeState.value.copy(
                     isLoading = false,
