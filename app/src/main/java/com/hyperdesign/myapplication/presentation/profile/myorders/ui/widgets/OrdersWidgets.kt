@@ -182,7 +182,7 @@ fun OrderItem(
                 Text(
                     text = order.createdAt,
                     fontSize = 16.sp,
-                    color = Color.LightGray,
+                    color = Color.Gray,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -190,9 +190,9 @@ fun OrderItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Quantity: ${meal.quantity}",
+                    text = stringResource(R.string.quantity, meal.quantity),
                     fontSize = 16.sp,
-                    color = Color.LightGray,
+                    color = Color.Gray,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -202,7 +202,7 @@ fun OrderItem(
                 Text(
                     text = stringResource(R.string.egy, meal.price),
                     fontSize = 16.sp,
-                    color = Color.LightGray,
+                    color = Color.Gray,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )

@@ -22,6 +22,8 @@ class HomeViewModel(
 
     fun handleIntents(intent: HomeIntents) {
         when (intent) {
+            //generate if condition
+
             is HomeIntents.GetBranches -> {
                 getBranches()
             }
@@ -34,6 +36,8 @@ class HomeViewModel(
             is HomeIntents.GetHomeMenuId -> {
                 getHomeMenuById()
             }
+
+
         }
     }
 

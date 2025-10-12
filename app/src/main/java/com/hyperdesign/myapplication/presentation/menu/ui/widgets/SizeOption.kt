@@ -59,7 +59,9 @@ fun SizeOption(size: String, price: String, selectedSize: String, onSelected: (S
 @Composable
 fun SubChoiceOption(
     subChoice: SubChoiceEntity,
-    choiceId: String, // Added to pass the parent choice ID
+    choiceId: String,
+    min: Int,
+    max: Int,
     isSelected: Boolean,
     onSelected: (String, String, Boolean) -> Unit
 ) {
@@ -91,11 +93,29 @@ fun SubChoiceOption(
                 fontSize = 14.sp,
                 color = if (isSelected) Color.White else Color.Black
             )
-            Checkbox(
-                colors = CheckboxDefaults.colors(checkedColor = if (isSelected) Color(0xFFFCB203) else Color.Black,checkmarkColor = if (isSelected) Color.White else Color.Black),
-                checked = isSelected,
-                onCheckedChange = { onSelected(choiceId, subChoice.id, it) }
-            )
+            if (max == 1) {
+                RadioButton(
+                    selected = isSelected,
+                    onClick = {
+                        val newSelected = if (isSelected && min == 0) false else true
+                        onSelected(choiceId, subChoice.id, newSelected)
+                    },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor =Color.White,
+                        unselectedColor = Color.Black
+                    )
+                )
+            } else {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onSelected(choiceId, subChoice.id, it) },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color(0xFFFCB203),
+                        checkmarkColor = Color.White,
+                        uncheckedColor = Color.Black
+                    )
+                )
+            }
         }
     }
 }

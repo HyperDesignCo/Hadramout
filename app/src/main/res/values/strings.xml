@@ -129,4 +129,12 @@
     <string name="egy2">EGY</string>
     <string name="you_must_choose">(You Must Choose %1$d)</string>
     <string name="you_can_choose">(You Can Choose %1$d)</string>
+    <string name="quantity">Quantity: %1$s</string>
+    <string name="meal_details_fragment_choice_adapter_maximum_choose_text">you can choose</string>
+    <string name="meal_details_fragment_choice_adapter_must_choose_choose_text">Must choose </string>
+    <string name="meal_details_fragment_choice_adapter_minimum_choose_text">Minimum choose </string>
+    <string name="meal_details_fragment_choice_adapter_bracket_choose_text">choose at least </string>
+    <string name="validation_error_min_choices">Please select at least %d options</string>
+    <string name="validation_error_max_choices">You can select up to %d options</string>
+    <string name="validation_error_general">Please fix the selection errors before adding to cart</string>
 </resources>

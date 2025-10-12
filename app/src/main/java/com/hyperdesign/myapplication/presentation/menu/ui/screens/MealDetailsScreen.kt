@@ -1,8 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.hyperdesign.myapplication.presentation.menu.ui
-
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -47,18 +43,15 @@ import com.hyperdesign.myapplication.presentation.menu.ui.widgets.FoodCardDesign
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SizeOption
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SubChoiceOption
 import org.koin.androidx.compose.koinViewModel
-
 @Composable
 fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewModel = koinViewModel()) {
     val navController = LocalNavController.current
     val mealDetailsState by mealDetailsViewModel.MealDetailsState.collectAsStateWithLifecycle()
     val featured = mealJson?.let { Gson().fromJson(it, Meal::class.java) }
-
     val context = LocalContext.current
     var mealDetails by remember { mutableStateOf<MealDetailsEntity?>(null) }
     var addCartMessage by remember { mutableStateOf("") }
-
-    // Trigger API call only once when the composable is first composed
+// Trigger API call only once when the composable is first composed
     LaunchedEffect(Unit) {
         if (mealDetailsState.MealDetailsData == null && !mealDetailsState.isLoading) {
             mealDetailsViewModel.handleIntents(
@@ -66,8 +59,7 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
             )
         }
     }
-
-    // Update mealDetails when state changes
+// Update mealDetails when state changes
     LaunchedEffect(mealDetailsState) {
         mealDetails = mealDetailsState.MealDetailsData?.meal
         addCartMessage = mealDetailsState.AddToCartData?.message.orEmpty()
@@ -77,25 +69,34 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
             Toast.makeText(context, mealDetailsState.AddToCartData?.message, Toast.LENGTH_SHORT).show()
         }
     }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        // Show content only when data is available
+// Show content only when data is available
         mealDetails?.let { meal ->
             var selectedSize by remember { mutableStateOf(meal.sizes.firstOrNull()?.sizeTitle ?: "") }
             var selectedSizeId by remember { mutableStateOf(meal.sizes.firstOrNull()?.id ?: "") }
             var selectedChoiceId by remember { mutableStateOf<String?>(null) }
             var selectedSubChoices by remember { mutableStateOf<Map<String, List<String>>>(emptyMap()) }
-
             MealDetailsContent(
                 meal = meal,
                 selectedSize = selectedSize,
                 selectedSubChoices = selectedSubChoices,
                 onSizeSelected = { size -> selectedSize = size },
                 onSubChoiceSelected = { choiceId, subChoiceId, isSelected ->
+                    val choice = meal.choices.find { it.id == choiceId } ?: return@MealDetailsContent
+                    val max = choice.max
                     selectedSubChoices = selectedSubChoices.toMutableMap().apply {
-                        val currentList = this[choiceId]?.toMutableList() ?: mutableListOf()
+                        val currentList = getOrPut(choiceId) { mutableListOf() }.toMutableList()
                         if (isSelected) {
-                            if (!currentList.contains(subChoiceId)) {
+                            if (max > 0 && currentList.size >= max) {
+                                if (max == 1 && !currentList.contains(subChoiceId)) {
+// Replace the current selection
+                                    currentList.clear()
+                                    currentList.add(subChoiceId)
+                                } else {
+                                    Toast.makeText(context, context.getString(R.string.validation_error_max_choices, max), Toast.LENGTH_SHORT).show()
+                                    return@apply
+                                }
+                            } else if (!currentList.contains(subChoiceId)) {
                                 currentList.add(subChoiceId)
                             }
                         } else {
@@ -121,7 +122,6 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 }
             )
         }
-
         if (addCartMessage.isNotEmpty() && addCartMessage == "Meal Added successfully") {
             Box(
                 modifier = Modifier
@@ -140,8 +140,7 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 }
             }
         }
-
-        // Show loading indicator when isLoading is true or data is not yet loaded
+// Show loading indicator when isLoading is true or data is not yet loaded
         if (mealDetailsState.isLoading || mealDetails == null) {
             Box(
                 modifier = Modifier
@@ -152,8 +151,7 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 CircularProgressIndicator(color = Secondry)
             }
         }
-
-        // Show error message if there's an error
+// Show error message if there's an error
         if (mealDetailsState.errorMessage != null) {
             Box(
                 modifier = Modifier
@@ -172,8 +170,6 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealDetailsContent(
     meal: MealDetailsEntity?,
@@ -196,8 +192,8 @@ fun MealDetailsContent(
             bottomBarHeight = with(density) { size.height.toDp() }
         }
     val scrollState = rememberScrollState()
-
-    // Calculate total price with derivedStateOf
+    val context = LocalContext.current
+// Calculate total price with derivedStateOf
     val totalPrice by remember(meal, selectedSize, selectedSubChoices) {
         derivedStateOf {
             val selectedSizePrice = meal?.sizes?.find { it.sizeTitle == selectedSize }?.price ?: meal?.price ?: 0.0
@@ -209,13 +205,22 @@ fun MealDetailsContent(
             selectedSizePrice + subChoicesPrice
         }
     }
-
+// Validate min and max choices
+    val isValidSelection by remember(selectedSubChoices, meal) {
+        derivedStateOf {
+            meal?.choices?.all { choice ->
+                val selectedCount = selectedSubChoices[choice.id]?.size ?: 0
+                selectedCount >= choice.min && (choice.max == 0 || selectedCount <= choice.max)
+            } ?: true
+        }
+    }
+    var showValidationErrors by remember { mutableStateOf(false) }
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        // Fixed App Bar with Image
+// Fixed App Bar with Image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -254,8 +259,7 @@ fun MealDetailsContent(
                 )
             }
         }
-
-        // Content Section
+// Content Section
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -263,25 +267,20 @@ fun MealDetailsContent(
                 .padding(bottom = bottomBarHeight + 16.dp) // Account for bottom bar
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 text = meal?.title ?: "",
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 fontSize = 20.sp
             )
-
             Spacer(modifier = Modifier.height(6.dp))
-
             Text(
                 text = meal?.description ?: "",
                 fontSize = 14.sp,
                 color = Color.Gray
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Sizes Section
+// Sizes Section
             if (!meal?.sizes.isNullOrEmpty()) {
                 Card(
                     modifier = Modifier
@@ -314,42 +313,68 @@ fun MealDetailsContent(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
-            // Choices Section
+// Choices Section
             meal?.choices?.forEach { choice ->
+                val selectedCount = selectedSubChoices[choice.id]?.size ?: 0
+                val isChoiceValid = selectedCount >= choice.min && (choice.max == 0 || selectedCount <= choice.max)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color.Black),
+                    border = BorderStroke(1.dp, if (showValidationErrors && !isChoiceValid) Color.Red else Color.Black),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
+// Display choice title with min/max requirements
                         Text(
-                            text = "${choice.choiceTitle} ${if(choice.min!=0){
-                                stringResource(R.string.you_must_choose, choice.min)
-                            }else{
-                                if(choice.max!=0){
-                                    stringResource(R.string.you_can_choose, choice.max)
-                                }else{
-                                    ""
+                            text = when {
+                                choice.min == 0 -> {
+                                    "${choice.choiceTitle} (" + stringResource(R.string.meal_details_fragment_choice_adapter_maximum_choose_text) + " 1 ) "
                                 }
-                            }
-                            }",
+                                choice.min == choice.max  -> {
+                                    "${choice.choiceTitle} (" + stringResource(R.string.meal_details_fragment_choice_adapter_must_choose_choose_text) + " ${choice.min})"
+                                }
+//                                choice.max == 0 -> {
+//                                    "${choice.choiceTitle} (" + stringResource(R.string.meal_details_fragment_choice_adapter_minimum_choose_text) + " ${choice.min})"
+//                                }
+                                else -> {
+                                    "${choice.choiceTitle} (" + stringResource(R.string.meal_details_fragment_choice_adapter_bracket_choose_text) + " ${choice.min})"
+                                }
+                            },
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (selectedChoiceId == choice.id) Color.White else Color.Black
                         )
-
+// Show validation message if selection is invalid and showValidationErrors is true
+                        if (showValidationErrors && !isChoiceValid) {
+                            Text(
+                                text = when {
+                                    selectedCount < choice.min -> stringResource(
+                                        R.string.validation_error_min_choices,
+                                        choice.min
+                                    )
+                                    selectedCount > choice.max -> stringResource(
+                                        R.string.validation_error_max_choices,
+                                        choice.max
+                                    )
+                                    else -> ""
+                                },
+                                color = Color.Red,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                         if (choice.subChoices.isNotEmpty()) {
                             Column(modifier = Modifier.padding(start = 16.dp)) {
                                 choice.subChoices.forEach { subChoice ->
                                     SubChoiceOption(
                                         subChoice = subChoice,
                                         choiceId = choice.id,
+                                        min = choice.min,
+                                        max = choice.max,
                                         isSelected = selectedSubChoices[choice.id]?.contains(subChoice.id) == true,
-                                        onSelected = onSubChoiceSelected,
+                                        onSelected = onSubChoiceSelected
                                     )
                                 }
                             }
@@ -359,15 +384,26 @@ fun MealDetailsContent(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
-
-        // Bottom Bar (fixed at the bottom)
+// Bottom Bar (fixed at the bottom)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp) // Separation from content
         ) {
             Button(
-                onClick = onAddToCart,
+                onClick = {
+                    if (isValidSelection) {
+                        showValidationErrors = false
+                        onAddToCart()
+                    } else {
+                        showValidationErrors = true
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.validation_error_general),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
                 modifier = bottomBarModifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .clip(RoundedCornerShape(12.dp))
