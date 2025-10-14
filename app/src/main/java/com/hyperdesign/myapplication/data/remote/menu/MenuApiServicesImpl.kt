@@ -52,7 +52,7 @@ class MenuApiServicesImpl(
                 parameter("branch_id", branchId)
                 parameter("meal_id", mealId)
             }.body<MealDetailResponseDto>()
-            Log.d("MenuApiServices", "Menu Response for branchId=$branchId: $response")
+            Log.d("MenuApiServices", "Menu Response for branchId=$branchId , mealId=$mealId: $response")
             response
 
         }catch (e:Exception){

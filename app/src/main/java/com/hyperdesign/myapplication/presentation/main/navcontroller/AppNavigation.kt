@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.presentation.main.navcontroller
 
 import MenuScreen
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -15,6 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.ForgotPasswordScreen
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.ResetPasswordScreen
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.VerifyScreen
@@ -23,6 +27,7 @@ import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScr
 import com.hyperdesign.myapplication.presentation.auth.signup.ui.SignUpScreen
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.MealDetailsScreen
+import com.hyperdesign.myapplication.presentation.menu.ui.MealInput
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CartScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CheckOutScreen
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens.AllAddressesScreen
@@ -35,6 +40,7 @@ import com.hyperdesign.myapplication.presentation.profile.settings.privacypolicy
 import com.hyperdesign.myapplication.presentation.profile.settings.returnpolicy.ui.screens.ReturnPolicyScreen
 import com.hyperdesign.myapplication.presentation.profile.settings.termsandconditions.ui.screens.TermsAndConditionsScreen
 import com.hyperdesign.myapplication.presentation.profile.settings.whoarewe.ui.screens.WhoAreWeScreen
+import kotlin.jvm.java
 
 val bottomNavScreens = listOf(
     Screen.HomeScreen,
@@ -46,6 +52,7 @@ val LocalNavController = compositionLocalOf<NavController> {
     error("No NavController provided")
 }
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
@@ -101,9 +108,30 @@ fun AppNavigation(startDestination: String) {
                     arguments = listOf(navArgument("mealJson") { type = NavType.StringType }),
 
                 ) {backStackEntry ->
-                    val mealJson = backStackEntry.arguments?.getString("mealJson")
-                    MealDetailsScreen(mealJson = mealJson)
-
+                    val mealJsonRaw = backStackEntry.arguments?.getString("mealJson")
+                    val mealInput = mealJsonRaw?.let { raw ->
+                        try {
+                            // Try to decode the raw string if it's URL-encoded
+                            val decoded = try {
+                                java.net.URLDecoder.decode(raw, "UTF-8")
+                            } catch (e: Exception) {
+                                raw // Fallback to raw string if decoding fails
+                            }
+                            // Try parsing as a Meal JSON
+                            val meal = Gson().fromJson(decoded, Meal::class.java)
+                            if (meal != null) {
+                                Log.d("NavGraph", "Parsed MealJson: $meal")
+                                MealInput.MealJson(decoded)
+                            } else {
+                                MealInput.MealId(decoded.removeSurrounding("\"", "\"").trim())
+                            }
+                        } catch (e: Exception) {
+                            // If JSON parsing fails, assume it's a mealId
+                            Log.w("NavGraph", "Failed to parse as MealJson, treating as MealId: $raw")
+                            MealInput.MealId(raw.removeSurrounding("\"", "\"").trim())
+                        }
+                    }
+                    MealDetailsScreen(mealJson=mealInput )
 
                 }
                 composable(Screen.CheckOutScreen.route) { CheckOutScreen() }

@@ -8,6 +8,8 @@ sealed class MealDetialsIntents{
     data class changeSizeId(val sizeId: String) : MealDetialsIntents()
     data class changeChoices(val choices :Map<String,List<String>>): MealDetialsIntents()
 
-    data class addMealToCart(val branchId: String,val mealId: String,val quantity: String,val sizeId: String,val choices :Map<String,List<String>>) : MealDetialsIntents()
+    data class changePickupStatus(val pickupStatus:String):MealDetialsIntents()
+
+    data class addMealToCart(val branchId: String,val mealId: String,val quantity: String,val sizeId: String,val choices :Map<String,List<String>>,val pickupStatus:String) : MealDetialsIntents()
 
 }

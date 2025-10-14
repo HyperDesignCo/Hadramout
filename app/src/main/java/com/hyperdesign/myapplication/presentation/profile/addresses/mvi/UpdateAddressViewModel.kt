@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class UpdateAddressViewModel @Inject constructor(
+class UpdateAddressViewModel(
     private val showAddressUseCase: ShowAddressUseCase,
     private val updateAddressUseCase: UpdateAddressUseCase,
     private val getRegionsUseCase: GetRegionsUseCase,
@@ -82,7 +82,7 @@ class UpdateAddressViewModel @Inject constructor(
                 val response = showAddressUseCase(addressId.toInt())
                 _addressState.value = _addressState.value.copy(
                     isLoading = false,
-                    regionId = response.address.region.id,
+//                    regionId = null,
                     areaId = response.address.area.id.toString(),
                     district = response.address.sub_region,
                     street = response.address.street,
@@ -97,7 +97,7 @@ class UpdateAddressViewModel @Inject constructor(
                     long = response.address.longitude
                 )
                 // Fetch areas for the selected region after fetching address
-                getAreaByRegionId(response.address.region.id)
+//                getAreaByRegionId(response.address.region?.id!!)
             }.onFailure {
                 _addressState.value = _addressState.value.copy(
                     isLoading = false,

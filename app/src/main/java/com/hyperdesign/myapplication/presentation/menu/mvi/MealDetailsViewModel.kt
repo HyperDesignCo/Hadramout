@@ -60,13 +60,20 @@ class MealDetailsViewModel(
                 )
 
             }
+            is MealDetialsIntents.changePickupStatus->{
+                _MealDetailsState.value = _MealDetailsState.value.copy(
+                    pickUpStatus = intent.pickupStatus
+
+                )
+            }
             is MealDetialsIntents.addMealToCart -> {
                 addMealIntoCart(AddOrderRequest(
                     branchId = intent.branchId,
                     mealId = intent.mealId,
                     sizeId = intent.sizeId,
                     quantity = intent.quantity,
-                    choices = intent.choices
+                    choices = intent.choices,
+                    pickupStatus = intent.pickupStatus
 
                 ))
             }

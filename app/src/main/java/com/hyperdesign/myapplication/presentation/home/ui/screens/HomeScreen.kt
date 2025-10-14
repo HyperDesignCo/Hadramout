@@ -41,15 +41,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.Branch
 import com.hyperdesign.myapplication.domain.Entity.HomeMenu
-import com.hyperdesign.myapplication.domain.Entity.Meal
+import com.hyperdesign.myapplication.domain.Entity.SlideShowEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeIntents
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.FeaturedWedgits
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.OffersList
-import com.hyperdesign.myapplication.presentation.home.ui.wedgit.offers
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
+import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDeataisWithString
 import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDetails
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
@@ -62,7 +62,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
     val homeState by homeViewModel.homeState.collectAsStateWithLifecycle()
 
     var branchList by remember { mutableStateOf<List<Branch>>(emptyList()) }
-    var bestSalesMeals by remember { mutableStateOf<List<Meal>>(emptyList()) }
+    var SlideShowMeals by remember { mutableStateOf<List<SlideShowEntity>>(emptyList()) }
     var homeMenus by remember { mutableStateOf<List<HomeMenu>>(emptyList()) }
     var status by remember { mutableStateOf(if(homeViewModel.tokenManager.getStatus()==1) true else false) } // Track delivery/pickup status
 
@@ -71,7 +71,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
 
     LaunchedEffect(homeState) {
         branchList = homeState.branches?.branches ?: emptyList()
-        bestSalesMeals = homeState.homeMenues?.bestSalesMeals ?: emptyList()
+        SlideShowMeals = homeState.homeMenues?.slideshow ?: emptyList()
         homeMenus = homeState.homeMenues?.homeMenus ?: emptyList()
         if (homeState.errorMessage.isNotEmpty()) {
             Log.d("HomeScreen", "Error: ${homeState.errorMessage}")
@@ -83,7 +83,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
         homeViewModel.tokenManager.getBranchId()?.let {
             HomeScreenContent(
                 branches = branchList,
-                offers = bestSalesMeals,
+                offers = SlideShowMeals,
                 homeMenus = homeMenus,
                 onBranchSelected = { branchId ->
                     homeViewModel.handleIntents(HomeIntents.changeBranchId(branchId))
@@ -127,7 +127,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
 @Composable
 fun HomeScreenContent(
     branches: List<Branch>,
-    offers: List<Meal>,
+    offers: List<SlideShowEntity>,
     homeMenus: List<HomeMenu>,
     onBranchSelected: (Int) -> Unit,
     onBackPressed: () -> Unit,
@@ -299,7 +299,14 @@ fun HomeScreenContent(
             }
 
             item {
-                OffersList(offers = offers)
+                OffersList(offers = offers, navToMealDetais = {mealId->
+                    val route = goToScreenMealDeataisWithString(mealId)
+                    navController.navigate(route)
+                },
+                navToMenu = {
+                    navController.navigate(Screen.MenueScreen.route)
+                }
+                )
             }
 
             item {

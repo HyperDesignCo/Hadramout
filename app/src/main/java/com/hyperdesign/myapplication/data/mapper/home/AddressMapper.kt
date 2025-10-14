@@ -13,7 +13,7 @@ import com.hyperdesign.myapplication.domain.Entity.ShowAddressResponseEntity
 
 fun AddressResponseDto.toDomain() : AddressResponseEntity {
     return AddressResponseEntity(
-        addresses = addresses.map { it.toDomain() }
+        addresses = addresses?.map { it.toDomain() }
     )
 
 }
@@ -27,7 +27,7 @@ fun AddressDto.toDomain(): AddressEntity{
 
     return AddressEntity(
         id = id,
-        region = region.toDomain(),
+        region = region?.toDomain(),
         area = area.toDomain(),
         sub_region = sub_region,
         street = street,

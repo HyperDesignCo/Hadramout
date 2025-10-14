@@ -2,7 +2,7 @@ package com.hyperdesign.myapplication.data.dto
 
 
 data class AddressResponseDto(
-    val addresses: List<AddressDto>
+    val addresses: List<AddressDto>?
 )
 
 
@@ -11,7 +11,7 @@ data class ShowAddressResponseDto (
 )
 data class AddressDto(
     val id: String,
-    val region: RegionDto,
+    val region: RegionDto?,
     val area: AreaDto,
     val sub_region: String,
     val street: String,
@@ -27,8 +27,8 @@ data class AddressDto(
 )
 
 data class RegionDto(
-    val id: Int,
-    val name: String
+    val id: Int?,
+    val name: String?
 )
 
 data class AreaDto(

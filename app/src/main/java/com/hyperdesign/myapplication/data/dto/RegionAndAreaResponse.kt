@@ -12,5 +12,5 @@ data class AreaResponseDto(
 )
 
 data class RegionResponseDto(
-    @SerializedName("regions") val regions: List<AreaAndRegionDto>
+    @SerializedName("regions") val regions: List<AreaAndRegionDto>?
 )

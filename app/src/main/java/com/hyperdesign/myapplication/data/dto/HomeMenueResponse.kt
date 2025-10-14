@@ -8,9 +8,33 @@ data class HomeResponseDTO(
     val homeMenus: List<HomeMenuDTO>,
     @SerializedName("best_sales_meals")
     val bestSalesMeals: List<MealMenuDto>,
+    val ads : List<AdsDto>?,
+    @SerializedName("Slideshow")
+    val slideshow :List<SlideShow>?,
     val message: String
 )
 
+data class SlideShow(
+    val id:String,
+    val title:String?,
+    val text:String?,
+    val image:String,
+    @SerializedName("meal_id")
+    val mealId:String?,
+    @SerializedName("order_by")
+    val orderId:String
+
+)
+
+data class AdsDto(
+    val id :String,
+    val image:String,
+    @SerializedName("meal_id")
+    val mealId:String?,
+    @SerializedName("order_by")
+    val orderId:String
+
+)
 data class HomeMenuDTO(
     val id: String,
     val title: String,

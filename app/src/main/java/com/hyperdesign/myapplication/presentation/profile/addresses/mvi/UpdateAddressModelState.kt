@@ -8,7 +8,7 @@ data class UpdateAddressModelState(
     val isLoading: Boolean = false,
     val errorMsg: String? = null,
     val addressId: String = "",
-    val regionId: Int = 0,
+    val regionId: Int? = null,
     val areaId: String = "",
     val district: String = "",
     val street: String = "",

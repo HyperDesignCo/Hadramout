@@ -1,4 +1,5 @@
 package com.hyperdesign.myapplication.presentation.menu.ui
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -43,23 +44,79 @@ import com.hyperdesign.myapplication.presentation.menu.ui.widgets.FoodCardDesign
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SizeOption
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SubChoiceOption
 import org.koin.androidx.compose.koinViewModel
+
+
+sealed class MealInput() {
+    data class MealJson(val json: String) : MealInput()
+    data class MealId(val id: String) : MealInput()
+}
 @Composable
-fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewModel = koinViewModel()) {
+fun MealDetailsScreen(
+    mealJson: MealInput?,
+    mealDetailsViewModel: MealDetailsViewModel = koinViewModel()
+) {
     val navController = LocalNavController.current
     val mealDetailsState by mealDetailsViewModel.MealDetailsState.collectAsStateWithLifecycle()
-    val featured = mealJson?.let { Gson().fromJson(it, Meal::class.java) }
     val context = LocalContext.current
     var mealDetails by remember { mutableStateOf<MealDetailsEntity?>(null) }
     var addCartMessage by remember { mutableStateOf("") }
-// Trigger API call only once when the composable is first composed
-    LaunchedEffect(Unit) {
-        if (mealDetailsState.MealDetailsData == null && !mealDetailsState.isLoading) {
-            mealDetailsViewModel.handleIntents(
-                MealDetialsIntents.showMealDetails(branchId = mealDetailsViewModel.tokenManager.getBranchId()?:0, mealId = featured?.id ?: 0)
-            )
+
+    // Utility function to clean the mealId string
+    fun cleanMealId(input: String?): String? {
+        if (input == null) return null
+        // Remove surrounding quotes and trim whitespace
+        val cleaned = input.trim().removeSurrounding("\"", "\"").removeSurrounding("'", "'")
+        // Validate if the cleaned string is numeric
+        return if (cleaned.matches(Regex("\\d+"))) cleaned else null
+    }
+
+    // Parse the input to get the mealId
+    val mealId = remember(mealJson) {
+        when (mealJson) {
+            is MealInput.MealJson -> {
+                try {
+                    val meal = Gson().fromJson(mealJson.json, Meal::class.java)
+                    Log.d("MealDetailsScreen", "Parsed MealJson: $meal")
+                    cleanMealId(meal?.id?.toString())
+                } catch (e: Exception) {
+                    Log.e("MealDetailsScreen", "Failed to parse MealJson: ${mealJson.json}", e)
+                    null
+                }
+            }
+            is MealInput.MealId -> {
+                Log.d("MealDetailsScreen", "Received MealId: ${mealJson.id}")
+                cleanMealId(mealJson.id)
+            }
+            null -> {
+                Log.w("MealDetailsScreen", "mealJson is null")
+                null
+            }
         }
     }
-// Update mealDetails when state changes
+
+    // Log the mealId to verify its value
+    Log.d("MealDetailsScreen", "mealId: '$mealId'")
+
+    // Trigger API call only if mealId is valid
+    LaunchedEffect(mealId) {
+        if (mealDetailsState.MealDetailsData == null && !mealDetailsState.isLoading && mealId != null) {
+            val mealIdInt = mealId.toIntOrNull()
+            Log.d("MealDetailsScreen", "Attempting to parse mealId: '$mealId' -> $mealIdInt")
+            if (mealIdInt != null) {
+                mealDetailsViewModel.handleIntents(
+                    MealDetialsIntents.showMealDetails(
+                        branchId = mealDetailsViewModel.tokenManager.getBranchId() ?: 0,
+                        mealId = mealIdInt
+                    )
+                )
+            } else {
+                Log.e("MealDetailsScreen", "Invalid mealId: '$mealId' cannot be converted to integer")
+                Toast.makeText(context, "Invalid meal ID", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Update mealDetails when state changes
     LaunchedEffect(mealDetailsState) {
         mealDetails = mealDetailsState.MealDetailsData?.meal
         addCartMessage = mealDetailsState.AddToCartData?.message.orEmpty()
@@ -69,8 +126,9 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
             Toast.makeText(context, mealDetailsState.AddToCartData?.message, Toast.LENGTH_SHORT).show()
         }
     }
+
     Box(modifier = Modifier.fillMaxSize()) {
-// Show content only when data is available
+        // Show content only when data is available
         mealDetails?.let { meal ->
             var selectedSize by remember { mutableStateOf(meal.sizes.firstOrNull()?.sizeTitle ?: "") }
             var selectedSizeId by remember { mutableStateOf(meal.sizes.firstOrNull()?.id ?: "") }
@@ -89,7 +147,6 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                         if (isSelected) {
                             if (max > 0 && currentList.size >= max) {
                                 if (max == 1 && !currentList.contains(subChoiceId)) {
-// Replace the current selection
                                     currentList.clear()
                                     currentList.add(subChoiceId)
                                 } else {
@@ -110,18 +167,26 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 onSelectedChoiceId = { choiceId -> selectedChoiceId = choiceId },
                 selectedChoiceId = selectedChoiceId,
                 onAddToCart = {
-                    mealDetailsViewModel.handleIntents(
-                        MealDetialsIntents.addMealToCart(
-                            mealId = featured?.id.toString(),
-                            quantity = mealDetailsState.quantity,
-                            sizeId = selectedSizeId,
-                            branchId = mealDetailsViewModel.tokenManager.getBranchId().toString(),
-                            choices = selectedSubChoices
+                    if (mealId != null) {
+                        mealDetailsViewModel.handleIntents(
+                            MealDetialsIntents.addMealToCart(
+                                mealId = mealId,
+                                quantity = mealDetailsState.quantity,
+                                sizeId = selectedSizeId,
+                                branchId = mealDetailsViewModel.tokenManager.getBranchId().toString(),
+                                choices = selectedSubChoices,
+                                pickupStatus = mealDetailsViewModel.tokenManager.getStatus().toString()
+                            )
                         )
-                    )
+                    } else {
+                        Log.e("MealDetailsScreen", "Cannot add to cart: mealId is null")
+                        Toast.makeText(context, "Invalid meal ID", Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
         }
+
+        // Show confirmation dialog when meal is added successfully
         if (addCartMessage.isNotEmpty() && addCartMessage == "Meal Added successfully") {
             Box(
                 modifier = Modifier
@@ -131,16 +196,19 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     FoodCardDesign(
-                        imageUrl = featured?.image.orEmpty(),
-                        onGoToCart = { navController.navigate(Screen.CartScreen.route) {
-                            popUpTo(Screen.MealDetailsScreen.route) { inclusive = true }
-                        } },
+                        imageUrl = mealDetails?.imageUrl.orEmpty(),
+                        onGoToCart = {
+                            navController.navigate(Screen.CartScreen.route) {
+                                popUpTo(Screen.MealDetailsScreen.route) { inclusive = true }
+                            }
+                        },
                         onGoToMenu = { navController.popBackStack() }
                     )
                 }
             }
         }
-// Show loading indicator when isLoading is true or data is not yet loaded
+
+        // Show loading indicator when isLoading is true or data is not yet loaded
         if (mealDetailsState.isLoading || mealDetails == null) {
             Box(
                 modifier = Modifier
@@ -151,7 +219,8 @@ fun MealDetailsScreen(mealJson: String?, mealDetailsViewModel: MealDetailsViewMo
                 CircularProgressIndicator(color = Secondry)
             }
         }
-// Show error message if there's an error
+
+        // Show error message if there's an error
         if (mealDetailsState.errorMessage != null) {
             Box(
                 modifier = Modifier

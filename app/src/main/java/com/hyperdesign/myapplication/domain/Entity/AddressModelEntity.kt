@@ -5,7 +5,7 @@ import com.hyperdesign.myapplication.data.dto.AreaDto
 import com.hyperdesign.myapplication.data.dto.RegionDto
 
 data class AddressResponseEntity(
-    val addresses: List<AddressEntity>
+    val addresses: List<AddressEntity>?
 )
 
 data class ShowAddressResponseEntity(
@@ -14,7 +14,7 @@ data class ShowAddressResponseEntity(
 
 data class AddressEntity(
     val id: String,
-    val region: RegionEntity,
+    val region: RegionEntity?,
     val area: AreaEntity,
     val sub_region: String,
     val street: String,
@@ -30,8 +30,8 @@ data class AddressEntity(
 )
 
 data class RegionEntity(
-    val id: Int,
-    val name: String
+    val id: Int?,
+    val name: String?
 )
 
 data class AreaEntity(

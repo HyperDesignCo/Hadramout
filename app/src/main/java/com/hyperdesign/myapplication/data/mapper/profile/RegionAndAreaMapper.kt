@@ -17,7 +17,7 @@ fun AreaResponseDto.toDomain(): AreaResponseEntity{
 
 fun RegionResponseDto.toDomain(): RegionResponseEntity {
     return RegionResponseEntity(
-        regions = regions.map { it.toDomain() }
+        regions = regions?.map { it.toDomain() }
     )
 }
 

@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.home.ui.wedgit
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,15 +20,12 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.Meal
+import com.hyperdesign.myapplication.domain.Entity.SlideShowEntity
 import kotlinx.coroutines.delay
 
-data class offers(
-    val image: String, // Changed from Int to String for URL
-    val id: Int
-)
 
 @Composable
-fun OffersList(offers: List<Meal>) {
+fun OffersList(offers: List<SlideShowEntity>,navToMealDetais:(String)->Unit,navToMenu:()->Unit) {
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { offers.size }
@@ -58,6 +56,16 @@ fun OffersList(offers: List<Meal>) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 4.dp)
+                    .clickable{
+                        offers[page].mealId?.let {
+                            if(!it.trim().isEmpty()){
+                                navToMealDetais(offers[page].mealId?.trim().orEmpty())
+
+                            }else{
+                                navToMenu()
+                            }
+                        }
+                    }
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)

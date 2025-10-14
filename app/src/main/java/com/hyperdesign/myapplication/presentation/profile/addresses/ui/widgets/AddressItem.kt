@@ -23,7 +23,7 @@ fun AddressItem(address: AddressEntity,onDeleteAddress:()->Unit,onGoToUpdateAddr
 
     val formattedAddress = listOfNotNull(
         address.area.name.takeIf { it.isNotEmpty() },
-        address.region.name.takeIf { it.isNotEmpty() },
+//        address.region?.name.takeIf { it?.isNotEmpty()  },
         address.sub_region.takeIf { it.isNotEmpty() },
         address.street.takeIf { it.isNotEmpty() },
         address.special_sign.takeIf { it.isNotEmpty() },

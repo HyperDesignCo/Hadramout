@@ -51,6 +51,10 @@ fun goToScreenMealDetails(meal: Meal): String {
     val json = Uri.encode(Gson().toJson(meal))
     return "${ScreensConst.MEAL_DETAILS_SCREEN}/$json"
 }
+fun goToScreenMealDeataisWithString(mealId:String): String{
+    val json = Uri.encode(Gson().toJson(mealId))
+    return "${ScreensConst.MEAL_DETAILS_SCREEN}/$json"
+}
 
 fun goToVerifyScreen(verify: ForgetPasswordModeEntity,email:String):String{
     val json = Uri.encode(Gson().toJson(verify))

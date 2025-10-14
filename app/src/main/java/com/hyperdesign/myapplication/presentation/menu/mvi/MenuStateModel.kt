@@ -18,5 +18,6 @@ data class MenuStateModel(
     val mealId : Int = 0,
     val quantity : String = "1",
     val sizeId : String = "",
+    val pickUpStatus :String ="0",
     val choices : Map<String,List<String>> = emptyMap()
 )

@@ -12,7 +12,7 @@ data class AreaResponseEntity(
 )
 
 data class RegionResponseEntity(
-    val regions: List<AreaAndRegionEntity>
+    val regions: List<AreaAndRegionEntity>?
 )
 
 
