@@ -139,4 +139,6 @@
     <string name="validation_error_min_choices">Please select at least %d options</string>
     <string name="validation_error_max_choices">You can select up to %d options</string>
     <string name="validation_error_general">Please fix the selection errors before adding to cart</string>
+    <string name="best_selling">Best Selling</string>
+    <string name="visitor">Visitor</string>
 </resources>

@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.domain.Entity.AdsEntity
 import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
@@ -125,6 +126,47 @@ fun FeaturedWedgits(
                     }
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun AdsWdegit(
+    meal: AdsEntity,
+    onItemClick: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .width(140.dp)
+            .height(150.dp)
+            .clip(RoundedCornerShape(8.dp)),
+        colors = cardColors(containerColor = Gray),
+        onClick = { onItemClick(meal.mealId?:"") }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(meal.image)
+                    .crossfade(true)
+                    .error(R.drawable.test_food)
+                    .placeholder(R.drawable.test_food)
+                    .build(),
+                contentDescription = "Meal image ${meal.image}",
+                modifier = Modifier
+                    .width(140.dp)
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+
         }
     }
 }

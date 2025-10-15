@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -32,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,12 +42,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.domain.Entity.AdsEntity
 import com.hyperdesign.myapplication.domain.Entity.Branch
 import com.hyperdesign.myapplication.domain.Entity.HomeMenu
+import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.domain.Entity.SlideShowEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeIntents
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
+import com.hyperdesign.myapplication.presentation.home.ui.wedgit.AdsWdegit
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.FeaturedWedgits
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.OffersList
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
@@ -54,6 +60,7 @@ import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenM
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -61,30 +68,15 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
     val navController = LocalNavController.current
     val homeState by homeViewModel.homeState.collectAsStateWithLifecycle()
 
-    var branchList by remember { mutableStateOf<List<Branch>>(emptyList()) }
-    var SlideShowMeals by remember { mutableStateOf<List<SlideShowEntity>>(emptyList()) }
-    var homeMenus by remember { mutableStateOf<List<HomeMenu>>(emptyList()) }
     var status by remember { mutableStateOf(if(homeViewModel.tokenManager.getStatus()==1) true else false) } // Track delivery/pickup status
 
-    Log.d("HomeScreen", "bestSalesMeals: ${homeState.homeMenues?.bestSalesMeals}")
-    Log.d("HomeScreen", "homeMenus: ${homeState.homeMenues?.homeMenus}")
 
-    LaunchedEffect(homeState) {
-        branchList = homeState.branches?.branches ?: emptyList()
-        SlideShowMeals = homeState.homeMenues?.slideshow ?: emptyList()
-        homeMenus = homeState.homeMenues?.homeMenus ?: emptyList()
-        if (homeState.errorMessage.isNotEmpty()) {
-            Log.d("HomeScreen", "Error: ${homeState.errorMessage}")
-            // Optionally show Toast or Snackbar for error
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        homeViewModel.tokenManager.getBranchId()?.let {
             HomeScreenContent(
-                branches = branchList,
-                offers = SlideShowMeals,
-                homeMenus = homeMenus,
+                branches = homeState.branches?.branches.orEmpty(),
+                offers = homeState.homeMenues?.slideshow.orEmpty(),
+                homeMenus = homeState.homeMenues?.homeMenus.orEmpty(),
                 onBranchSelected = { branchId ->
                     homeViewModel.handleIntents(HomeIntents.changeBranchId(branchId))
                     homeViewModel.tokenManager.saveBranchId(branchId)
@@ -98,8 +90,6 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
                     }else{
                         homeViewModel.tokenManager.saveStatus(1)
                     }
-
-
                 },
                 onCartPressed = {
                     navController.navigate(Screen.CartScreen.route)
@@ -107,10 +97,11 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
                 saveBranchId={branchId->
                     homeViewModel.tokenManager.saveBranchId(branchId)
                 },
-                getBranchId=it,
-                myStatus = homeViewModel.tokenManager.getStatus()
+                getBranchId=homeViewModel.tokenManager.getBranchId()?:homeState.branches?.branches[0]!!.id,
+                myStatus = homeViewModel.tokenManager.getStatus(),
+                bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
+                ads = homeState.homeMenues?.ads.orEmpty()
             )
-        }
         if (homeState.isLoading) {
             Box(
                 modifier = Modifier
@@ -135,14 +126,19 @@ fun HomeScreenContent(
     status: Boolean,
     getBranchId:Int,
     saveBranchId:(Int)->Unit,
+    bestSelling:List<Meal>,
+    ads:List<AdsEntity>,
     onStatusChanged: (Boolean) -> Unit, // Callback to update status
     myStatus:Int?
 ) {
     val navController = LocalNavController.current
     var expanded by remember { mutableStateOf(false) }
-    var selectedBranch by remember { mutableStateOf("Select Branch") }
+    var selectedBranch by remember { mutableStateOf("") }
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
 
     LaunchedEffect(branches) {
+
         if (branches.isNotEmpty()) {
             if (getBranchId != 0) {
                 val selected = branches.find { it.id == getBranchId }
@@ -157,11 +153,11 @@ fun HomeScreenContent(
                     saveBranchId(branches[0].id)
                 }
             } else {
-                if (selectedBranch == "Select Branch") {
+//                if (selectedBranch == "Select Branch") {
                     selectedBranch = branches[0].title
                     onBranchSelected(branches[0].id)
                     saveBranchId(branches[0].id)
-                }
+//                }
             }
         }
     }
@@ -181,7 +177,6 @@ fun HomeScreenContent(
             cardCount = "2",
             onCartPressed = {
                 onCartPressed()
-
             },
             showStatus = true,
             onClickChangStatus = onStatusChanged, // Pass the callback to update status
@@ -285,27 +280,19 @@ fun HomeScreenContent(
                         }
                     }
                 }
-
-                Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                    Spacer(modifier = Modifier.height(15.dp))
-                    Text(
-                        stringResource(R.string.offers),
-                        color = Secondry,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
             }
 
             item {
-                OffersList(offers = offers, navToMealDetais = {mealId->
-                    val route = goToScreenMealDeataisWithString(mealId)
-                    navController.navigate(route)
-                },
-                navToMenu = {
-                    navController.navigate(Screen.MenueScreen.route)
-                }
+                Spacer(modifier = Modifier.height(15.dp))
+                OffersList(
+                    offers = offers,
+                    navToMealDetais = { mealId ->
+                        val route = goToScreenMealDeataisWithString(mealId)
+                        navController.navigate(route)
+                    },
+                    navToMenu = {
+                        navController.navigate(Screen.MenueScreen.route)
+                    }
                 )
             }
 
@@ -324,16 +311,99 @@ fun HomeScreenContent(
             }
 
             homeMenus.forEach { homeMenu ->
-                items(homeMenu.meals, key = { meal -> meal.id }) { meal ->
-                    FeaturedWedgits(
-                        meal = meal,
-                        onItemClick = {
-                            val route = goToScreenMealDetails(meal)
-                            navController.navigate(route)
+                item {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(homeMenu.meals, key = { meal -> meal.id }) { meal ->
+                            Box(
+                                modifier = Modifier.width(screenWidth)
+                            ) {
+                                FeaturedWedgits(
+                                    meal = meal,
+                                    onItemClick = {
+                                        val route = goToScreenMealDetails(meal)
+                                        navController.navigate(route)
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
                 }
+            }
+
+            item {
+                Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.best_selling),
+                        color = Secondry,
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(top = 10.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                }
+            }
+
+
+                item {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(bestSelling, key = { meal -> meal.id }) { meal ->
+                            Box(
+                                modifier = Modifier.width(screenWidth)
+                            ) {
+                                FeaturedWedgits(
+                                    meal = meal,
+                                    onItemClick = {
+                                        val route = goToScreenMealDetails(meal)
+                                        navController.navigate(route)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
+
+
+
+            item {
+                Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.offers),
+                        color = Secondry,
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(top = 10.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            item {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(ads, key = { meal -> meal.id }) { meal ->
+
+                        AdsWdegit(
+                                meal = meal,
+                                onItemClick = {
+                                    val route = goToScreenMealDeataisWithString(meal.mealId?:"")
+                                    navController.navigate(route)
+                                }
+                            )
+
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }

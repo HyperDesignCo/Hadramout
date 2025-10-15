@@ -133,7 +133,7 @@ fun SignUpScreenContent(
             Text(
                 text = stringResource(id = R.string.user_name),
                 color = Secondry,
-                fontSize = 17.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
             CustomTextField(
@@ -155,7 +155,7 @@ fun SignUpScreenContent(
             Text(
                 text = stringResource(id = R.string.email_address),
                 color = Secondry,
-                fontSize = 17.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
             CustomTextField(
@@ -177,7 +177,7 @@ fun SignUpScreenContent(
             Text(
                 text = stringResource(id = R.string.phone_number),
                 color = Secondry,
-                fontSize = 17.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
             CustomTextField(
@@ -199,7 +199,7 @@ fun SignUpScreenContent(
             Text(
                 text = stringResource(id = R.string.password),
                 color = Secondry,
-                fontSize = 17.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
             CustomTextField(
@@ -222,7 +222,7 @@ fun SignUpScreenContent(
             Text(
                 text = stringResource(id = R.string.confirm_password),
                 color = Secondry,
-                fontSize = 17.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
             CustomTextField(

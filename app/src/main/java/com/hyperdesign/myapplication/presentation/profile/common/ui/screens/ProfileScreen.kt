@@ -77,17 +77,17 @@ fun ProfileScreenCotent(onGoToCartScreen:()->Unit,onBackPressed: () -> Unit,onGo
                 onClick = { onGoToCartScreen() }
             )
 
-            SettingItem(
-                title = stringResource(R.string.pick_up),
-                icon = R.drawable.ic_pickup,
-                onClick = { /* Handle Logout Click */ }
-            )
-
-            SettingItem(
-                title = stringResource(R.string.Delivery),
-                icon = R.drawable.delivery,
-                onClick = { /* Handle Logout Click */ }
-            )
+//            SettingItem(
+//                title = stringResource(R.string.pick_up),
+//                icon = R.drawable.ic_pickup,
+//                onClick = { /* Handle Logout Click */ }
+//            )
+//
+//            SettingItem(
+//                title = stringResource(R.string.Delivery),
+//                icon = R.drawable.delivery,
+//                onClick = { /* Handle Logout Click */ }
+//            )
 
             SettingItem(
                 title = stringResource(R.string.Call_support),

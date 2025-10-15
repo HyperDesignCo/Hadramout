@@ -77,7 +77,9 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
             navController.navigate(Screen.SignUpScreen.route)
         },
         onGuestLoginClick = {
-            // TODO: Handle login as guest
+            navController.navigate(Screen.HomeScreen.route) {
+                popUpTo(Screen.LoginInScreen.route) { inclusive = true }
+            }
         }
     )
 }
@@ -117,9 +119,11 @@ fun LoginScreenContent(
             Text(
                 text = stringResource(id = R.string.email_or_phoneNumber),
                 color = Secondry,
-                fontSize = 17.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            Spacer(modifier = Modifier.height(7.dp))
             CustomTextField(
                 value = phoneNumber,
                 onValueChange = onPhoneNumberChange,
@@ -136,14 +140,17 @@ fun LoginScreenContent(
                 nextFocusRequester = passwordFocusRequester
             )
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = stringResource(id = R.string.password),
                 color = Secondry,
-                fontSize = 17.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            Spacer(modifier = Modifier.height(7.dp))
+
             CustomTextField(
                 value = password,
                 onValueChange = onPasswordChange,
@@ -160,7 +167,7 @@ fun LoginScreenContent(
                 focusRequester = passwordFocusRequester
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(13.dp))
             Text(
                 text = stringResource(R.string.forgot_password),
                 color = Secondry,
@@ -224,7 +231,7 @@ fun LoginScreenContent(
                 endColor = Color(0xFFFCB203)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(13.dp))
 
             Button(
                 onClick = onGuestLoginClick,
