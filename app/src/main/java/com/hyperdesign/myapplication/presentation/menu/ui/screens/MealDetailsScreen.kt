@@ -35,6 +35,7 @@ import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsEntity
 import com.hyperdesign.myapplication.domain.Entity.SubChoiceEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
+import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
@@ -60,6 +61,7 @@ fun MealDetailsScreen(
     val context = LocalContext.current
     var mealDetails by remember { mutableStateOf<MealDetailsEntity?>(null) }
     var addCartMessage by remember { mutableStateOf("") }
+    val showAuthDialoge by mealDetailsViewModel.showAuthDialoge
 
     // Utility function to clean the mealId string
     fun cleanMealId(input: String?): String? {
@@ -168,22 +170,44 @@ fun MealDetailsScreen(
                 selectedChoiceId = selectedChoiceId,
                 onAddToCart = {
                     if (mealId != null) {
-                        mealDetailsViewModel.handleIntents(
-                            MealDetialsIntents.addMealToCart(
-                                mealId = mealId,
-                                quantity = mealDetailsState.quantity,
-                                sizeId = selectedSizeId,
-                                branchId = mealDetailsViewModel.tokenManager.getBranchId().toString(),
-                                choices = selectedSubChoices,
-                                pickupStatus = mealDetailsViewModel.tokenManager.getStatus().toString()
+                        if(mealDetailsViewModel.tokenManager.getUserData()?.authenticated=="authenticated"){
+                            mealDetailsViewModel.handleIntents(
+                                MealDetialsIntents.addMealToCart(
+                                    mealId = mealId,
+                                    quantity = mealDetailsState.quantity,
+                                    sizeId = selectedSizeId,
+                                    branchId = mealDetailsViewModel.tokenManager.getBranchId().toString(),
+                                    choices = selectedSubChoices,
+                                    pickupStatus = mealDetailsViewModel.tokenManager.getStatus().toString()
+                                )
                             )
-                        )
+                        }else{
+                            mealDetailsViewModel.showAuthDialoge.value =true
+
+                        }
+
                     } else {
                         Log.e("MealDetailsScreen", "Cannot add to cart: mealId is null")
                         Toast.makeText(context, "Invalid meal ID", Toast.LENGTH_SHORT).show()
                     }
                 }
             )
+
+            if(showAuthDialoge){
+                ShowAuthentaionDialge(onNavToLogin = {
+                    navController.navigate(Screen.LoginInScreen.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                    mealDetailsViewModel.showAuthDialoge.value =false
+
+                }, onCancel = {
+                    mealDetailsViewModel.showAuthDialoge.value =false
+
+                })
+            }
+
         }
 
         // Show confirmation dialog when meal is added successfully

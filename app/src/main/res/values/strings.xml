@@ -139,4 +139,8 @@
     <string name="validation_error_general">Please fix the selection errors before adding to cart</string>
     <string name="best_selling">Best Selling</string>
     <string name="visitor">Visitor</string>
+    <string name="update_data">Update Data</string>
+    <string name="profile_updated_successfully">Profile updated successfully!</string>
+    <string name="you_should_loginin_firstly">You should login firstly to can continue</string>
+    <string name="cancel">Cancel</string>
 </resources>

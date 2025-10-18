@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.profile.settings.common.mvi
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.data.local.TokenManager
@@ -12,11 +13,14 @@ import kotlinx.coroutines.launch
 class SettingViewModel(
     private val setLanguageUseCase: SetLagugaueUsecase,
     private val getLanguageUseCase: GetLagugaueUsecase,
-    private val tokenManager: TokenManager
+     val tokenManager: TokenManager
 ) : ViewModel() {
 
     private var _settingsState = MutableStateFlow(SettingModelState())
     val settingsState: StateFlow<SettingModelState> = _settingsState
+
+    var showAuthDialoge = mutableStateOf(false)
+
 
     fun handelIntent(intent: SettingIntents): String? {
         return when (intent) {

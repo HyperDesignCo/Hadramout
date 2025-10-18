@@ -6,30 +6,81 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
+import com.hyperdesign.myapplication.presentation.profile.common.mvi.ProfileViewModel
 import com.hyperdesign.myapplication.presentation.profile.common.ui.Widgets.ProfileHeader
 import com.hyperdesign.myapplication.presentation.profile.common.ui.Widgets.SettingItem
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun ProfileScreen() {
     val navController = LocalNavController.current
+    val userProfileViewModel: ProfileViewModel = koinViewModel()
+
+    val showAuthDialoge by userProfileViewModel.showAuthDialoge
+
 
     ProfileScreenCotent(onBackPressed = {
         navController.popBackStack()
     }, onGoToMyOrdersScreen = {
-        navController.navigate(Screen.MyOrders.route)
+        if (userProfileViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
+            navController.navigate(Screen.MyOrders.route)
+
+        }else{
+            userProfileViewModel.showAuthDialoge.value =true
+
+
+        }
     }, onGotToSettingsScreen = {
         navController.navigate(Screen.SettingsScreen.route)
-    }, onGoToAllAddressesScreen = {navController.navigate(Screen.AllAddressesScreen.route)}
-    , onGoToCartScreen = {navController.navigate(Screen.CartScreen.route)}
+    }, onGoToAllAddressesScreen = {
+        if (userProfileViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
+            navController.navigate(Screen.AllAddressesScreen.route)
+
+        }else{
+            userProfileViewModel.showAuthDialoge.value =true
+
+
+        }
+
+
+  }
+    , onGoToCartScreen = {
+            if (userProfileViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
+                navController.navigate(Screen.CartScreen.route)
+
+            }else{
+                userProfileViewModel.showAuthDialoge.value =true
+
+
+            }
+
+    }
     )
+
+    if (showAuthDialoge) {
+        ShowAuthentaionDialge(onNavToLogin = {
+            navController.navigate(Screen.LoginInScreen.route) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                }
+            }
+            userProfileViewModel.showAuthDialoge.value = false
+
+        }, onCancel = {
+            userProfileViewModel.showAuthDialoge.value = false
+
+        })
+    }
 }
 
 

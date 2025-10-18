@@ -21,6 +21,7 @@ fun User.toDomain(): UserEntity {
         name = name,
         email = email,
         image = image,
-        mobile = mobile
+        mobile = mobile,
+        authenticated=authenticated
     )
 }

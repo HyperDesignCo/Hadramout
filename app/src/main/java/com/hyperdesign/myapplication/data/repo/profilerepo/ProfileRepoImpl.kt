@@ -13,6 +13,8 @@ import com.hyperdesign.myapplication.domain.Entity.AddressEntity
 import com.hyperdesign.myapplication.domain.Entity.AreaResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.CreateNewAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteAddressRequest
+import com.hyperdesign.myapplication.domain.Entity.EditProfileRequest
+import com.hyperdesign.myapplication.domain.Entity.EditProfileResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.OrdersResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.PagesResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.RegionResponseEntity
@@ -72,5 +74,11 @@ class ProfileRepoImpl(
     override suspend fun updateAddress(updateAddressRequest: updateAddressRequest): AddToCartResponseEntity {
         val response = profileApiServices.updateAddress(updateAddressRequest)
         return response.toDomain()
+    }
+
+    override suspend fun editProfile(editProfileRequest: EditProfileRequest): EditProfileResponseEntity {
+        val response = profileApiServices.editProfile(editProfileRequest)
+
+        return response.toEntity()
     }
 }

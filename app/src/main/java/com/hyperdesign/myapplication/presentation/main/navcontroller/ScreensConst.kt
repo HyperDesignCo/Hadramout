@@ -33,4 +33,6 @@ object ScreensConst {
     const val ALL_ADDRESSES_SCREEN="all_address_screen"
 
     const val UPDATE_ADDRESS_SCREEN="update_address_screen"
+
+    const val USER_PROFILE_SCREEN ="user_profile_screen"
 }

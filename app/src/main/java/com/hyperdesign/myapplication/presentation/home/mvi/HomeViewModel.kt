@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.presentation.home.mvi
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.data.local.TokenManager
@@ -19,6 +20,8 @@ class HomeViewModel(
 ) : ViewModel() {
     private var _homeState = MutableStateFlow(HomeStateModel())
     val homeState: StateFlow<HomeStateModel> = _homeState.asStateFlow()
+
+    var showAuthDialoge = mutableStateOf(false)
 
     fun handleIntents(intent: HomeIntents) {
         when (intent) {

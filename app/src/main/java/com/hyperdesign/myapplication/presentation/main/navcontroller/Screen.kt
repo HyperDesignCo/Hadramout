@@ -42,6 +42,8 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
     object AllAddressesScreen: Screen("${ScreensConst.ALL_ADDRESSES_SCREEN}/{screenType}")
 
     object UpdateAddressScreen:Screen("${ScreensConst.UPDATE_ADDRESS_SCREEN}/{addressId}/{lat}/{long}")
+
+    object UserProfileScreen: Screen(ScreensConst.USER_PROFILE_SCREEN)
 }
 
 

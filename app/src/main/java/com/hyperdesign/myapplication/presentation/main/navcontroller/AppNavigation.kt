@@ -33,6 +33,7 @@ import com.hyperdesign.myapplication.presentation.menu.ui.screens.CheckOutScreen
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens.AllAddressesScreen
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens.UpdateAddressScreen
 import com.hyperdesign.myapplication.presentation.profile.common.ui.screens.ProfileScreen
+import com.hyperdesign.myapplication.presentation.profile.common.ui.screens.UserProfileScreen
 import com.hyperdesign.myapplication.presentation.profile.myorders.ui.screens.MyOrderScreen
 import com.hyperdesign.myapplication.presentation.profile.settings.contactus.ui.screens.ContactUsScreen
 import com.hyperdesign.myapplication.presentation.profile.settings.common.ui.screens.SettingsScreen
@@ -158,11 +159,8 @@ fun AppNavigation(startDestination: String) {
                     val long = navBackStack.arguments?.getString("long")
 
                     UpdateAddressScreen(addressId = addressId.orEmpty(), lat = lat.orEmpty(), long = long.orEmpty())
-
-
-
-
                 }
+                composable(Screen.UserProfileScreen.route) { UserProfileScreen() }
 
             }
         }

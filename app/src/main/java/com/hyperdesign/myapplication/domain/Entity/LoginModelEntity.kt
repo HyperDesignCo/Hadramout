@@ -22,5 +22,6 @@ data class UserEntity(
     val name: String,
     val email: String,
     val image: String,
-    val mobile: String
+    val mobile: String,
+    val authenticated:String
 )

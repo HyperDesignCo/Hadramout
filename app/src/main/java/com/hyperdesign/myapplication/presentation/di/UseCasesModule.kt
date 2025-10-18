@@ -20,6 +20,7 @@ import com.hyperdesign.myapplication.domain.usecase.menu.GetMenuUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.CreateNewAddressUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.DeleteAddressUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.DisplayAboutUsUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.EditProfileUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.GetAreaUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.GetLagugaueUsecase
 import com.hyperdesign.myapplication.domain.usecase.profile.GetRegionsUseCase
@@ -149,6 +150,10 @@ val useCasesModule = module {
 
     single<UpdateAddressUseCase> {
         UpdateAddressUseCase(get())
+    }
+
+    single<EditProfileUseCase> {
+        EditProfileUseCase(get())
     }
 
     }

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
+import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
 import com.hyperdesign.myapplication.presentation.main.MainActivity
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
@@ -42,6 +43,7 @@ fun SettingsScreen(settingViewModel: SettingViewModel = koinViewModel()) {
     var selectedLanguage by remember { mutableStateOf(settingViewModel.getLanguage() ?: "en") }
     Log.d("SettingsScreen", selectedLanguage)
     val navController = LocalNavController.current
+
     SettingsScreenContent(
         onBackPressed = { navController.popBackStack() },
         onGoToWhoAreWeScreen = { navController.navigate(Screen.WhoAreWeScreen.route) },
@@ -49,19 +51,34 @@ fun SettingsScreen(settingViewModel: SettingViewModel = koinViewModel()) {
         onSaveNewLanguage = { settingViewModel.setLanguage(it) },
         selectedLanguage = selectedLanguage,
         onLogOut = {
-            settingViewModel.logOut()
-            navController.navigate(Screen.LoginInScreen.route) {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
+            if (settingViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
+                settingViewModel.logOut()
+                navController.navigate(Screen.LoginInScreen.route) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
                 }
-                launchSingleTop = true
+
+            }else{
+                navController.navigate(Screen.LoginInScreen.route) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
+
+
             }
+
 
         },
         onGoToReturnPolicyScreen = {navController.navigate(Screen.ReturnPolicyScreen.route)},
         onGoToTermsAndConditionsScreen = {navController.navigate(Screen.TermesAndConditionsScreen.route)},
-        onGoToPrivacyPolicyScreen = {navController.navigate(Screen.PrivacyPolicyScreen.route)}
+        onGoToPrivacyPolicyScreen = {navController.navigate(Screen.PrivacyPolicyScreen.route)},
+        authState = settingViewModel.tokenManager.getUserData()?.authenticated.toString()
     )
+
+
 }
 
 @Composable
@@ -69,6 +86,7 @@ fun SettingsScreenContent(
     onSaveNewLanguage: (String) -> Unit, // Updated to reflect return type
     selectedLanguage: String,
     onBackPressed: () -> Unit,
+    authState:String,
     onGoToWhoAreWeScreen: () -> Unit,
     onGoToContactUsScreenScreen: () -> Unit,
     onGoToReturnPolicyScreen:()->Unit,
@@ -168,7 +186,7 @@ fun SettingsScreenContent(
             }
 
             item {
-                SettingItem(title = stringResource(R.string.log_out), onClick = {onLogOut()})
+                SettingItem(title = if(authState=="authenticated")stringResource(R.string.log_out) else stringResource(R.string.login) , onClick = {onLogOut()})
             }
 
             item {

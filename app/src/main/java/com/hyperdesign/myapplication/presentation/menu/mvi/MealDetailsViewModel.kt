@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.menu.mvi
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.data.local.TokenManager
@@ -21,6 +22,8 @@ class MealDetailsViewModel(
 
     private var _MealDetailsState = MutableStateFlow(MenuStateModel())
     val MealDetailsState: StateFlow<MenuStateModel> get() = _MealDetailsState
+
+    var showAuthDialoge = mutableStateOf(false)
 
     fun handleIntents(intent: MealDetialsIntents) {
         when(intent){

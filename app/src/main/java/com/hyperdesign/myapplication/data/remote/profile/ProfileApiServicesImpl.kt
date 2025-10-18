@@ -5,16 +5,20 @@ import com.hyperdesign.myapplication.data.dto.AboutUsResponseDTO
 import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
 import com.hyperdesign.myapplication.data.dto.AddressDto
 import com.hyperdesign.myapplication.data.dto.AreaResponseDto
+import com.hyperdesign.myapplication.data.dto.EditProfileResponse
 import com.hyperdesign.myapplication.data.dto.OrdersResponseDTO
 import com.hyperdesign.myapplication.data.dto.PagesResponseDto
 import com.hyperdesign.myapplication.data.dto.RegionResponseDto
 import com.hyperdesign.myapplication.data.dto.ShowAddressResponseDto
 import com.hyperdesign.myapplication.domain.Entity.CreateNewAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteAddressRequest
+import com.hyperdesign.myapplication.domain.Entity.EditProfileRequest
 import com.hyperdesign.myapplication.domain.Entity.ReorderRequest
 import com.hyperdesign.myapplication.domain.Entity.updateAddressRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -168,6 +172,34 @@ class ProfileApiServicesImpl(
             response
         }catch (e: Exception){
             Log.e("ProfileApiServices","updateAddressFaild:,request:${updateAddressRequest}, ${e.message.toString()}")
+            throw e
+        }
+    }
+
+    override suspend fun editProfile(editProfileRequest: EditProfileRequest): EditProfileResponse {
+        return try {
+            val response = client.post("edit_profile") {
+                contentType(ContentType.MultiPart.FormData)
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("name", editProfileRequest.name)
+                            append("email", editProfileRequest.email)
+                            append("mobile", editProfileRequest.mobile)
+                            editProfileRequest.image?.let { image ->
+                                append(
+                                    "image",
+                                    image
+                                ) // Assuming image is a URL or file path as a string
+                            }
+                        }
+                    )
+                )
+            }.body<EditProfileResponse>()
+            Log.d("ProfileApiServices", "editProfileSuccess, request: $editProfileRequest, Response: $response")
+            response
+        } catch (e: Exception) {
+            Log.e("ProfileApiServices", "editProfileFailed, request: $editProfileRequest, ${e.message}")
             throw e
         }
     }

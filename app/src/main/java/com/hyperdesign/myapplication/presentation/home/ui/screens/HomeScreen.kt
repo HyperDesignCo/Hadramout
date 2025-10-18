@@ -48,6 +48,7 @@ import com.hyperdesign.myapplication.domain.Entity.HomeMenu
 import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.domain.Entity.SlideShowEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
+import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeIntents
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.AdsWdegit
@@ -67,6 +68,8 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
     val navController = LocalNavController.current
     val homeState by homeViewModel.homeState.collectAsStateWithLifecycle()
+    val showAuthDialoge by homeViewModel.showAuthDialoge
+
 
     var status by remember { mutableStateOf(if(homeViewModel.tokenManager.getStatus()==1) true else false) } // Track delivery/pickup status
 
@@ -92,7 +95,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
                     }
                 },
                 onCartPressed = {
-                    navController.navigate(Screen.CartScreen.route)
+                    if (homeViewModel.tokenManager.getUserData()?.authenticated=="authenticated"){
+                        navController.navigate(Screen.CartScreen.route)
+                    }else{
+                        homeViewModel.showAuthDialoge.value =true
+                    }
+
                 },
                 saveBranchId={branchId->
                     homeViewModel.tokenManager.saveBranchId(branchId)
@@ -102,6 +110,21 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
                 bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
                 ads = homeState.homeMenues?.ads.orEmpty()
             )
+
+        if(showAuthDialoge){
+            ShowAuthentaionDialge(onNavToLogin = {
+                navController.navigate(Screen.LoginInScreen.route) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
+                homeViewModel.showAuthDialoge.value =false
+
+            }, onCancel = {
+                homeViewModel.showAuthDialoge.value =false
+
+            })
+        }
         if (homeState.isLoading) {
             Box(
                 modifier = Modifier
@@ -298,7 +321,7 @@ fun HomeScreenContent(
 
             item {
                 Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         stringResource(R.string.meals),
                         color = Secondry,
@@ -306,7 +329,6 @@ fun HomeScreenContent(
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
@@ -329,7 +351,7 @@ fun HomeScreenContent(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
@@ -343,32 +365,28 @@ fun HomeScreenContent(
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                 }
             }
 
 
-                item {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(bestSelling, key = { meal -> meal.id }) { meal ->
-                            Box(
-                                modifier = Modifier.width(screenWidth)
-                            ) {
-                                FeaturedWedgits(
-                                    meal = meal,
-                                    onItemClick = {
-                                        val route = goToScreenMealDetails(meal)
-                                        navController.navigate(route)
-                                    }
-                                )
+
+
+                items(bestSelling, key = { meal -> meal.id }) { meal ->
+
+                        FeaturedWedgits(
+                            meal = meal,
+                            onItemClick = {
+                                val route = goToScreenMealDetails(meal)
+                                navController.navigate(route)
                             }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
+                        )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
+
+
+
 
 
 
@@ -383,7 +401,7 @@ fun HomeScreenContent(
                         modifier = Modifier.padding(top = 10.dp),
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
 
