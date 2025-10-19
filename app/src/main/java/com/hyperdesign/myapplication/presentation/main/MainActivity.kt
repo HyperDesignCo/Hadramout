@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.hyperdesign.myapplication.BuildConfig
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.main.mvi.AuthViewModel
 import com.hyperdesign.myapplication.presentation.main.navcontroller.AppNavigation
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
 
         Log.d("MainActivity",selectedLanguge)
         updateLocale(context = this,selectedLanguge)
+        Log.d("map_api_key", BuildConfig.MAPS_API_KEY)
         lifecycleScope.launch {
             setContent {
                 rememberSystemUiController().setStatusBarColor(

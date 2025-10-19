@@ -1,13 +1,15 @@
+import com.hyperdesign.myapplication.presentation.utilies.getSecret
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
-//    id ("kotlin-kapt")//Room
-    id("com.google.devtools.ksp")
-    id ("dagger.hilt.android.plugin")   //dagger_hilt
-    id ("com.google.dagger.hilt.android")
+    alias(libs.plugins.ksp)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.dagger.hilt.android")
     id("kotlin-parcelize")
+
 //    alias(libs.plugins.google.gms.google.services)
 }
 
@@ -21,10 +23,12 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    secrets {
+        propertiesFileName = "secrets.properties"
+    }
 
     buildTypes {
         release {
@@ -33,18 +37,37 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "MAPS_API_KEY", getSecret("GOOGLE_MAPS_API_KEY", "\"EMPTY\""))
+            buildConfigField("String", "API_KEY", getSecret("API_KEY", "\"EMPTY\""))
+            buildConfigField("boolean", "IS_PRODUCTION", "true")
+            manifestPlaceholders["MAPS_API_KEY"] = getSecret("GOOGLE_MAPS_API_KEY", "EMPTY")
+        }
+        debug {
+            isDebuggable = true
+            buildConfigField("String", "MAPS_API_KEY", getSecret("GOOGLE_MAPS_API_KEY", "\"EMPTY\""))
+            buildConfigField("String", "API_KEY", getSecret("API_KEY", "\"EMPTY\""))
+            buildConfigField("boolean", "IS_PRODUCTION", "false")
+            manifestPlaceholders["MAPS_API_KEY"] = getSecret("GOOGLE_MAPS_API_KEY", "EMPTY")
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+
+//    kotlin {
+//        compilerOptions {
+//            jvmTarget.set(JavaVersion.VERSION_17)  // Updated to JVM 17
+//        }
+//    }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
+
     buildFeatures {
         compose = true
-
+        buildConfig = true
     }
 }
 
@@ -142,14 +165,27 @@ dependencies {
 
     // MockK for unit testing
     testImplementation(libs.mockk)
-    testImplementation( libs.mockk.android)
-    testImplementation (libs.mockk.agent)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockwebserver)
-
-    // Turbine for testing Kotlin Flows
     testImplementation(libs.turbine)
     testImplementation(kotlin("test"))
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    ksp(libs.androidx.room.compiler)
+    ksp(libs.hilt.compiler)
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
 
-
+    //map
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+    implementation(libs.places)
+    implementation(libs.accompanist.permissions)
 }
+
