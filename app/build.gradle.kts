@@ -37,30 +37,28 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "MAPS_API_KEY", getSecret("GOOGLE_MAPS_API_KEY", "\"EMPTY\""))
+
+            buildConfigField ("String", "MAPS_API_KEY", "\"${getSecret("GOOGLE_MAPS_API_KEY", "EMPTY")}\"")
             buildConfigField("String", "API_KEY", getSecret("API_KEY", "\"EMPTY\""))
             buildConfigField("boolean", "IS_PRODUCTION", "true")
-            manifestPlaceholders["MAPS_API_KEY"] = getSecret("GOOGLE_MAPS_API_KEY", "EMPTY")
+            manifestPlaceholders["MAPS_API_KEY"] = getSecret("GOOGLE_MAPS_API_KEY", "\"EMPTY\"")
         }
         debug {
             isDebuggable = true
-            buildConfigField("String", "MAPS_API_KEY", getSecret("GOOGLE_MAPS_API_KEY", "\"EMPTY\""))
+            buildConfigField ("String", "MAPS_API_KEY", "\"${getSecret("GOOGLE_MAPS_API_KEY", "EMPTY")}\"")
             buildConfigField("String", "API_KEY", getSecret("API_KEY", "\"EMPTY\""))
             buildConfigField("boolean", "IS_PRODUCTION", "false")
-            manifestPlaceholders["MAPS_API_KEY"] = getSecret("GOOGLE_MAPS_API_KEY", "EMPTY")
+            manifestPlaceholders["MAPS_API_KEY"] = getSecret("GOOGLE_MAPS_API_KEY", "\"EMPTY\"")
         }
     }
+
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-//    kotlin {
-//        compilerOptions {
-//            jvmTarget.set(JavaVersion.VERSION_17)  // Updated to JVM 17
-//        }
-//    }
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -72,120 +70,95 @@ android {
 }
 
 dependencies {
-
+    // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
-    implementation(libs.play.services.auth)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    implementation(libs.material.icons.extended)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.firebase.messaging.ktx)
-    //Security
-    implementation ("androidx.security:security-crypto:1.1.0-alpha01")
 
-//icons
-    implementation("androidx.compose.material:material-icons-extended:1.7.7")
-    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("androidx.credentials:credentials:1.3.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
 
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-    //Retrofit
+    // LiveData + State
+    implementation(libs.androidx.runtime.livedata)
 
-    implementation (libs.retrofit)
-    implementation (libs.converter.gson)
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.52")
+    ksp("com.google.dagger:hilt-android-compiler:2.52")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    // Retrofit & Networking
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
     implementation(libs.okhttp)
 
-    implementation (libs.androidx.room.runtime)
-    ksp (libs.androidx.room.compiler)
-    implementation (libs.androidx.room.ktx)
-
-    //Coil
+    // Coil
     implementation(libs.coil.compose)
 
-    //Accompanist
-    implementation (libs.accompanist.systemuicontroller)
+    // Accompanist
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.accompanist.permissions)
 
+    // Security
+    implementation(libs.androidx.security.crypto)
 
-    //Compose Navigation
-    //noinspection GradleDependency
-    implementation (libs.androidx.navigation.compose)
-
-    //Dagger Hilt
-    implementation ("com.google.dagger:hilt-android:2.51.1")
-    ksp ("com.google.dagger:hilt-android-compiler:2.51.1")
-    ksp ("androidx.hilt:hilt-compiler:1.1.0")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
-    implementation ("androidx.activity:activity-ktx:1.8.1")
-
-    //Splash Api
-    implementation (libs.androidx.core.splashscreen)
-
-    //observe as state
-    //noinspection GradleDependency
-    implementation (libs.androidx.runtime.livedata)
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-messaging-directboot")
 
     //Serialization
     implementation(libs.kotlinx.serialization.json)
 
-    //Firebase
-    implementation(libs.firebase.bom)
-//    implementation(libs.firebase.analytics)
-    implementation (libs.firebase.messaging.directboot)
-    implementation(libs.firebase.auth)
+    // Google Sign-In & Credentials
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.play.services.auth)
 
+    // Google Play Services & Maps (✅ Updated)
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.maps.android:maps-compose:6.5.2") // ✅ Updated for Compose 2024.10.00
+    implementation("com.google.android.libraries.places:places:5.0.0")
 
-    //ktor dependencies
-    implementation("io.ktor:ktor-client-core:2.3.4")
-    implementation("io.ktor:ktor-client-cio:2.3.4")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.4")
-    implementation("io.ktor:ktor-serialization-gson:2.3.4")
-    implementation("com.google.code.gson:gson:2.11.0")
+    // Ktor (Networking)
+    implementation("io.ktor:ktor-client-core:2.3.12")
+    implementation("io.ktor:ktor-client-cio:2.3.12")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
+    implementation("io.ktor:ktor-serialization-gson:2.3.12")
     implementation("io.ktor:ktor-client-logging:2.3.12")
 
-
-    //koin
+    // Koin
     implementation(libs.bundles.koin)
 
-    // MockK for unit testing
+    // Testing
+    testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.mockk.android)
     testImplementation(libs.mockk.agent)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockwebserver)
     testImplementation(libs.turbine)
-    testImplementation(kotlin("test"))
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-    ksp(libs.androidx.room.compiler)
-    ksp(libs.hilt.compiler)
-    ksp("androidx.hilt:hilt-compiler:1.2.0")
-
-    //map
-    implementation(libs.play.services.location)
-    implementation(libs.play.services.maps)
-    implementation(libs.maps.compose)
-    implementation(libs.places)
-    implementation(libs.accompanist.permissions)
 }
-

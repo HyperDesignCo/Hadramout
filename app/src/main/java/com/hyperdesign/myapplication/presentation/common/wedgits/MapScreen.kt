@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -43,14 +42,12 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.hyperdesign.myapplication.presentation.common.viewmodel.MapViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MapScreen(
-    onLocationSelected: (LatLng, String) -> Unit   // callback when the user confirms a location
+    onLocationSelected: (LatLng, String) -> Unit
 ) {
-    // 1. Permission handling (Accompanist makes it easy)
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -65,14 +62,12 @@ fun MapScreen(
     }
 
     if (!permissionState.allPermissionsGranted) {
-        // Show a friendly message while waiting for permission
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Location permission is required to show the map")
         }
         return
     }
 
-    // Permission granted → show the map UI
     MapContent(onLocationSelected = onLocationSelected)
 }
 
@@ -84,24 +79,42 @@ private fun MapContent(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val uiState by mapViewModel.uiState.collectAsState()
-
-    // GoogleMap composable (needs a GoogleMapOptions with the API key)
     val cameraPositionState = rememberCameraPositionState {
-        // start somewhere – will be overwritten by current location
-        position = CameraPosition.fromLatLngZoom(LatLng(24.7136, 46.6753), 10f)
+        position =CameraPosition.fromLatLngZoom(LatLng(51.5074, -0.1278), 10f) // San Francisco
     }
 
-
     Box(modifier = Modifier.fillMaxSize()) {
-        GoogleMap(
-            modifier = Modifier.matchParentSize(),
-            cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = true),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = true)
-        ) {
-            // optional: you can add markers here
+        if (uiState.error != null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(uiState.error ?: "An error occurred")
+            }
+            return
         }
-
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Loading map, please wait...")
+            }
+        } else {
+            GoogleMap(
+                modifier = Modifier.matchParentSize(),
+                cameraPositionState = cameraPositionState,
+                properties = MapProperties(isMyLocationEnabled = true),
+                uiSettings = MapUiSettings(myLocationButtonEnabled = true),
+                onMapLoaded = {
+                    android.util.Log.d("MapScreen", "✅ Map loaded successfully!")
+                },
+                onMapClick = {
+                    android.util.Log.d("MapScreen", "Map clicked at: $it")
+                }
+            ) {
+                uiState.targetLatLng?.let {
+                    com.google.maps.android.compose.Marker(
+                        state = com.google.maps.android.compose.MarkerState(position = it),
+                        title = "Selected Location"
+                    )
+                }
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -121,18 +134,16 @@ private fun MapContent(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
-//                    backgroundColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 )
             )
-
-
             if (uiState.predictions.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier
                         .heightIn(max = 200.dp)
                         .background(Color.White)
+                        .fillMaxWidth()
                 ) {
                     items(uiState.predictions) { prediction ->
                         ListItem(
@@ -149,8 +160,6 @@ private fun MapContent(
                 }
             }
         }
-
-
         Button(
             onClick = {
                 val latLng = cameraPositionState.position.target
@@ -168,15 +177,22 @@ private fun MapContent(
         }
     }
 
-
     LaunchedEffect(uiState.targetLatLng) {
         uiState.targetLatLng?.let {
+            android.util.Log.d("MapScreen", "Moving camera to: $it")
             cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(it, 15f))
         }
     }
 
-
     LaunchedEffect(Unit) {
-        mapViewModel.requestCurrentLocation(context)
+        val googleApiAvailability = com.google.android.gms.common.GoogleApiAvailability.getInstance()
+        val status = googleApiAvailability.isGooglePlayServicesAvailable(context)
+        if (status != com.google.android.gms.common.ConnectionResult.SUCCESS) {
+            android.util.Log.e("MapScreen", "Google Play Services error: $status")
+            mapViewModel.updateErrorState("Google Play Services unavailable. Please update or install.")
+        } else {
+            android.util.Log.d("MapScreen", "Google Play Services available")
+            mapViewModel.requestCurrentLocation(context)
+        }
     }
 }

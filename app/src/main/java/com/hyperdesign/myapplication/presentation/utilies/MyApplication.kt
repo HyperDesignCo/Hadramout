@@ -2,6 +2,8 @@ package com.hyperdesign.myapplication.presentation.utilies
 
 import android.app.Application
 import com.example.doctorona.data.di.networkingModule
+import com.google.android.libraries.places.api.Places
+import com.hyperdesign.myapplication.BuildConfig
 import com.hyperdesign.myapplication.presentation.di.RepoModule
 import com.hyperdesign.myapplication.presentation.di.localDataModule
 import com.hyperdesign.myapplication.presentation.di.useCasesModule
@@ -14,6 +16,7 @@ class MyApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
         // Initialize any global resources or configurations here
         // For example, you can initialize Koin or any other dependency injection framework here
          startKoin {

@@ -108,7 +108,10 @@ fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
                 getBranchId=homeViewModel.tokenManager.getBranchId()?:homeState.branches?.branches[0]!!.id,
                 myStatus = homeViewModel.tokenManager.getStatus(),
                 bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
-                ads = homeState.homeMenues?.ads.orEmpty()
+                ads = homeState.homeMenues?.ads.orEmpty(),
+                navToMap = {
+                    navController.navigate(Screen.MapScreen.route)
+                }
             )
 
         if(showAuthDialoge){
@@ -152,7 +155,8 @@ fun HomeScreenContent(
     bestSelling:List<Meal>,
     ads:List<AdsEntity>,
     onStatusChanged: (Boolean) -> Unit, // Callback to update status
-    myStatus:Int?
+    myStatus:Int?,
+    navToMap:()->Unit
 ) {
     val navController = LocalNavController.current
     var expanded by remember { mutableStateOf(false) }
@@ -203,7 +207,10 @@ fun HomeScreenContent(
             },
             showStatus = true,
             onClickChangStatus = onStatusChanged, // Pass the callback to update status
-            myStatus = myStatus
+            myStatus = myStatus,
+            goToMap = {
+                navToMap()
+            }
         )
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {

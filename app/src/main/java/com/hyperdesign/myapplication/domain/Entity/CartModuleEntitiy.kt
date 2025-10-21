@@ -23,7 +23,8 @@ data class CartEntity(
     val totalPrice: Double,
     val specialRequests: String,
     val freeDelivery: Boolean,
-    val cartMeals: List<CartMealEntity>
+    val cartMeals: List<CartMealEntity>,
+    val pickUpStatus:String
 )
 
 data class CartMealEntity(

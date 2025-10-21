@@ -48,6 +48,10 @@ fun CartScreen(
 
     var cartMeals by remember { mutableStateOf(listOf<CartMealEntity>()) }
     var cartId by remember { mutableStateOf("") }
+    Log.d("deliveryStatus",cartMealState.showCartDate?.cart?.pickUpStatus.toString())
+    var deliveryStatus by remember { mutableStateOf(false) }
+
+    Log.d("deliveryStatus",deliveryStatus.toString())
 
     LaunchedEffect(Unit) {
         cartViewModel.handleIntent(CartIntents.GetCart(cartViewModel.tokenManager.getBranchId()?:0))
@@ -56,6 +60,7 @@ fun CartScreen(
     LaunchedEffect(cartMealState) {
         cartMeals = cartMealState.showCartDate?.cart?.cartMeals.orEmpty()
         cartId = cartMealState.showCartDate?.cart?.id.orEmpty()
+        deliveryStatus = if(cartMealState.showCartDate?.cart?.pickUpStatus=="0") true else false
     }
 
 //    Log.d("CartScreen", "cartMealState: ${cartMealState.quantity}")
@@ -142,7 +147,8 @@ fun CartScreen(
                 onGoToCheckOutScreen = { navController.navigate(Screen.CheckOutScreen.route) },
                 deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
                 totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString() ?: "0",
-                totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString() ?: "0.00"
+                totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString() ?: "0.00",
+                pickUpStatus = deliveryStatus
             )
         }
         if (cartMealState.isLoading) {
@@ -174,7 +180,8 @@ fun CartScreenContent(
     deliveryPrice: String,
     cartId: String,
     onCheckCoponClick: () -> Unit,
-    onGoToCheckOutScreen: () -> Unit
+    onGoToCheckOutScreen: () -> Unit,
+    pickUpStatus : Boolean,
 ) {
     Column(
         modifier = Modifier
@@ -239,7 +246,8 @@ fun CartScreenContent(
             deliveryPrice = deliveryPrice,
             totalPrice = totalPrice,
             buttonText = stringResource(R.string.complete_order),
-            onPayClick = { onGoToCheckOutScreen() }
+            onPayClick = { onGoToCheckOutScreen() },
+            pickUpStatus=pickUpStatus
         )
     }
 }

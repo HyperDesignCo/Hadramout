@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.widgets
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,8 +39,11 @@ fun CartBottomBar(
     deliveryPrice: String,
     totalPrice: String,
     buttonText:String,
-    onPayClick: () -> Unit
+    onPayClick: () -> Unit,
+    pickUpStatus: Boolean
 ) {
+
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -67,12 +75,15 @@ fun CartBottomBar(
                         fontWeight = FontWeight.Bold,
                         color = Secondry
                     )
-                    Text(
-                        text = deliveryPrice,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondry
-                    )
+                    if (pickUpStatus){
+                        Text(
+                            text = deliveryPrice,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondry
+                        )
+                    }
+
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
@@ -80,11 +91,14 @@ fun CartBottomBar(
                         fontSize = 16.sp,
                         color = Color.Gray
                     )
-                    Text(
-                        text = stringResource(R.string.delivery),
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
+                    if (pickUpStatus){
+                        Text(
+                            text = stringResource(R.string.delivery),
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                    }
+
                 }
 
             }
@@ -128,8 +142,8 @@ fun CartBottomBar(
     }
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun CartBottomBarPreview() {
-    CartBottomBar("3", "1000","1500", "",onPayClick = {})
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun CartBottomBarPreview() {
+//    CartBottomBar("3", "1000","1500", "",onPayClick = {})
+//}

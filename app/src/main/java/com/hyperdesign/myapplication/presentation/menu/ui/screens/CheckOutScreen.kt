@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.domain.Entity.BranchInfoEntity
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
@@ -47,6 +48,7 @@ import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CheckOutHeader
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PaymentsOption
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.ShowAddress
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SpecialRequestEditText
+import com.hyperdesign.myapplication.presentation.menu.ui.widgets.showBranchDetails
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
@@ -65,6 +67,11 @@ fun CheckOutScreen(
     var paymentId by remember { mutableStateOf("") }
     var addressList by remember { mutableStateOf<List<Pair<String, String>>?>(null) }
     var justAdded by remember { mutableStateOf(false) }
+    var deliveryStatus by remember { mutableStateOf(false) }
+    Log.d("lang",loginViewModel.tokenManager.getLanguage().toString())
+
+
+
 
     // Listen for address_added flag from AllAddressesScreen
     val addressAdded by navController.currentBackStackEntry
@@ -132,6 +139,8 @@ fun CheckOutScreen(
             allAddress = addressList!!.last().second
             justAdded = false
         }
+        deliveryStatus=if(checkState.checkOutResponse?.cart?.pickUpStatus=="0") true else false
+
     }
 
     // Handle order completion messages
@@ -187,7 +196,10 @@ fun CheckOutScreen(
                     Log.d("CheckOutScreen", "Navigating to AllAddressesScreen")
                     val screenType = "checkOutScreen"
                     navController.navigate(Screen.AllAddressesScreen.route.replace("{screenType}", screenType))
-                }
+                },
+                pickUpStatus = deliveryStatus,
+                branchName = if(loginViewModel.tokenManager.getLanguage()=="en") checkState.checkOutResponse?.branch?.titleEn else checkState.checkOutResponse?.branch?.titleAr,
+                branchAddress =if(loginViewModel.tokenManager.getLanguage()=="en") checkState.checkOutResponse?.branch?.addressEn else checkState.checkOutResponse?.branch?.addressAr,
             )
         }
         if (checkState.isLoading) {
@@ -219,8 +231,13 @@ fun CheckOutScreenContent(
     phoneNumber: String,
     image: String? = null,
     onBackedBresed: () -> Unit,
-    onClickToAddNewAddress: () -> Unit
+    onClickToAddNewAddress: () -> Unit,
+    pickUpStatus : Boolean,
+    branchName: String?,
+    branchAddress:String?
+
 ) {
+    Log.d("pickUpStatus",pickUpStatus.toString())
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -244,32 +261,40 @@ fun CheckOutScreenContent(
                 Spacer(modifier = Modifier.height(10.dp))
             }
             item {
-                if (allAddress.isNotEmpty() && subRegion.isNotEmpty()) {
-                    ShowAddress(
-                        district = subRegion,
-                        addressDetails = allAddress,
-                        addressList = addressList,
-                        onAddressSelected = onAddressSelected
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    CustomButton(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(horizontal = 15.dp)
-                            .fillMaxWidth(),
-                        text = stringResource(R.string.add_new_address),
-                        onClick = onClickToAddNewAddress
-                    )
-                } else {
-                    CustomButton(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(horizontal = 15.dp)
-                            .fillMaxWidth(),
-                        text = stringResource(R.string.add_new_address),
-                        onClick = onClickToAddNewAddress
+                if(pickUpStatus){
+                    if (allAddress.isNotEmpty() && subRegion.isNotEmpty()) {
+                        ShowAddress(
+                            district = subRegion,
+                            addressDetails = allAddress,
+                            addressList = addressList,
+                            onAddressSelected = onAddressSelected
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CustomButton(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(horizontal = 15.dp)
+                                .fillMaxWidth(),
+                            text = stringResource(R.string.add_new_address),
+                            onClick = onClickToAddNewAddress
+                        )
+                    } else {
+                        CustomButton(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(horizontal = 15.dp)
+                                .fillMaxWidth(),
+                            text = stringResource(R.string.add_new_address),
+                            onClick = onClickToAddNewAddress
+                        )
+                    }
+                }else{
+                    showBranchDetails(
+                        branchName =branchName,
+                        branchaddress = branchAddress
                     )
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
             }
             item {
@@ -318,7 +343,8 @@ fun CheckOutScreenContent(
             buttonText = stringResource(R.string.checkout),
             onPayClick = {
                 finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
-            }
+            },
+            pickUpStatus = pickUpStatus
         )
     }
 }

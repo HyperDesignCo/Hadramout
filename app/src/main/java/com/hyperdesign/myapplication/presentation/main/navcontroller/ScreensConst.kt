@@ -35,4 +35,6 @@ object ScreensConst {
     const val UPDATE_ADDRESS_SCREEN="update_address_screen"
 
     const val USER_PROFILE_SCREEN ="user_profile_screen"
+
+    const val MAP_SCREEN = "map_screen"
 }

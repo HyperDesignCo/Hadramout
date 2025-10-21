@@ -57,6 +57,7 @@ fun MainHeader(
     showStatus: Boolean = false,
     onClickChangStatus: (Boolean) -> Unit = {}, // Updated to pass the new status
     myStatus:Int?=null,
+    goToMap:()->Unit={}
 ) {
     var statusState by remember { mutableStateOf(if(myStatus==0)false else true) }
     var showDialog by remember { mutableStateOf(false) }
@@ -223,6 +224,9 @@ fun MainHeader(
                                 .clickable {
                                     statusState = !statusState
                                     onClickChangStatus(statusState) // Pass the new status
+                                    if (!statusState){
+                                        goToMap()
+                                    }
                                     showDialog = false
                                 }
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -251,16 +255,16 @@ fun MainHeader(
     }
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun MainHeaderPreview() {
-    MainHeader(
-        title = "",
-        onBackPressesd = {},
-        showIcon = true,
-        showLogo = true,
-        showBackPressedIcon = true,
-        showStatus = true,
-        onClickChangStatus = {}
-    )
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun MainHeaderPreview() {
+//    MainHeader(
+//        title = "",
+//        onBackPressesd = {},
+//        showIcon = true,
+//        showLogo = true,
+//        showBackPressedIcon = true,
+//        showStatus = true,
+//        onClickChangStatus = {}
+//    )
+//}

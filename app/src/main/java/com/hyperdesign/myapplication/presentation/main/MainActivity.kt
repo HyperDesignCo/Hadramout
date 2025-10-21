@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
         
 
         val selectedLanguge = settingViewModel.getLanguage()
+        settingViewModel.tokenManager.saveLanguage(selectedLanguge)
 
         Log.d("MainActivity",selectedLanguge)
         updateLocale(context = this,selectedLanguge)

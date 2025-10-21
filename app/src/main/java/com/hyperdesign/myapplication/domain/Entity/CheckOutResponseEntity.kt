@@ -5,12 +5,34 @@ import kotlinx.serialization.Serializable
 
 
 data class CheckOutResponseEntity(
+    val branch : BranchInfoEntity?,
     val cart: CartEntity,
     val message: String,
     val addresses: List<AddressEntity>,
     val payment_methods: List<PaymentMethodEntity>
 )
 
+data class BranchInfoEntity(
+    val id :Int,
+    val titleAr :String?,
+    val titleEn :String?,
+    val slug :String?,
+    val addressEn :String?,
+    val addressAr :String?,
+    val deliveryCost :String?,
+    val lat :String?,
+    val lng :String?,
+    val status:Int?,
+    val busyHours:Int?,
+    val busyEndAt :String?,
+    val openTime:String?,
+    val closeTime:String?,
+    val pickupStatus:Int?,
+    val pickupBusyHours:String?,
+    val createAt:String?,
+    val updateAt:String?,
+    val deleteAt:String?,
+)
 data class PaymentMethodEntity(
     val id: String,
     val title: String,

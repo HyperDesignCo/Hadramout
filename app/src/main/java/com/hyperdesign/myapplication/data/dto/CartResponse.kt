@@ -36,7 +36,9 @@ data class CartDto(
     @SerializedName("free_delivery")
     val freeDelivery: String,
     @SerializedName("cart_meals")
-    val cartMeals: List<CartMealDto>?
+    val cartMeals: List<CartMealDto>?,
+    @SerializedName("pickup_status")
+    val pickupStatus:String,
 )
 
 data class CartMealDto(

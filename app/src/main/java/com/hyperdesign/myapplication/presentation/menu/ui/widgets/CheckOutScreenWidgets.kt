@@ -237,9 +237,57 @@ fun PaymentsOption(payment: String, selectedPayment: String, onSelected: (String
 }
 
 @Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun Preview(){
-    PaymentsOption(payment = "visa", selectedPayment = "visa",{
+fun showBranchDetails(
+    branchName:String?,
+    branchaddress:String?
 
-    })
+){
+
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(Gray),
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.pickup_from),
+                color = Color.Black,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                fontSize = 15.sp,
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(
+                text = branchName?:"",
+                fontSize = 14.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(horizontal = 5.dp),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Start,
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Text(
+                text = branchaddress?:"",
+                modifier = Modifier.padding(horizontal = 5.dp),
+                fontSize = 13.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Start,
+            )
+        }
+
+    }
 }
+
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun Preview(){
+//    PaymentsOption(payment = "visa", selectedPayment = "visa",{
+//
+//    })
+//}
