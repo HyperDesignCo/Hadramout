@@ -13,5 +13,8 @@
     </color>
     <color name="back" tools:ignore="ReferenceType">@drawable/background</color>
     <color name="secondry" >#46200B</color>
+    <color name="colorAccentDark">#F79901</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccentNew">#FAC600</color>
 
 </resources>

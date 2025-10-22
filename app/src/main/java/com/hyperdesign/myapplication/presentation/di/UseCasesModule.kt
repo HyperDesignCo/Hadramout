@@ -11,6 +11,7 @@ import com.hyperdesign.myapplication.domain.usecase.cart.DeleteCartItemUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.FinishOrderUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.UpdateCartItemQuantityUseCase
+import com.hyperdesign.myapplication.domain.usecase.home.CheckLocationUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetAllAddressUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
@@ -154,6 +155,9 @@ val useCasesModule = module {
 
     single<EditProfileUseCase> {
         EditProfileUseCase(get())
+    }
+    single<CheckLocationUseCase> {
+        CheckLocationUseCase(get())
     }
 
     }

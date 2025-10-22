@@ -54,7 +54,7 @@ val viewModels = module {
 
     viewModel<RegisterViewModel> { RegisterViewModel(get(), get(), get(), get(), get()) }
 
-    viewModel<HomeViewModel> { HomeViewModel(get(), get(), get()) }
+    viewModel<HomeViewModel> { HomeViewModel(get(), get(), get(),get()) }
 
     viewModel<MenuViewModel> { MenuViewModel(get(), get()) }
 

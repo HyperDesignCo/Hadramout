@@ -163,10 +163,7 @@ fun AppNavigation(startDestination: String) {
                 }
                 composable(Screen.UserProfileScreen.route) { UserProfileScreen() }
 
-                composable(Screen.MapScreen.route) { MapScreen({it,ij->
-
-
-                }) }
+                composable(Screen.MapScreen.route) { MapScreen() }
 
             }
         }

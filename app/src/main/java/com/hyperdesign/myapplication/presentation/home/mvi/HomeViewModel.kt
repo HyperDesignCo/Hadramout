@@ -5,18 +5,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.data.local.TokenManager
+import com.hyperdesign.myapplication.domain.Entity.CheckLocationResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.checkLocationRequest
+import com.hyperdesign.myapplication.domain.usecase.home.CheckLocationUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetHomeMenueUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val getBranchesUseCase: GetBranchesUseCase,
     private val getHomeMenuByIdUseCase: GetHomeMenueUseCase,
-    val tokenManager: TokenManager
+    val tokenManager: TokenManager,
+    private val checkLocationUseCase: CheckLocationUseCase
 ) : ViewModel() {
     private var _homeState = MutableStateFlow(HomeStateModel())
     val homeState: StateFlow<HomeStateModel> = _homeState.asStateFlow()
@@ -34,12 +39,71 @@ class HomeViewModel(
                 _homeState.value = _homeState.value.copy(
                     branchId = intent.id
                 )
-                getHomeMenuById()
+//                getHomeMenuById()
             }
             is HomeIntents.GetHomeMenuId -> {
                 getHomeMenuById()
             }
 
+            is HomeIntents.ChangeLat -> {
+                _homeState.update{ it.copy(
+                    lat = intent.lat
+                )
+
+                }
+            }
+            is HomeIntents.ChangeLng ->{
+                _homeState.update{ it.copy(
+                    lng = intent.lng
+                )
+
+                }
+            }
+            HomeIntents.CheckLocation -> {
+                changeLocation()
+            }
+        }
+    }
+
+    private fun changeLocation() {
+
+        _homeState.update {
+            it.copy(
+                isLoading = true
+            )
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val checkLocationRequest = checkLocationRequest(
+                    lat = _homeState.value.lat,
+                    lng=_homeState.value.lng
+                )
+                val response = checkLocationUseCase(checkLocationRequest)
+                _homeState.update {
+                    it.copy(
+                        checkLocationResponseEntity = response,
+                        isLoading = false
+
+                      )
+
+                }
+            }.onSuccess {
+                Log.d("HomeViewModel", "checkLocationSuccess: ${_homeState.value.checkLocationResponseEntity}")
+
+                _homeState.update {
+                    it.copy(
+                        isLoading = false
+                    )
+                }
+            }.onFailure {
+                Log.d("HomeViewModel", "checkLocationFalure: $it")
+                _homeState.update {
+                    it.copy(
+                        isLoading = false
+                    )
+                }
+
+            }
 
         }
     }
@@ -76,7 +140,7 @@ class HomeViewModel(
     }
 
     private fun getBranches() {
-        _homeState.value = _homeState.value.copy(isLoading = true)
+        _homeState.value = _homeState.value.copy(isLoading = false)
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val response = getBranchesUseCase.invoke()

@@ -3,12 +3,15 @@ package com.hyperdesign.myapplication.data.remote.home
 import android.util.Log
 import com.hyperdesign.myapplication.data.dto.AddressResponseDto
 import com.hyperdesign.myapplication.data.dto.BranchesResponseDTO
+import com.hyperdesign.myapplication.data.dto.CheckLocationResponseDto
 import com.hyperdesign.myapplication.data.dto.HomeResponseDTO
+import com.hyperdesign.myapplication.domain.Entity.checkLocationRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
@@ -46,6 +49,23 @@ class HomeApiServicesImpl(
         }catch (e: Exception) {
             Log.e("HomeApiServices", "AddressResponse failed = ${e.message}", e)
             throw e
+        }
+    }
+
+    override suspend fun checkLocation(checkLocationRequest: checkLocationRequest): CheckLocationResponseDto {
+        return try {
+            val response = client.post("checkLocation"){
+                contentType(ContentType.Application.Json)
+                setBody(checkLocationRequest)
+            }.body<CheckLocationResponseDto>()
+            Log.d("HomeApiServices", "checkLocationRequest: $checkLocationRequest / CheckLocationResponse : $response")
+            response
+
+        }catch (e: Exception){
+            Log.e("HomeApiServices", "checkLocationRequest: $checkLocationRequest / CheckLocationResponse failed = ${e.message}", e)
+
+            throw e
+
         }
     }
 

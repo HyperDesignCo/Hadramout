@@ -1,46 +1,36 @@
 package com.hyperdesign.myapplication.presentation.home.ui.screens
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.AdsEntity
 import com.hyperdesign.myapplication.domain.Entity.Branch
@@ -61,74 +51,125 @@ import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenM
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import org.koin.androidx.compose.koinViewModel
 
+@SuppressLint("MissingPermission")
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel = koinViewModel()) {
+fun HomeScreen(
+    homeViewModel: HomeViewModel = koinViewModel(),
+) {
     val navController = LocalNavController.current
     val homeState by homeViewModel.homeState.collectAsStateWithLifecycle()
     val showAuthDialoge by homeViewModel.showAuthDialoge
+    val context = LocalContext.current
+    var status by remember { mutableStateOf(homeViewModel.tokenManager.getStatus() == 1) }
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
+    val fusedLocationClient: FusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+    var userLocation by remember { mutableStateOf(LatLng(30.0444, 31.2357)) } // Default to Cairo
+    var isFetchingLocation by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        if (!permissionState.allPermissionsGranted) {
+            permissionState.launchMultiplePermissionRequest()
+        } else {
+            isFetchingLocation = true
+            scope.launch {
+                try {
+                    val lastLocation = fusedLocationClient.lastLocation.await()
+                    if (lastLocation != null) {
+                        userLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
+                        Log.d("HomeScreen", "Location fetched (last): $userLocation")
+                    } else {
+                        val currentLocation = fusedLocationClient.getCurrentLocation(
+                            Priority.PRIORITY_HIGH_ACCURACY, null
+                        ).await()
+                        if (currentLocation != null) {
+                            userLocation = LatLng(currentLocation.latitude, currentLocation.longitude)
+                            Log.d("HomeScreen", "Location fetched (current): $userLocation")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeScreen", "Failed to get location", e)
+                } finally {
+                    isFetchingLocation = false
+                }
+                homeViewModel.handleIntents(HomeIntents.ChangeLat(userLocation.latitude.toString()))
+                homeViewModel.handleIntents(HomeIntents.ChangeLng(userLocation.longitude.toString()))
+                homeViewModel.handleIntents(HomeIntents.CheckLocation)
+            }
+        }
+    }
 
-    var status by remember { mutableStateOf(if(homeViewModel.tokenManager.getStatus()==1) true else false) } // Track delivery/pickup status
-
-
+    if (!permissionState.allPermissionsGranted) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Location permission is required")
+        }
+        return
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-            HomeScreenContent(
-                branches = homeState.branches?.branches.orEmpty(),
-                offers = homeState.homeMenues?.slideshow.orEmpty(),
-                homeMenus = homeState.homeMenues?.homeMenus.orEmpty(),
-                onBranchSelected = { branchId ->
-                    homeViewModel.handleIntents(HomeIntents.changeBranchId(branchId))
-                    homeViewModel.tokenManager.saveBranchId(branchId)
-                },
-                onBackPressed = { /* navController.popBackStack() */ },
-                status = status,
-                onStatusChanged = { newStatus ->
-                    status = newStatus // Update status state
-                    if(!newStatus){
-                        homeViewModel.tokenManager.saveStatus(0)
-                    }else{
-                        homeViewModel.tokenManager.saveStatus(1)
-                    }
-                },
-                onCartPressed = {
-                    if (homeViewModel.tokenManager.getUserData()?.authenticated=="authenticated"){
-                        navController.navigate(Screen.CartScreen.route)
-                    }else{
-                        homeViewModel.showAuthDialoge.value =true
-                    }
+        HomeScreenContent(
+            branches = homeState.branches?.branches.orEmpty(),
+            offers = homeState.homeMenues?.slideshow.orEmpty(),
+            homeMenus = homeState.homeMenues?.homeMenus.orEmpty(),
+            onBranchSelected = { branchId ->
+                homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(branchId))
+                homeViewModel.tokenManager.saveBranchId(branchId)
+            },
+            onBackPressed = { /* navController.popBackStack() */ },
+            status = status,
+            onStatusChanged = { newStatus ->
+                status = newStatus
+                homeViewModel.tokenManager.saveStatus(if (newStatus) 1 else 0)
+            },
+            onCartPressed = {
+                if (homeViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
+                    navController.navigate(Screen.CartScreen.route)
+                } else {
+                    homeViewModel.showAuthDialoge.value = true
+                }
+            },
+            saveBranchId = { branchId ->
+                homeViewModel.tokenManager.saveBranchId(branchId)
+            },
+            getBranchId = homeViewModel.tokenManager.getBranchId() ?: homeState.branches?.branches?.get(0)?.id ?: 0,
+            myStatus = homeViewModel.tokenManager.getStatus(),
+            bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
+            ads = homeState.homeMenues?.ads.orEmpty(),
+            navToMap = {
+                navController.navigate(Screen.MapScreen.route)
+            },
+            currentResturentBranch = homeState.checkLocationResponseEntity?.data?.currentResturantBranch.orEmpty()
+        )
 
+        if (showAuthDialoge) {
+            ShowAuthentaionDialge(
+                onNavToLogin = {
+                    navController.navigate(Screen.LoginInScreen.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                    homeViewModel.showAuthDialoge.value = false
                 },
-                saveBranchId={branchId->
-                    homeViewModel.tokenManager.saveBranchId(branchId)
-                },
-                getBranchId=homeViewModel.tokenManager.getBranchId()?:homeState.branches?.branches[0]!!.id,
-                myStatus = homeViewModel.tokenManager.getStatus(),
-                bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
-                ads = homeState.homeMenues?.ads.orEmpty(),
-                navToMap = {
-                    navController.navigate(Screen.MapScreen.route)
+                onCancel = {
+                    homeViewModel.showAuthDialoge.value = false
                 }
             )
-
-        if(showAuthDialoge){
-            ShowAuthentaionDialge(onNavToLogin = {
-                navController.navigate(Screen.LoginInScreen.route) {
-                    popUpTo(navController.graph.id) {
-                        inclusive = true
-                    }
-                }
-                homeViewModel.showAuthDialoge.value =false
-
-            }, onCancel = {
-                homeViewModel.showAuthDialoge.value =false
-
-            })
         }
-        if (homeState.isLoading) {
+
+        if (homeState.isLoading || isFetchingLocation) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -148,15 +189,16 @@ fun HomeScreenContent(
     homeMenus: List<HomeMenu>,
     onBranchSelected: (Int) -> Unit,
     onBackPressed: () -> Unit,
-    onCartPressed:()->Unit,
+    onCartPressed: () -> Unit,
     status: Boolean,
-    getBranchId:Int,
-    saveBranchId:(Int)->Unit,
-    bestSelling:List<Meal>,
-    ads:List<AdsEntity>,
-    onStatusChanged: (Boolean) -> Unit, // Callback to update status
-    myStatus:Int?,
-    navToMap:()->Unit
+    getBranchId: Int,
+    saveBranchId: (Int) -> Unit,
+    bestSelling: List<Meal>,
+    ads: List<AdsEntity>,
+    onStatusChanged: (Boolean) -> Unit,
+    myStatus: Int?,
+    navToMap: () -> Unit,
+    currentResturentBranch: String
 ) {
     val navController = LocalNavController.current
     var expanded by remember { mutableStateOf(false) }
@@ -164,27 +206,37 @@ fun HomeScreenContent(
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
-    LaunchedEffect(branches) {
+    LaunchedEffect(currentResturentBranch) {
+        if (myStatus == 0 && currentResturentBranch.isNotEmpty()) {
+            val selected = branches.find { it.id == currentResturentBranch.toIntOrNull() }
+            if (selected != null) {
+                selectedBranch = selected.title
+                onBranchSelected(selected.id)
+            }
+        }
+    }
 
+    LaunchedEffect(branches) {
         if (branches.isNotEmpty()) {
-            if (getBranchId != 0) {
-                val selected = branches.find { it.id == getBranchId }
-                if (selected != null) {
-                    selectedBranch = selected.title
-                    onBranchSelected(selected.id)
+            if (myStatus == 0) {
+                // Wait for currentResturentBranch to set selectedBranch
+            } else {
+                if (getBranchId != 0) {
+                    val selected = branches.find { it.id == getBranchId }
+                    if (selected != null) {
+                        selectedBranch = selected.title
+                        onBranchSelected(selected.id)
+                    } else {
+                        saveBranchId(0)
+                        selectedBranch = branches[0].title
+                        onBranchSelected(branches[0].id)
+                        saveBranchId(branches[0].id)
+                    }
                 } else {
-                    // Invalid saved branch ID (not found in current list), reset to default
-                    saveBranchId(0)
                     selectedBranch = branches[0].title
                     onBranchSelected(branches[0].id)
                     saveBranchId(branches[0].id)
                 }
-            } else {
-//                if (selectedBranch == "Select Branch") {
-                    selectedBranch = branches[0].title
-                    onBranchSelected(branches[0].id)
-                    saveBranchId(branches[0].id)
-//                }
             }
         }
     }
@@ -206,7 +258,7 @@ fun HomeScreenContent(
                 onCartPressed()
             },
             showStatus = true,
-            onClickChangStatus = onStatusChanged, // Pass the callback to update status
+            onClickChangStatus = onStatusChanged,
             myStatus = myStatus,
             goToMap = {
                 navToMap()
@@ -262,12 +314,22 @@ fun HomeScreenContent(
                                 color = Secondry,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable{
-                                    expanded = true
+                                modifier = Modifier.clickable {
+                                    if (myStatus == 1) {
+                                        expanded = true
+                                    } else {
+                                        navToMap()
+                                    }
                                 }
                             )
                             IconButton(
-                                onClick = { expanded = true },
+                                onClick = {
+                                    if (myStatus == 1) {
+                                        expanded = true
+                                    } else {
+                                        navToMap()
+                                    }
+                                },
                                 modifier = Modifier.size(20.dp)
                             ) {
                                 if (expanded) {
@@ -373,30 +435,19 @@ fun HomeScreenContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-
                 }
             }
 
-
-
-
-                items(bestSelling, key = { meal -> meal.id }) { meal ->
-
-                        FeaturedWedgits(
-                            meal = meal,
-                            onItemClick = {
-                                val route = goToScreenMealDetails(meal)
-                                navController.navigate(route)
-                            }
-                        )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-
-
-
-
-
+            items(bestSelling, key = { meal -> meal.id }) { meal ->
+                FeaturedWedgits(
+                    meal = meal,
+                    onItemClick = {
+                        val route = goToScreenMealDetails(meal)
+                        navController.navigate(route)
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             item {
                 Column(modifier = Modifier.padding(horizontal = 10.dp)) {
@@ -417,15 +468,13 @@ fun HomeScreenContent(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(ads, key = { meal -> meal.id }) { meal ->
-
                         AdsWdegit(
-                                meal = meal,
-                                onItemClick = {
-                                    val route = goToScreenMealDeataisWithString(meal.mealId?:"")
-                                    navController.navigate(route)
-                                }
-                            )
-
+                            meal = meal,
+                            onItemClick = {
+                                val route = goToScreenMealDeataisWithString(meal.mealId ?: "")
+                                navController.navigate(route)
+                            }
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))

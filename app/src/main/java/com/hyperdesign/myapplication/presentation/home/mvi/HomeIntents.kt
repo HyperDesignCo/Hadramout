@@ -6,5 +6,11 @@ sealed class HomeIntents {
     data class GetHomeMenuId(val id: Int) : HomeIntents()
     data class changeBranchId(val id: Int) : HomeIntents()
 
+    data class ChangeLat(val lat: String): HomeIntents()
+
+    data class ChangeLng(val lng: String): HomeIntents()
+
+    data object CheckLocation: HomeIntents()
+
 
 }

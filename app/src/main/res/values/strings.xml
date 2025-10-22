@@ -25,7 +25,7 @@
     <string name="profile">Profile</string>
     <string name="menu">Menu</string>
     <string name="hello">Hello</string>
-    <string name="delevery_to">Delivery to</string>
+    <string name="delevery_to">Delivery from</string>
     <string name="offers">Offers</string>
     <string name="featured">Featured</string>
     <string name="my_orders">My orders</string>
@@ -143,4 +143,7 @@
     <string name="profile_updated_successfully">Profile updated successfully!</string>
     <string name="you_should_loginin_firstly">You should login firstly to can continue</string>
     <string name="cancel">Cancel</string>
+    <string name="search">Search</string>
+    <string name="selected_location_is">Selected Location Is</string>
+    <string name="choose_location">Choose Location</string>
 </resources>
