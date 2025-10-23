@@ -148,4 +148,9 @@
     <string name="search">Search</string>
     <string name="selected_location_is">Selected Location Is</string>
     <string name="choose_location">Choose Location</string>
+    <string name="current_branches_not_equal">CCurrent Branch Not Equal</string>
+    <string name="change_location_not_work">Please chanmge your location</string>
+    <string name="no_delivery_available">عفوا ,هذا المكان خارج نطاق التوصيل</string>
+    <string name="confirm">Confirm</string>
+    <string name="change_Location">Change Location</string>
 </resources>

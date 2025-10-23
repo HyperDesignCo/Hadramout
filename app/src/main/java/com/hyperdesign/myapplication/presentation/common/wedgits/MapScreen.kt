@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -37,6 +38,7 @@ import com.hyperdesign.myapplication.R
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.hyperdesign.myapplication.presentation.common.viewmodel.MapViewModel
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
@@ -44,6 +46,7 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MapScreen(
+    navigateFrom: String = "",
     mapViewModel: MapViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -54,27 +57,38 @@ fun MapScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
+    Log.d("MapScreen", "Received navigateFrom: $navigateFrom")
     val scope = rememberCoroutineScope()
     val uiState by mapViewModel.uiState.collectAsState()
     val defaultZoom = 15f
+    val defaultLatLng = LatLng(30.0444, 31.2357) // Default to Cairo
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), defaultZoom)
+        position = CameraPosition.fromLatLngZoom(defaultLatLng, defaultZoom)
     }
     val density = LocalDensity.current
     var showNoDeliveryDialog by remember { mutableStateOf(false) }
     var showDiffBranchDialog by remember { mutableStateOf(false) }
     var isInitialLocationSet by remember { mutableStateOf(false) }
 
-    // Request location permissions and load initial location
+    // Load saved location on startup
     LaunchedEffect(Unit) {
         if (!permissionState.allPermissionsGranted) {
             permissionState.launchMultiplePermissionRequest()
         } else {
-            mapViewModel.requestCurrentLocation(context)
+            // Check for saved location first
+            val savedLocation = mapViewModel.getSavedLocation()
+            if (savedLocation != null) {
+                Log.d("MapScreen", "Loaded saved location: $savedLocation")
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(savedLocation, defaultZoom)
+                mapViewModel.updateTargetLocation(savedLocation)
+                isInitialLocationSet = true
+            } else {
+                Log.d("MapScreen", "No saved location, requesting current location")
+                mapViewModel.requestCurrentLocation(context)
+            }
         }
     }
 
-    // Move camera to initial location with default zoom
     LaunchedEffect(uiState.targetLatLng) {
         uiState.targetLatLng?.let { latLng ->
             if (!isInitialLocationSet) {
@@ -90,10 +104,9 @@ fun MapScreen(
         }
     }
 
-    // Update location when camera stops moving
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
-            delay(300) // Debounce to avoid excessive updates
+            delay(300)
             val target = cameraPositionState.position.target
             mapViewModel.updateTargetLocation(target)
             Log.d("MapScreen", "Camera idle, updated location: $target")
@@ -118,78 +131,75 @@ fun MapScreen(
             },
             onMapClick = { latLng ->
                 mapViewModel.updateTargetLocation(latLng)
-//                cameraPositionState.animate(
-//                    CameraUpdateFactory.newLatLngZoom(latLng, cameraPositionState.position.zoom)
-//                )
                 Log.d("MapScreen", "Map clicked, updated location: $latLng")
             }
         )
 
-        // Fixed marker image at the center
         Image(
             painter = painterResource(R.drawable.mark),
             contentDescription = "Fixed Marker",
             modifier = Modifier
                 .align(Alignment.Center)
-                .offset(y = (-16).dp) // TranslationY as in XML
+                .offset(y = (-16).dp)
         )
 
-        // Search bar and predictions
-//        Column(
-//            modifier = Modifier
-//                .align(Alignment.TopCenter)
-//                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-//                .background(Color.White, RoundedCornerShape(25.dp))
-//                .padding(horizontal = 12.dp, vertical = 8.dp)
-//                .width(300.dp)
-//        ) {
-//            var query by remember { mutableStateOf("") }
-//            TextField(
-//                value = query,
-//                onValueChange = {
-//                    query = it
-//                    mapViewModel.searchPlaces(it)
-//                },
-//                placeholder = { Text(stringResource(R.string.search_for_an_location)) },
-//                modifier = Modifier.fillMaxWidth(),
-//                singleLine = true,
-//                colors = TextFieldDefaults.colors(
-//                    focusedIndicatorColor = Color.Transparent,
-//                    unfocusedIndicatorColor = Color.Transparent,
-//                    focusedContainerColor = Color.White,
-//                    unfocusedContainerColor = Color.White
-//                ),
-//                leadingIcon = {
-//                    Icon(
-//                        imageVector = Icons.Default.Search,
-//                        contentDescription = ""
-//                    )
-//                }
-//            )
-//            if (uiState.predictions.isNotEmpty()) {
-//                LazyColumn(
-//                    modifier = Modifier
-//                        .heightIn(max = 200.dp)
-//                        .background(Color.White)
-//                        .fillMaxWidth()
-//                ) {
-//                    items(uiState.predictions) { prediction ->
-//                        ListItem(
-//                            headlineContent = { Text(prediction.getPrimaryText(null).toString()) },
-//                            supportingContent = { Text(prediction.getSecondaryText(null).toString()) },
-//                            modifier = Modifier
-//                                .clickable {
-//                                    mapViewModel.selectPlace(prediction.placeId)
-//                                    query = prediction.getPrimaryText(null).toString()
-//                                }
-//                                .fillMaxWidth()
-//                        )
-//                    }
-//                }
-//            }
-//        }
+        // Search bar and predictions (commented out as in original code)
+        /*
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                .background(Color.White, RoundedCornerShape(25.dp))
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .width(300.dp)
+        ) {
+            var query by remember { mutableStateOf("") }
+            TextField(
+                value = query,
+                onValueChange = {
+                    query = it
+                    mapViewModel.searchPlaces(it)
+                },
+                placeholder = { Text(stringResource(R.string.search_for_an_location)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = ""
+                    )
+                }
+            )
+            if (uiState.predictions.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .heightIn(max = 200.dp)
+                        .background(Color.White)
+                        .fillMaxWidth()
+                ) {
+                    items(uiState.predictions) { prediction ->
+                        ListItem(
+                            headlineContent = { Text(prediction.getPrimaryText(null).toString()) },
+                            supportingContent = { Text(prediction.getSecondaryText(null).toString()) },
+                            modifier = Modifier
+                                .clickable {
+                                    mapViewModel.selectPlace(prediction.placeId)
+                                    query = prediction.getPrimaryText(null).toString()
+                                }
+                                .fillMaxWidth()
+                        )
+                    }
+                }
+            }
+        }
+        */
 
-        // Detected location card
         uiState.detectedAddress?.let { address ->
             Card(
                 modifier = Modifier
@@ -219,48 +229,64 @@ fun MapScreen(
             }
         }
 
-        // Confirm button
         Button(
             onClick = {
                 uiState.targetLatLng?.let { latLng ->
                     scope.launch {
+                        Log.d("MapScreen", "Choose Location clicked, latLng: $latLng")
                         val address = mapViewModel.reverseGeocode(latLng)
+                        Log.d("MapScreen", "Reverse geocoded address: $address")
                         mapViewModel.checkLocationDelivery(
                             context,
                             latLng.latitude.toString(),
                             latLng.longitude.toString()
                         ) { deliveryStatus, currentRestaurantBranch ->
-                            // Your commented navigation logic
-                            // val currentRerBranch = SharedPrefManager.getDefaults("userResBranch", context)
-                            // when (deliveryStatus) {
-                            //     "1" -> {
-                            //         if (currentRerBranch == null || currentRerBranch == currentRestaurantBranch) {
-                            //             val bundle = Bundle().apply {
-                            //                 putString("selectedLocation", address)
-                            //                 putString("lat", latLng.latitude.toString())
-                            //                 putString("lng", latLng.longitude.toString())
-                            //             }
-                            //             when (navigateFrom) {
-                            //                 "Add", "Cart" -> navController.navigate("addNewAddressFragment", bundle)
-                            //                 "Edit" -> navController.navigate("editSaveAddressFragment", bundle)
-                            //                 "Home", "Menu", "HomeToMap" -> {
-                            //                     if (navigateFrom == "HomeToMap") {
-                            //                         navController.navigate("homeFragment", bundle)
-                            //                     } else {
-                            //                         navController.popBackStack()
-                            //                     }
-                            //                 }
-                            //             }
-                            //         } else {
-                            //             showDiffBranchDialog = true
-                            //         }
-                            //     }
-                            //     "0" -> showNoDeliveryDialog = true
-                            //     else -> showNoDeliveryDialog = true
-                            // }
+                            Log.d("MapScreen", "checkLocationDelivery result: deliveryStatus=$deliveryStatus, currentRestaurantBranch=$currentRestaurantBranch")
+                            Log.d("MapScreen", "Stored Current restaurant branch: ${mapViewModel.tokenManger.getCurrentResturentBranch()}")
+                            when (deliveryStatus) {
+                                "1" -> {
+                                    if (currentRestaurantBranch == null || mapViewModel.tokenManger.getCurrentResturentBranch() == currentRestaurantBranch) {
+                                        mapViewModel.saveLocation(latLng)
+                                        Log.d("MapScreen", "Location saved: lat=${latLng.latitude}, lng=${latLng.longitude}")
+                                        val bundle = Bundle().apply {
+                                            putString("selectedLocation", address)
+                                            putString("lat", latLng.latitude.toString())
+                                            putString("lng", latLng.longitude.toString())
+                                        }
+                                        if (navigateFrom == "Home") {
+                                            val route = "home_screen?lat=${latLng.latitude}&lng=${latLng.longitude}&pickup="
+                                            Log.d("MapScreen", "Navigating to: $route")
+                                            try {
+                                                navController.navigate(route) {
+                                                    popUpTo(Screen.MapScreen.route) { inclusive = true }
+                                                }
+                                                Log.d("MapScreen", "Navigation successful")
+                                            } catch (e: Exception) {
+                                                Log.e("MapScreen", "Navigation failed: ${e.message}", e)
+                                                Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                            }
+                                        } else {
+                                            Log.w("MapScreen", "Navigation not implemented for navigateFrom=$navigateFrom")
+                                            Toast.makeText(context, "Navigation not implemented for $navigateFrom", Toast.LENGTH_SHORT).show()
+                                        }
+                                    } else {
+                                        Log.d("MapScreen", "Branch mismatch, showing DiffBranchDialog")
+                                        showDiffBranchDialog = true
+                                    }
+                                }
+                                "0" -> {
+                                    Log.d("MapScreen", "No delivery available, showing NoDeliveryDialog")
+                                    showNoDeliveryDialog = true
+                                }
+                                else -> {
+                                    Log.w("MapScreen", "Unknown delivery status: $deliveryStatus")
+                                    showNoDeliveryDialog = true
+                                }
+                            }
                         }
                     }
                 } ?: run {
+                    Log.w("MapScreen", "No location selected")
                     Toast.makeText(context, "Please select a location on the map", Toast.LENGTH_SHORT).show()
                 }
             },
@@ -279,35 +305,105 @@ fun MapScreen(
             )
         }
 
-        // Dialogs
         if (showNoDeliveryDialog) {
-            // NoDeliveryDialog(
-            //     message = context.getString(R.string.change_location_not_work),
-            //     onDismiss = { showNoDeliveryDialog = false },
-            //     onPickupClick = {
-            //         Variable.setChangePickupFromMap("1")
-            //         showNoDeliveryDialog = false
-            //         navController.navigate("homeFragment")
-            //     }
-            // )
+            NoDeliveryDialog(
+                message = stringResource(R.string.change_location_not_work),
+                onDismiss = { showNoDeliveryDialog = false },
+                onPickupClick = {
+                    showNoDeliveryDialog = false
+                    val route = "home_screen?pickup=1"
+                    Log.d("MapScreen", "Navigating to Home with pickup: $route")
+                    try {
+                        navController.navigate(route) {
+                            popUpTo(Screen.MapScreen.route) { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MapScreen", "Pickup navigation failed: ${e.message}", e)
+                        Toast.makeText(context, "Pickup navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            )
         }
 
         if (showDiffBranchDialog) {
-            // DiffBranchDialog(
-            //     message = context.getString(R.string.current_branches_not_equal),
-            //     onDismiss = { showDiffBranchDialog = false },
-            //     onChangeBranch = {
-            //         showDiffBranchDialog = false
-            //         val bundle = uiState.targetLatLng?.let {
-            //             Bundle().apply {
-            //                 putString("selectedLocation", uiState.detectedAddress)
-            //                 putString("lat", it.latitude.toString())
-            //                 putString("lng", it.longitude.toString())
-            //             }
-            //         }
-            //         navController.navigate("homeFragment", bundle)
-            //     }
-            // )
+            DiffBranchDialog(
+                message = stringResource(R.string.current_branches_not_equal),
+                onDismiss = { showDiffBranchDialog = false },
+                onChangeBranch = {
+                    showDiffBranchDialog = false
+                    uiState.targetLatLng?.let {
+                        val bundle = Bundle().apply {
+                            putString("selectedLocation", uiState.detectedAddress)
+                            putString("lat", it.latitude.toString())
+                            putString("lng", it.longitude.toString())
+                        }
+                        val route = "home_screen?lat=${it.latitude}&lng=${it.longitude}&pickup="
+                        Log.d("MapScreen", "Navigating to Home from DiffBranchDialog: $route")
+                        try {
+                            navController.navigate(route) {
+                                popUpTo(Screen.MapScreen.route) { inclusive = true }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("MapScreen", "DiffBranch navigation failed: ${e.message}", e)
+                            Toast.makeText(context, "DiffBranch navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            )
         }
     }
+}
+
+@Composable
+fun NoDeliveryDialog(
+    message: String,
+    onDismiss: () -> Unit,
+    onPickupClick: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.no_delivery_available), fontWeight = FontWeight.Bold, fontSize = 15.sp) },
+
+        confirmButton = {
+            TextButton(modifier = Modifier.fillMaxWidth(),onClick = onDismiss) {
+                Text(stringResource(R.string.confirm),modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, fontSize = 16.sp,color = Color(0xFFFCB203))
+            }
+        },
+//        dismissButton = {
+//            TextButton(onClick = onDismiss) {
+//                Text("Change Location", color = Color(0xFFF15A25))
+//            }
+//        },
+        containerColor = Color.White,
+       /* modifier = Modifier
+            .width(350.dp)
+            .height(420.dp)*/
+    )
+}
+
+@Composable
+fun DiffBranchDialog(
+    message: String,
+    onDismiss: () -> Unit,
+    onChangeBranch: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Different Branch", fontWeight = FontWeight.Bold) },
+        text = { Text(message, fontSize = 14.sp) },
+        confirmButton = {
+            TextButton(onClick = onChangeBranch) {
+                Text("Change Branch", color = Color(0xFFF15A25))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = Color(0xFFF15A25))
+            }
+        },
+        containerColor = Color.White,
+        modifier = Modifier
+            .width(350.dp)
+            .height(420.dp)
+    )
 }

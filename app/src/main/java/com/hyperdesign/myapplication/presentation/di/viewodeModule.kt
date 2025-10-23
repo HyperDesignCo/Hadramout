@@ -87,6 +87,6 @@ val viewModels = module {
     viewModel<ProfileViewModel> { ProfileViewModel(get(), get()) }
 
     viewModel<MapViewModel> {
-        MapViewModel(get(), get(), get(), androidContext())
+        MapViewModel(get(), get(), get(),get(),get(),androidContext())
     }
 }

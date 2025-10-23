@@ -5,18 +5,12 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import androidx.navigation.NavType
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.google.gson.Gson
 import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens.ForgotPasswordScreen
@@ -42,7 +36,7 @@ import com.hyperdesign.myapplication.presentation.profile.settings.privacypolicy
 import com.hyperdesign.myapplication.presentation.profile.settings.returnpolicy.ui.screens.ReturnPolicyScreen
 import com.hyperdesign.myapplication.presentation.profile.settings.termsandconditions.ui.screens.TermsAndConditionsScreen
 import com.hyperdesign.myapplication.presentation.profile.settings.whoarewe.ui.screens.WhoAreWeScreen
-import kotlin.jvm.java
+import java.net.URLDecoder
 
 val bottomNavScreens = listOf(
     Screen.HomeScreen,
@@ -54,19 +48,28 @@ val LocalNavController = compositionLocalOf<NavController> {
     error("No NavController provided")
 }
 
+fun routeWithoutQuery(route: String?): String {
+    return route?.substringBefore("?") ?: ""
+}
+
 @SuppressLint("RememberReturnType")
 @Composable
 fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
-    val currentRoute = navController.currentBackStackEntryFlow
+
+    // Current destination (with possible query string)
+    val currentBackStackEntry = navController.currentBackStackEntryFlow
         .collectAsState(initial = navController.currentBackStackEntry)
-        .value?.destination?.route
+        .value
 
-    Log.i("NavControllerScreen", "Current Route: $currentRoute")
+    val currentRoute = currentBackStackEntry?.destination?.route
+    Log.i("NavControllerScreen", "Current Route (raw): $currentRoute")
 
-    // Determine if the current screen is part of the bottom navigation
-    val isBottomNavScreen = bottomNavScreens.any { it.route == currentRoute }
-//            || currentRoute.toString() in Screen.MyOrders.route
+    // Clean route – without query part
+    val cleanCurrentRoute = routeWithoutQuery(currentRoute)
+
+    // Show bottom bar only on the three bottom‑nav screens
+    val isBottomNavScreen = bottomNavScreens.any { it.route == cleanCurrentRoute }
 
     CompositionLocalProvider(LocalNavController provides navController) {
         Scaffold(
@@ -81,45 +84,60 @@ fun AppNavigation(startDestination: String) {
                 startDestination = startDestination,
                 modifier = Modifier.padding(innerPadding)
             ) {
+                /* ------------------- HOME SCREEN ------------------- */
+                composable(
+                    route = "${Screen.HomeScreen.route}?lat={lat}&lng={lng}&pickup={pickup}",
+                    arguments = listOf(
+                        navArgument("lat") { type = NavType.StringType; defaultValue = "" },
+                        navArgument("lng") { type = NavType.StringType; defaultValue = "" },
+                        navArgument("pickup") { type = NavType.StringType; defaultValue = "" }
+                    )
+                ) { backStackEntry ->
+                    Log.d(
+                        "AppNavigation",
+                        "HomeScreen args → lat=${backStackEntry.arguments?.getString("lat")} " +
+                                "lng=${backStackEntry.arguments?.getString("lng")} " +
+                                "pickup=${backStackEntry.arguments?.getString("pickup")}"
+                    )
+                    HomeScreen(navBackStackEntry = backStackEntry)
+                }
+
+                /* ------------------- OTHER SCREENS ------------------- */
                 composable(Screen.LoginInScreen.route) { LoginScreen() }
                 composable(Screen.LoginStepTwoScreen.route) { LoginScreenStepTwo() }
-                composable(Screen.ForgotPasswordScreen.route)
-                {
-                    ForgotPasswordScreen()
-                }
-                composable(Screen.VerifyScreen.route, arguments = listOf(navArgument("verifyJson"){type=
-                    NavType.StringType},navArgument("email"){type=NavType.StringType}))
-                {backStackEntry ->
+                composable(Screen.ForgotPasswordScreen.route) { ForgotPasswordScreen() }
+
+                composable(
+                    Screen.VerifyScreen.route,
+                    arguments = listOf(
+                        navArgument("verifyJson") { type = NavType.StringType },
+                        navArgument("email") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
                     val verifyJson = backStackEntry.arguments?.getString("verifyJson")
                     val email = backStackEntry.arguments?.getString("email")
                     VerifyScreen(verifyJson = verifyJson, email = email)
                 }
-                composable(Screen.ResetPasswordScreen.route, arguments =
-                    listOf(navArgument("email"){
-                        type= NavType.StringType
-                    })
-                ){backStack->
+
+                composable(
+                    Screen.ResetPasswordScreen.route,
+                    arguments = listOf(navArgument("email") { type = NavType.StringType })
+                ) { backStack ->
                     val email = backStack.arguments?.getString("email")
                     ResetPasswordScreen(email = email)
                 }
-                composable(Screen.HomeScreen.route) { HomeScreen() }
+
                 composable(Screen.ProfileScreen.route) { ProfileScreen() }
                 composable(Screen.MenueScreen.route) { MenuScreen() }
+
                 composable(
                     Screen.MealDetailsScreen.route,
-                    arguments = listOf(navArgument("mealJson") { type = NavType.StringType }),
-
-                ) {backStackEntry ->
+                    arguments = listOf(navArgument("mealJson") { type = NavType.StringType })
+                ) { backStackEntry ->
                     val mealJsonRaw = backStackEntry.arguments?.getString("mealJson")
                     val mealInput = mealJsonRaw?.let { raw ->
                         try {
-                            // Try to decode the raw string if it's URL-encoded
-                            val decoded = try {
-                                java.net.URLDecoder.decode(raw, "UTF-8")
-                            } catch (e: Exception) {
-                                raw // Fallback to raw string if decoding fails
-                            }
-                            // Try parsing as a Meal JSON
+                            val decoded = try { URLDecoder.decode(raw, "UTF-8") } catch (e: Exception) { raw }
                             val meal = Gson().fromJson(decoded, Meal::class.java)
                             if (meal != null) {
                                 Log.d("NavGraph", "Parsed MealJson: $meal")
@@ -128,14 +146,13 @@ fun AppNavigation(startDestination: String) {
                                 MealInput.MealId(decoded.removeSurrounding("\"", "\"").trim())
                             }
                         } catch (e: Exception) {
-                            // If JSON parsing fails, assume it's a mealId
                             Log.w("NavGraph", "Failed to parse as MealJson, treating as MealId: $raw")
                             MealInput.MealId(raw.removeSurrounding("\"", "\"").trim())
                         }
                     }
-                    MealDetailsScreen(mealJson=mealInput )
-
+                    MealDetailsScreen(mealJson = mealInput)
                 }
+
                 composable(Screen.CheckOutScreen.route) { CheckOutScreen() }
                 composable(Screen.CartScreen.route) { CartScreen() }
                 composable(Screen.SignUpScreen.route) { SignUpScreen() }
@@ -146,28 +163,49 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.ReturnPolicyScreen.route) { ReturnPolicyScreen() }
                 composable(Screen.TermesAndConditionsScreen.route) { TermsAndConditionsScreen() }
                 composable(Screen.PrivacyPolicyScreen.route) { PrivacyPolicyScreen() }
-                composable(Screen.AllAddressesScreen.route, arguments = listOf(navArgument("screenType"){
-                    type =  NavType.StringType
-                })) {navBackStack->
+
+                composable(
+                    Screen.AllAddressesScreen.route,
+                    arguments = listOf(navArgument("screenType") { type = NavType.StringType })
+                ) { navBackStack ->
                     val screenType = navBackStack.arguments?.getString("screenType")
                     AllAddressesScreen(screenType)
                 }
-                composable(Screen.UpdateAddressScreen.route, arguments = listOf(navArgument("addressId"){type=
-                    NavType.StringType},navArgument("lat"){NavType.StringType},navArgument("long"){NavType.StringType}))
-                {navBackStack->
-                    val addressId = navBackStack.arguments?.getString("addressId")
-                    val lat =  navBackStack.arguments?.getString("lat")
-                    val long = navBackStack.arguments?.getString("long")
 
-                    UpdateAddressScreen(addressId = addressId.orEmpty(), lat = lat.orEmpty(), long = long.orEmpty())
+                composable(
+                    Screen.UpdateAddressScreen.route,
+                    arguments = listOf(
+                        navArgument("addressId") { type = NavType.StringType },
+                        navArgument("lat") { type = NavType.StringType },
+                        navArgument("long") { type = NavType.StringType }
+                    )
+                ) { navBackStack ->
+                    val addressId = navBackStack.arguments?.getString("addressId")
+                    val lat = navBackStack.arguments?.getString("lat")
+                    val long = navBackStack.arguments?.getString("long")
+                    UpdateAddressScreen(
+                        addressId = addressId.orEmpty(),
+                        lat = lat.orEmpty(),
+                        long = long.orEmpty()
+                    )
                 }
+
                 composable(Screen.UserProfileScreen.route) { UserProfileScreen() }
 
-                composable(Screen.MapScreen.route) { MapScreen() }
-
+                composable(
+                    Screen.MapScreen.route,
+                    arguments = listOf(
+                        navArgument("navigateFrom") {
+                            type = NavType.StringType
+                            defaultValue = ""
+                        }
+                    )
+                ) { backStackEntry ->
+                    val navigateFrom = backStackEntry.arguments?.getString("navigateFrom")?.trim() ?: ""
+                    Log.d("AppNavigation", "MapScreen navigateFrom: $navigateFrom")
+                    MapScreen(navigateFrom = navigateFrom)
+                }
             }
         }
     }
 }
-
-

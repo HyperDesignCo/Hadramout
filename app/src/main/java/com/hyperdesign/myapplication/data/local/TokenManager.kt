@@ -19,6 +19,7 @@ class TokenManager(private val context: Context) {
 
         private const val BRANCH_ID = "branch_id"
 
+        private const val CURRENT_RESTURANT_BRANCH="current_resturent_Branch"
         private const val STATUS = "status"
     }
 
@@ -79,6 +80,15 @@ class TokenManager(private val context: Context) {
         encryptedSharedPreferences.edit()
             .putInt(STATUS,status)
             .apply()
+    }
+    fun saveCurrentResturentBranch(branch:String){
+        encryptedSharedPreferences.edit()
+            .putString(CURRENT_RESTURANT_BRANCH,branch)
+            .apply()
+    }
+
+    fun getCurrentResturentBranch(): String? {
+        return encryptedSharedPreferences.getString(CURRENT_RESTURANT_BRANCH,"")
     }
 
     fun getStatus():Int{

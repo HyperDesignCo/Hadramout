@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.home.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,9 +23,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -60,6 +63,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = koinViewModel(),
+    navBackStackEntry: NavBackStackEntry? = null
 ) {
     val navController = LocalNavController.current
     val homeState by homeViewModel.homeState.collectAsStateWithLifecycle()
@@ -75,38 +79,86 @@ fun HomeScreen(
     val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(context)
     }
+
     var userLocation by remember { mutableStateOf(LatLng(30.0444, 31.2357)) } // Default to Cairo
     var isFetchingLocation by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
+    // Track navigation arguments to trigger recomposition
+    val navArgsKey by rememberUpdatedState(
+        "${navBackStackEntry?.arguments?.getString("lat")}:${navBackStackEntry?.arguments?.getString("lng")}:${navBackStackEntry?.arguments?.getString("pickup")}"
+    )
+
+    Log.d("HomeScreen", "Composing HomeScreen with navArgsKey=$navArgsKey")
+
     LaunchedEffect(Unit) {
+
         if (!permissionState.allPermissionsGranted) {
             permissionState.launchMultiplePermissionRequest()
         } else {
             isFetchingLocation = true
-            scope.launch {
-                try {
-                    val lastLocation = fusedLocationClient.lastLocation.await()
-                    if (lastLocation != null) {
-                        userLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
-                        Log.d("HomeScreen", "Location fetched (last): $userLocation")
-                    } else {
-                        val currentLocation = fusedLocationClient.getCurrentLocation(
-                            Priority.PRIORITY_HIGH_ACCURACY, null
-                        ).await()
-                        if (currentLocation != null) {
-                            userLocation = LatLng(currentLocation.latitude, currentLocation.longitude)
-                            Log.d("HomeScreen", "Location fetched (current): $userLocation")
+            if(navArgsKey.isEmpty() || navArgsKey=="::"){
+                Log.d("anaaslan,","ana aslan wwad ")
+                scope.launch {
+                    try {
+                        val lastLocation = fusedLocationClient.lastLocation.await()
+                        if (lastLocation != null) {
+                            userLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
+                            Log.d("HomeScreen", "Location fetched (last): $userLocation")
+                        } else {
+                            val currentLocation = fusedLocationClient.getCurrentLocation(
+                                Priority.PRIORITY_HIGH_ACCURACY, null
+                            ).await()
+                            if (currentLocation != null) {
+                                userLocation = LatLng(currentLocation.latitude, currentLocation.longitude)
+                                Log.d("HomeScreen", "Location fetched (current): $userLocation")
+                            }
                         }
+                    } catch (e: Exception) {
+                        Log.e("HomeScreen", "Failed to get location", e)
+                    } finally {
+                        isFetchingLocation = false
                     }
-                } catch (e: Exception) {
-                    Log.e("HomeScreen", "Failed to get location", e)
-                } finally {
-                    isFetchingLocation = false
+
+                    // Use actual user location — NO static test values
+                    homeViewModel.handleIntents(HomeIntents.ChangeLat(userLocation.latitude.toString()))
+                    homeViewModel.handleIntents(HomeIntents.ChangeLng(userLocation.longitude.toString()))
+                    homeViewModel.handleIntents(HomeIntents.CheckLocation)
+                    Log.d("HomeScreen", "Initial CheckLocation called with lat=${userLocation.latitude}, lng=${userLocation.longitude}")
                 }
-                homeViewModel.handleIntents(HomeIntents.ChangeLat(userLocation.latitude.toString()))
-                homeViewModel.handleIntents(HomeIntents.ChangeLng(userLocation.longitude.toString()))
-                homeViewModel.handleIntents(HomeIntents.CheckLocation)
+            }
+
+        }
+    }
+
+    // === 2. HANDLE RETURN FROM MAPSCREEN — Runs ONLY when nav args change ===
+    LaunchedEffect(navArgsKey) {
+        navBackStackEntry?.arguments?.let { args ->
+            val lat = args.getString("lat")
+            val lng = args.getString("lng")
+            val pickup = args.getString("pickup")
+            Log.d("HomeScreen", "Received args from MapScreen: lat=$lat, lng=$lng, pickup=$pickup")
+
+            if (lat != null && lng != null && lat.isNotEmpty() && lng.isNotEmpty()) {
+                try {
+                    userLocation = LatLng(lat.toDouble(), lng.toDouble())
+                    homeViewModel.handleIntents(HomeIntents.ChangeLat(lat))
+                    homeViewModel.handleIntents(HomeIntents.ChangeLng(lng))
+                    homeViewModel.handleIntents(HomeIntents.CheckLocation)
+                    Log.d("HomeScreen", "Processed location from MapScreen: $userLocation")
+                } catch (e: NumberFormatException) {
+                    Log.e("HomeScreen", "Invalid lat/lng format: lat=$lat, lng=$lng", e)
+                }finally {
+
+                    isFetchingLocation = false
+
+                }
+            }
+
+            if (pickup == "1") {
+                status = true
+                homeViewModel.tokenManager.saveStatus(1)
+                Log.d("HomeScreen", "Switched to pickup mode via navigation")
             }
         }
     }
@@ -116,6 +168,21 @@ fun HomeScreen(
             Text("Location permission is required")
         }
         return
+    }
+
+    // === FIX: Prevent infinite dialog loop ===
+    var hasShownNoDeliveryDialog by remember { mutableStateOf(false) }
+    val deliveryStatus = homeState.checkLocationResponseEntity?.data?.deliveryStatus
+
+    // Only trigger dialog when deliveryStatus becomes "0"
+    LaunchedEffect(deliveryStatus) {
+        if (deliveryStatus == "0" && !hasShownNoDeliveryDialog) {
+            hasShownNoDeliveryDialog = true
+            Log.d("HomeScreen", "Delivery status is 0 → showing No Delivery dialog")
+        }else{
+            homeViewModel.tokenManager.saveCurrentResturentBranch(homeState.checkLocationResponseEntity?.data?.currentResturantBranch?:"")
+
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -132,6 +199,9 @@ fun HomeScreen(
             onStatusChanged = { newStatus ->
                 status = newStatus
                 homeViewModel.tokenManager.saveStatus(if (newStatus) 1 else 0)
+                if (newStatus) {
+                    hasShownNoDeliveryDialog = false // Reset when switching to pickup
+                }
             },
             onCartPressed = {
                 if (homeViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
@@ -148,7 +218,8 @@ fun HomeScreen(
             bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
             ads = homeState.homeMenues?.ads.orEmpty(),
             navToMap = {
-                navController.navigate(Screen.MapScreen.route)
+                Log.d("HomeScreen", "Navigating to MapScreen with navigateFrom=Home")
+                navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}", "Home"))
             },
             currentResturentBranch = homeState.checkLocationResponseEntity?.data?.currentResturantBranch.orEmpty()
         )
@@ -157,14 +228,31 @@ fun HomeScreen(
             ShowAuthentaionDialge(
                 onNavToLogin = {
                     navController.navigate(Screen.LoginInScreen.route) {
-                        popUpTo(navController.graph.id) {
-                            inclusive = true
-                        }
+                        popUpTo(navController.graph.id) { inclusive = true }
                     }
                     homeViewModel.showAuthDialoge.value = false
                 },
                 onCancel = {
                     homeViewModel.showAuthDialoge.value = false
+                }
+            )
+        }
+
+        // === Show No Delivery Dialog ONLY ONCE ===
+        if (deliveryStatus == "0" && hasShownNoDeliveryDialog) {
+            NoDeliveryDialogHome(
+                onPickUp = {
+                    status = true
+                    homeViewModel.tokenManager.saveStatus(1)
+                    hasShownNoDeliveryDialog = false
+                    Log.d("HomeScreen", "User selected Pickup → dialog dismissed")
+                },
+                onChangeLocation = {
+                    status = false
+                    homeViewModel.tokenManager.saveStatus(0)
+                    hasShownNoDeliveryDialog = false
+                    navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}", "Home"))
+                    Log.d("HomeScreen", "User selected Change Location → navigating to Map")
                 }
             )
         }
@@ -212,6 +300,7 @@ fun HomeScreenContent(
             if (selected != null) {
                 selectedBranch = selected.title
                 onBranchSelected(selected.id)
+                Log.d("HomeScreen", "Updated selectedBranch to ${selected.title} based on currentResturentBranch=$currentResturentBranch")
             }
         }
     }
@@ -226,22 +315,25 @@ fun HomeScreenContent(
                     if (selected != null) {
                         selectedBranch = selected.title
                         onBranchSelected(selected.id)
+                        Log.d("HomeScreen", "Set selectedBranch to ${selected.title} from getBranchId=$getBranchId")
                     } else {
                         saveBranchId(0)
                         selectedBranch = branches[0].title
                         onBranchSelected(branches[0].id)
                         saveBranchId(branches[0].id)
+                        Log.d("HomeScreen", "Fallback to first branch: ${branches[0].title}")
                     }
                 } else {
                     selectedBranch = branches[0].title
                     onBranchSelected(branches[0].id)
                     saveBranchId(branches[0].id)
+                    Log.d("HomeScreen", "Default to first branch: ${branches[0].title}")
                 }
             }
         }
     }
 
-    Log.d("HomeScreen", "Branches: $branches, Offers: $offers, HomeMenus: $homeMenus")
+    Log.d("HomeScreen", "Rendering HomeScreenContent: Branches=$branches, Offers=$offers, HomeMenus=$homeMenus, selectedBranch=$selectedBranch")
 
     Column(
         modifier = Modifier
@@ -352,10 +444,10 @@ fun HomeScreenContent(
                                 modifier = Modifier.background(Color.White)
                             ) {
                                 if (branches.isEmpty()) {
-                                    // DropdownMenuItem(
-                                    //     text = { Text("No branches available") },
-                                    //     onClick = { expanded = false }
-                                    // )
+                                    DropdownMenuItem(
+                                        text = { Text("No branches available") },
+                                        onClick = { expanded = false }
+                                    )
                                 } else {
                                     branches.forEach { branch ->
                                         DropdownMenuItem(
@@ -364,6 +456,7 @@ fun HomeScreenContent(
                                                 selectedBranch = branch.title
                                                 expanded = false
                                                 onBranchSelected(branch.id)
+                                                Log.d("HomeScreen", "Selected branch: ${branch.title}, id=${branch.id}")
                                             }
                                         )
                                     }
@@ -481,4 +574,49 @@ fun HomeScreenContent(
             }
         }
     }
+}
+
+@Composable
+fun NoDeliveryDialogHome(
+    onPickUp: () -> Unit,
+    onChangeLocation: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = {
+            // Prevent accidental dismissal
+        },
+        title = {
+            Text(
+                stringResource(R.string.no_delivery_available),
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+        },
+        confirmButton = {
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onChangeLocation
+            ) {
+                Text(
+                    stringResource(R.string.change_Location),
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color(0xFFFCB203)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onPickUp) {
+                Text(
+                    stringResource(R.string.pick_up),
+                    color = Color(0xFFF15A25),
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        containerColor = Color.White
+    )
 }

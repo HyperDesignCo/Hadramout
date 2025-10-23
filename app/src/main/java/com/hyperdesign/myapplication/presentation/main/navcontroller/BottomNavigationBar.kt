@@ -26,6 +26,7 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 fun BottomNavigationBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val cleanCurrentRoute = routeWithoutQuery(currentRoute) // ← ADD THIS
 
     val selectedGradient = Brush.linearGradient(
         colors = listOf(Color(0xFFF15A25), Color(0xFFFCB203))
@@ -33,7 +34,7 @@ fun BottomNavigationBar(navController: NavController) {
 
     NavigationBar(containerColor = Color.White) {
         bottomNavScreens.forEach { screen ->
-            val isSelected = currentRoute == screen.route
+            val isSelected = cleanCurrentRoute == screen.route // ← USE CLEAN ROUTE
 
             NavigationBarItem(
                 selected = isSelected,
@@ -49,7 +50,6 @@ fun BottomNavigationBar(navController: NavController) {
                 icon = {
                     screen.icon?.let { iconRes ->
                         if (isSelected) {
-                            // Gradient icon
                             Icon(
                                 painter = painterResource(id = iconRes),
                                 contentDescription = screen.title?.let { stringResource(id = it) },
@@ -64,7 +64,6 @@ fun BottomNavigationBar(navController: NavController) {
                                     }
                             )
                         } else {
-                            // Default icon
                             Icon(
                                 painter = painterResource(id = iconRes),
                                 contentDescription = screen.title?.let { stringResource(id = it) },
@@ -76,7 +75,6 @@ fun BottomNavigationBar(navController: NavController) {
                 label = {
                     screen.title?.let {
                         if (isSelected) {
-                            // Gradient text
                             Text(
                                 text = stringResource(id = it),
                                 modifier = Modifier
@@ -90,7 +88,6 @@ fun BottomNavigationBar(navController: NavController) {
                                     }
                             )
                         } else {
-                            // Default text
                             Text(
                                 text = stringResource(id = it),
                                 color = Secondry
@@ -103,8 +100,7 @@ fun BottomNavigationBar(navController: NavController) {
                     selectedIconColor = Color.Unspecified,
                     selectedTextColor = Color.Unspecified,
                     unselectedIconColor = Secondry,
-                    unselectedTextColor = Secondry
-                )
+                    unselectedTextColor = Secondry )
             )
         }
     }

@@ -28,6 +28,11 @@ class HomeViewModel(
 
     var showAuthDialoge = mutableStateOf(false)
 
+
+    var setChangeLocation = mutableStateOf(false)
+
+
+
     fun handleIntents(intent: HomeIntents) {
         when (intent) {
             //generate if condition

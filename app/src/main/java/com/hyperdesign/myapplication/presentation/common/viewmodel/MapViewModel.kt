@@ -8,9 +8,6 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
@@ -20,6 +17,9 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.hyperdesign.myapplication.data.local.TokenManager
+import com.hyperdesign.myapplication.domain.Entity.checkLocationRequest
+import com.hyperdesign.myapplication.domain.usecase.home.CheckLocationUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,14 +28,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.Locale
 
 class MapViewModel(
     private val placesClient: PlacesClient,
     private val fusedLocationClient: FusedLocationProviderClient,
     private val geocoder: Geocoder,
+    private val checkLocationUseCase: CheckLocationUseCase,
+    val tokenManger: TokenManager,
     private val context: Context
-) : ViewModel() {
+) : ViewModel(), KoinComponent {
 
     data class UiState(
         val predictions: List<AutocompletePrediction> = emptyList(),
@@ -64,12 +68,15 @@ class MapViewModel(
             viewModelScope.launch {
                 val address = reverseGeocode(latLng)
                 _uiState.update { it.copy(targetLatLng = latLng, detectedAddress = address, isLoading = false) }
+                Log.d("MapViewModel", "Loaded saved location: $latLng, Address: $address")
             }
         } else {
             sharedPreferences.edit {
                 remove("latitude")
                 remove("longitude")
             }
+            _uiState.update { it.copy(isLoading = false) }
+            Log.d("MapViewModel", "No valid saved location found")
         }
     }
 
@@ -189,23 +196,45 @@ class MapViewModel(
     }
 
     fun checkLocationDelivery(context: Context, lat: String, lng: String, callback: (String, String?) -> Unit) {
-        val queue = Volley.newRequestQueue(context)
-        val url = "your_api_endpoint_here" // Replace with actual API endpoint
-        val request = JsonObjectRequest(Request.Method.GET, url, null, { response ->
-            val deliveryStatus = response.getString("deliveryStatus")
-            val currentRestaurantBranch = response.optString("currentRestaurantBranch", null)
-            callback(deliveryStatus, currentRestaurantBranch)
-        }, { error ->
-            Log.e("MapViewModel", "Delivery check error", error)
-            callback("0", null)
-        })
-        queue.add(request)
+        viewModelScope.launch {
+            try {
+                val request = checkLocationRequest(lat, lng)
+                val response = checkLocationUseCase(request)
+                val deliveryStatus = response.data.deliveryStatus
+                val currentRestaurantBranch = response.data.currentResturantBranch
+                callback(deliveryStatus, currentRestaurantBranch)
+            } catch (e: Exception) {
+                Log.e("MapViewModel", "Delivery check error", e)
+                callback("0", null)
+            }
+        }
     }
 
-    private fun saveLocation(latLng: LatLng) {
+    fun getCurrentRestaurantBranch(): String? {
+        return sharedPreferences.getString("userResBranch", null)
+    }
+
+    fun saveLocation(latLng: LatLng) {
         sharedPreferences.edit {
             putFloat("latitude", latLng.latitude.toFloat())
             putFloat("longitude", latLng.longitude.toFloat())
+        }
+        Log.d("MapViewModel", "Saved location: lat=${latLng.latitude}, lng=${latLng.longitude}")
+    }
+
+    fun getSavedLocation(): LatLng? {
+        val lat = sharedPreferences.getFloat("latitude", Float.MIN_VALUE).toDouble()
+        val lng = sharedPreferences.getFloat("longitude", Float.MIN_VALUE).toDouble()
+        return try {
+            if (lat != Float.MIN_VALUE.toDouble() && lng != Float.MIN_VALUE.toDouble() &&
+                lat in -90.0..90.0 && lng in -180.0..180.0) {
+                LatLng(lat, lng)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("MapViewModel", "Invalid saved location format: lat=$lat, lng=$lng", e)
+            null
         }
     }
 
