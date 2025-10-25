@@ -7,9 +7,8 @@ sealed class UpdateAddressIntents {
     data object GetRegions : UpdateAddressIntents()
 
     data class SaveUpdatedAddress(
-        val regionId: String,
+
         val areaId: String,
-        val district: String,
         val street: String,
         val firstPhoneNum: String,
         val secondPhoneNum: String,

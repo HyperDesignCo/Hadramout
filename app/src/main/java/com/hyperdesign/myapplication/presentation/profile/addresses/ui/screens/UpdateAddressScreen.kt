@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,13 +35,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.AreaAndRegionEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomTextField
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
+import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
+import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.AddressesIntents
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.UpdateAddressIntents
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.UpdateAddressViewModel
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.widgets.CustomSearchableDropdownMenu
@@ -51,16 +55,49 @@ import org.koin.androidx.compose.koinViewModel
 @SuppressLint("RememberInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateAddressScreen(addressId: String, lat: String, long: String, viewModel: UpdateAddressViewModel = koinViewModel()) {
+fun UpdateAddressScreen(addressId: String,navBackStackEntry: NavBackStackEntry?=null, viewModel: UpdateAddressViewModel = koinViewModel()) {
     val navController = LocalNavController.current
     val addressState by viewModel.addressState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+
+    val myAddressId = viewModel.tokenManager.getAddressId().orEmpty()
     // Fetch address data when screen loads
-    LaunchedEffect(addressId) {
-        Log.d("UpdateAddressScreen", "Fetching address with id: $addressId")
-        viewModel.handleIntents(UpdateAddressIntents.FetchAddress(addressId))
-        viewModel.handleIntents(UpdateAddressIntents.GetRegions) // Ensure regions are fetched
+    LaunchedEffect(myAddressId) {
+        Log.d("UpdateAddressScreen", "Fetching address with id: $myAddressId")
+        viewModel.handleIntents(UpdateAddressIntents.FetchAddress(myAddressId))
+//        viewModel.handleIntents(UpdateAddressIntents.GetRegions) // Ensure regions are fetched
+    }
+
+
+    val navArgsKey by rememberUpdatedState(
+        "${navBackStackEntry?.arguments?.getString("lat")}:${navBackStackEntry?.arguments?.getString("lng")}:${navBackStackEntry?.arguments?.getString("pickup")}"
+    )
+
+
+    LaunchedEffect(navArgsKey) {
+        navBackStackEntry?.arguments?.let { args ->
+            val lat = args.getString("lat")
+            val lng = args.getString("lng")
+            val areaId = args.getString("areaId")
+            Log.d("Alladdress", "Received args from MapScreen: lat=$lat, lng=$lng, areaId=$areaId")
+
+            if (lat != null && lng != null&& areaId!=null && lat.isNotEmpty() && lng.isNotEmpty()&& areaId.isNotEmpty()) {
+                try {
+                    addressState.lat=lat
+                    addressState.long =lng
+                    viewModel.handleIntents(UpdateAddressIntents.ChangeAreaId(areaId.toInt()))
+
+//                    userLocation = LatLng(lat.toDouble(), lng.toDouble())
+//                    homeViewModel.handleIntents(HomeIntents.ChangeLat(lat))
+//                    homeViewModel.handleIntents(HomeIntents.ChangeLng(lng))
+//                    homeViewModel.handleIntents(HomeIntents.CheckLocation)
+//                    Log.d("HomeScreen", "Processed location from MapScreen: $userLocation")
+                } catch (e: NumberFormatException) {
+                    Log.e("HomeScreen", "Invalid lat/lng format: lat=$lat, lng=$lng", e)
+                }
+            }
+        }
     }
 
     LaunchedEffect(addressState) {
@@ -70,7 +107,10 @@ fun UpdateAddressScreen(addressId: String, lat: String, long: String, viewModel:
                     Toast.makeText(context, event.errorMessage, Toast.LENGTH_SHORT).show()
                 }
                 ValidationEvent.Success -> {
-                    navController.popBackStack()
+                    navController.navigate(Screen.AllAddressesScreen.route){
+                        popUpTo(Screen.AllAddressesScreen.route){true}
+                        launchSingleTop = true
+                    }
                 }
             }
         }
@@ -95,55 +135,39 @@ fun UpdateAddressScreen(addressId: String, lat: String, long: String, viewModel:
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp)
             ) {
-                item {
-                    Spacer(modifier = Modifier.padding(vertical = 10.dp))
-                    Text(stringResource(R.string.region), fontSize = 17.sp, color = Color.Black)
-                    Spacer(modifier = Modifier.padding(vertical = 5.dp))
-                    CustomSearchableDropdownMenu(
-                        items = addressState.regions?.regions.orEmpty(),
-                        onItemSelected = { /* Not needed */ },
-                        onItemSelectId = { selected ->
-                            viewModel.handleIntents(UpdateAddressIntents.ChangeRegionId(selected.id))
-                        },
-                        selectedItem = addressState.regionId.toString(),
-                        isError = addressState.regionError != null,
-                        errorMessage = addressState.regionError,
-                        selectedId = addressState.regionId,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
 
-                item {
-                    Spacer(modifier = Modifier.padding(vertical = 10.dp))
-                    Text(stringResource(R.string.area), fontSize = 17.sp, color = Color.Black)
-                    Spacer(modifier = Modifier.padding(vertical = 5.dp))
-                    CustomSearchableDropdownMenu(
-                        items = addressState.area?.areas.orEmpty(),
-                        onItemSelected = { /* Not needed */ },
-                        onItemSelectId = { selected ->
-                            viewModel.handleIntents(UpdateAddressIntents.ChangeAreaId(selected.id))
-                        },
-                        selectedItem = addressState.areaId,
-                        isError = addressState.areaError != null,
-                        errorMessage = addressState.areaError,
-                        selectedId = addressState.areaId.toIntOrNull(),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
 
-                item {
-                    Spacer(modifier = Modifier.padding(vertical = 10.dp))
-                    Text(stringResource(R.string.district), fontSize = 17.sp, color = Color.Black)
-                    Spacer(modifier = Modifier.padding(vertical = 5.dp))
-                    CustomTextField(
-                        value = addressState.district,
-                        onValueChange = { viewModel.handleIntents(UpdateAddressIntents.ChangeDistrictValue(it)) },
-                        borderWidth = 1f,
-                        isError = false,
-                        errorMessage = null,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+//                item {
+//                    Spacer(modifier = Modifier.padding(vertical = 10.dp))
+//                    Text(stringResource(R.string.area), fontSize = 17.sp, color = Color.Black)
+//                    Spacer(modifier = Modifier.padding(vertical = 5.dp))
+//                    CustomSearchableDropdownMenu(
+//                        items = addressState.area?.areas.orEmpty(),
+//                        onItemSelected = { /* Not needed */ },
+//                        onItemSelectId = { selected ->
+//                            viewModel.handleIntents(UpdateAddressIntents.ChangeAreaId(selected.id))
+//                        },
+//                        selectedItem = addressState.areaId,
+//                        isError = addressState.areaError != null,
+//                        errorMessage = addressState.areaError,
+//                        selectedId = addressState.areaId.toIntOrNull(),
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                }
+//
+//                item {
+//                    Spacer(modifier = Modifier.padding(vertical = 10.dp))
+//                    Text(stringResource(R.string.district), fontSize = 17.sp, color = Color.Black)
+//                    Spacer(modifier = Modifier.padding(vertical = 5.dp))
+//                    CustomTextField(
+//                        value = addressState.district,
+//                        onValueChange = { viewModel.handleIntents(UpdateAddressIntents.ChangeDistrictValue(it)) },
+//                        borderWidth = 1f,
+//                        isError = false,
+//                        errorMessage = null,
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                }
 
                 item {
                     Spacer(modifier = Modifier.padding(vertical = 10.dp))
@@ -255,9 +279,7 @@ fun UpdateAddressScreen(addressId: String, lat: String, long: String, viewModel:
                         onClick = {
                             viewModel.handleIntents(
                                 UpdateAddressIntents.SaveUpdatedAddress(
-                                    regionId = addressState.regionId.toString(),
                                     areaId = addressState.areaId,
-                                    district = addressState.district,
                                     street = addressState.street,
                                     firstPhoneNum = addressState.phone,
                                     secondPhoneNum = addressState.secondPhoneNum,
@@ -266,8 +288,8 @@ fun UpdateAddressScreen(addressId: String, lat: String, long: String, viewModel:
                                     apartmentNum = addressState.apartmentNumber,
                                     specialSign = addressState.specialSign,
                                     extraInfo = addressState.extraInfo,
-                                    lat = lat,
-                                    long = long
+                                    lat = addressState.lat,
+                                    long = addressState.long
                                 )
                             )
                         }

@@ -124,7 +124,7 @@ class ProfileApiServicesImpl(
                 setBody(createNewAddressRequest)
 
             }.body<AddToCartResponseDto>()
-            Log.d("ProfileApiServices","createNewAddressSuccess ,Response:${response}")
+            Log.d("ProfileApiServices","createNewAddressSuccess createNewAddressRequest:$createNewAddressRequest ,Response:${response}")
             response
         }catch (e: Exception){
             Log.e("ProfileApiServices","createNewAddressFaild:${e.message.toString()}")

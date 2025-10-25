@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.presentation.common.wedgits
 
 import android.Manifest
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -47,6 +49,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun MapScreen(
     navigateFrom: String = "",
+    addressId: String = "",  // New parameter
     mapViewModel: MapViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -57,7 +60,7 @@ fun MapScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
-    Log.d("MapScreen", "Received navigateFrom: $navigateFrom")
+    Log.d("MapScreen", "Received navigateFrom: $navigateFrom, addressId: $addressId")  // Log here to confirm
     val scope = rememberCoroutineScope()
     val uiState by mapViewModel.uiState.collectAsState()
     val defaultZoom = 15f
@@ -240,7 +243,7 @@ fun MapScreen(
                             context,
                             latLng.latitude.toString(),
                             latLng.longitude.toString()
-                        ) { deliveryStatus, currentRestaurantBranch ->
+                        ) { deliveryStatus, currentRestaurantBranch,areaId ->
                             Log.d("MapScreen", "checkLocationDelivery result: deliveryStatus=$deliveryStatus, currentRestaurantBranch=$currentRestaurantBranch")
                             Log.d("MapScreen", "Stored Current restaurant branch: ${mapViewModel.tokenManger.getCurrentResturentBranch()}")
                             when (deliveryStatus) {
@@ -258,14 +261,43 @@ fun MapScreen(
                                             Log.d("MapScreen", "Navigating to: $route")
                                             try {
                                                 navController.navigate(route) {
-                                                    popUpTo(Screen.MapScreen.route) { inclusive = true }
+                                                    popUpTo(Screen.HomeScreen.route) { inclusive = true }
                                                 }
                                                 Log.d("MapScreen", "Navigation successful")
                                             } catch (e: Exception) {
                                                 Log.e("MapScreen", "Navigation failed: ${e.message}", e)
                                                 Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
                                             }
-                                        } else {
+                                        }
+                                        else if(navigateFrom =="addAddress"){
+                                            val route = "all_address_screen/{screenType}?lat=${latLng.latitude}&lng=${latLng.longitude}&areaId=${areaId}"
+                                            Log.d("MapScreen", "Navigating to: $route")
+                                            try {
+                                                navController.navigate(route) {
+                                                    popUpTo(Screen.AllAddressesScreen.route) { inclusive = true }
+                                                }
+                                                Log.d("MapScreen", "Navigation successful")
+                                            } catch (e: Exception) {
+                                                Log.e("MapScreen", "Navigation failed: ${e.message}", e)
+                                                Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                            }
+
+                                        } else if(navigateFrom =="editAddress"){
+                                            val route = "update_address_screen/{addressId}?lat=${latLng.latitude}&lng=${latLng.longitude}&areaId=${areaId}"
+                                            Log.d("MapScreen", "Navigating to: $route")
+                                            try {
+                                                navController.navigate(route) {
+                                                    popUpTo(Screen.UpdateAddressScreen.route) { inclusive = true }
+                                                }
+                                                Log.d("MapScreen", "Navigation successful")
+                                            } catch (e: Exception) {
+                                                Log.e("MapScreen", "Navigation failed: ${e.message}", e)
+                                                Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                            }
+
+                                        }
+
+                                        else {
                                             Log.w("MapScreen", "Navigation not implemented for navigateFrom=$navigateFrom")
                                             Toast.makeText(context, "Navigation not implemented for $navigateFrom", Toast.LENGTH_SHORT).show()
                                         }

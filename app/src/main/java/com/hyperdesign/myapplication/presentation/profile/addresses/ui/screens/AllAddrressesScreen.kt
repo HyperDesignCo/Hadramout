@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,15 +41,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
+import com.google.android.gms.maps.model.LatLng
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.AddressEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
+import com.hyperdesign.myapplication.presentation.home.mvi.HomeIntents
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.AddressesIntents
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.AddressesViewModel
+import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.UpdateAddressViewModel
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.widgets.AddressItem
 import com.hyperdesign.myapplication.presentation.utilies.ValidationEvent
 import kotlinx.coroutines.flow.collectLatest
@@ -56,7 +61,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AllAddressesScreen(type:String?,addressViewModel: AddressesViewModel = koinViewModel()) {
+fun AllAddressesScreen(type:String?,navBackStackEntry: NavBackStackEntry?=null,addressViewModel: AddressesViewModel = koinViewModel(),updateAddressViewModel: UpdateAddressViewModel=koinViewModel()) {
     val navController = LocalNavController.current
     val addressState by addressViewModel.addressState.collectAsStateWithLifecycle()
     var addresses by remember { mutableStateOf<List<AddressEntity>>(emptyList()) }
@@ -65,13 +70,45 @@ fun AllAddressesScreen(type:String?,addressViewModel: AddressesViewModel = koinV
     val context = LocalContext.current
     var showRationaleDialog by remember { mutableStateOf(false) }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            addressViewModel.fetchCurrentLocation()
-        } else {
-            Log.w("Permission", "Location permission denied")
+//    val permissionLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.RequestPermission()
+//    ) { isGranted ->
+//        if (isGranted) {
+//            addressViewModel.fetchCurrentLocation()
+//        } else {
+//            Log.w("Permission", "Location permission denied")
+//        }
+//    }
+
+
+    val navArgsKey by rememberUpdatedState(
+        "${navBackStackEntry?.arguments?.getString("lat")}:${navBackStackEntry?.arguments?.getString("lng")}:${navBackStackEntry?.arguments?.getString("pickup")}"
+    )
+
+
+    LaunchedEffect(navArgsKey) {
+        navBackStackEntry?.arguments?.let { args ->
+            val lat = args.getString("lat")
+            val lng = args.getString("lng")
+            val areaId = args.getString("areaId")
+            Log.d("Alladdress", "Received args from MapScreen: lat=$lat, lng=$lng, areaId=$areaId")
+
+            if (lat != null && lng != null&& areaId!=null && lat.isNotEmpty() && lng.isNotEmpty()&& areaId.isNotEmpty()) {
+                try {
+                    showBottomSheet=true
+                    addressState.lat=lat
+                    addressState.long =lng
+                    addressViewModel.handleIntents(AddressesIntents.ChangeAreaId(areaId.toInt()))
+
+//                    userLocation = LatLng(lat.toDouble(), lng.toDouble())
+//                    homeViewModel.handleIntents(HomeIntents.ChangeLat(lat))
+//                    homeViewModel.handleIntents(HomeIntents.ChangeLng(lng))
+//                    homeViewModel.handleIntents(HomeIntents.CheckLocation)
+//                    Log.d("HomeScreen", "Processed location from MapScreen: $userLocation")
+                } catch (e: NumberFormatException) {
+                    Log.e("HomeScreen", "Invalid lat/lng format: lat=$lat, lng=$lng", e)
+                }
+            }
         }
     }
 
@@ -100,27 +137,7 @@ fun AllAddressesScreen(type:String?,addressViewModel: AddressesViewModel = koinV
     }
 
     // Check and request permission when screen is entered
-    LaunchedEffect(Unit) {
-        val activity = context as? ComponentActivity
-        if (activity != null) {
-            when {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    addressViewModel.fetchCurrentLocation()
-                }
-                activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                    showRationaleDialog = true
-                }
-                else -> {
-                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                }
-            }
-        } else {
-            Log.w("Permission", "No Activity context available, skipping permission check")
-        }
-    }
+
 
     // Rationale dialog
     if (showRationaleDialog) {
@@ -131,7 +148,7 @@ fun AllAddressesScreen(type:String?,addressViewModel: AddressesViewModel = koinV
             confirmButton = {
                 TextButton(onClick = {
                     showRationaleDialog = false
-                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+//                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 }) {
                     Text(stringResource(R.string.allow))
                 }
@@ -147,15 +164,19 @@ fun AllAddressesScreen(type:String?,addressViewModel: AddressesViewModel = koinV
     Box(modifier = Modifier.fillMaxSize()) {
         AllAddressesScreenContent(
             onGoToUpdateAddressId = { id ->
-                val addressId = Uri.encode(id ?: "")
-                val lat = Uri.encode(addressState.lat ?: "")
-                val long = Uri.encode(addressState.long ?: "")
-                navController.navigate("${Screen.UpdateAddressScreen.route.replace("{addressId}/{lat}/{long}", "$addressId/$lat/$long")}")
+
+                val addressId = Uri.encode(id )
+                Log.d("myAddressId ",addressId)
+                addressViewModel.tokenManager.setAddressId(addressId)
+                navController.navigate("${Screen.MapScreen.route.replace("{navigateFrom}", "editAddress")}?addressId=$addressId")
             },
             onDeleteAddress = { id -> addressViewModel.handleIntents(AddressesIntents.DeleteAddress(id)) },
             onBackPressed = { navController.popBackStack() },
             addresses = addresses,
-            onAddNewAddressClick = { showBottomSheet = true }
+            onAddNewAddressClick = {
+                navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}","addAddress"))
+//                showBottomSheet = true
+            }
         )
 
         if (addressState.isLoading) {

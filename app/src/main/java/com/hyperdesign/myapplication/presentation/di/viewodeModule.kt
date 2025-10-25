@@ -80,9 +80,9 @@ val viewModels = module {
 
     viewModel<StaticPagesViewModel> { StaticPagesViewModel(get()) }
 
-    viewModel<AddressesViewModel> { AddressesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel<AddressesViewModel> { AddressesViewModel(get(), get(), get(), get(), get(), get(), get(), get(),get()) }
 
-    viewModel<UpdateAddressViewModel> { UpdateAddressViewModel(get(), get(), get(), get(), get()) }
+    viewModel<UpdateAddressViewModel> { UpdateAddressViewModel(get(), get(), get(), get(), get(),get()) }
 
     viewModel<ProfileViewModel> { ProfileViewModel(get(), get()) }
 

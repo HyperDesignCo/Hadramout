@@ -6,6 +6,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.hyperdesign.myapplication.domain.Entity.UserEntity
+import kotlinx.coroutines.flow.update
 
 class TokenManager(private val context: Context) {
 
@@ -18,6 +19,8 @@ class TokenManager(private val context: Context) {
         private const val FCM_TOKEN = "fcm_token"
 
         private const val BRANCH_ID = "branch_id"
+
+        private const val ADDRESS_ID ="address_id"
 
         private const val CURRENT_RESTURANT_BRANCH="current_resturent_Branch"
         private const val STATUS = "status"
@@ -33,6 +36,8 @@ class TokenManager(private val context: Context) {
             throw e
         }
     }
+
+
 
     private val encryptedSharedPreferences by lazy {
         try {
@@ -61,6 +66,17 @@ class TokenManager(private val context: Context) {
         encryptedSharedPreferences.edit()
             .putString(ACCESS_TOKEN, accessToken)
             .apply()
+    }
+
+
+    fun setAddressId(addressId:String){
+        encryptedSharedPreferences.edit()
+            .putString(ADDRESS_ID, addressId)
+            .apply()
+    }
+
+    fun getAddressId(): String? {
+        return encryptedSharedPreferences.getString(ADDRESS_ID,"")
     }
 
     fun saveUserData(user: UserEntity?) {

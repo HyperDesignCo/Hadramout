@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.hyperdesign.myapplication.R
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.Entity.CreateNewAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteAddressRequest
 import com.hyperdesign.myapplication.domain.usecase.home.GetAllAddressUseCase
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -37,7 +39,8 @@ class AddressesViewModel @Inject constructor(
     private val validatePhoneNumber: ValidatePhoneNumber,
     @ApplicationContext private val context: Context,
     private val createNewAddressUseCase: CreateNewAddressUseCase,
-    private val deleteAddressUseCase: DeleteAddressUseCase
+    private val deleteAddressUseCase: DeleteAddressUseCase,
+    val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _addressState = MutableStateFlow(AddressesModelState())
@@ -51,38 +54,52 @@ class AddressesViewModel @Inject constructor(
     }
 
     init {
+        _addressState.update { it->
+            it.copy(phone = tokenManager.getUserData()?.mobile.orEmpty())
+        }
         getAllAddress()
-        getRegions()
+//        getRegions()
     }
 
     fun handleIntents(intent: AddressesIntents) {
         when (intent) {
             AddressesIntents.GetAddress -> getAllAddress()
             is AddressesIntents.GetArea -> getAreaByRegionId(intent.regionId)
-            AddressesIntents.GetRegions -> getRegions()
+            AddressesIntents.GetRegions ->{
+//                getRegions()
+            }
             is AddressesIntents.SaveNewAddress -> saveNewAddress(intent.lat, intent.long)
             is AddressesIntents.ChangeApartmentNumValue -> _addressState.value = _addressState.value.copy(apartmentNumber = intent.apartmentNum)
             is AddressesIntents.ChangeBuildingNumValue -> _addressState.value = _addressState.value.copy(buildingNumber = intent.buildingNum)
             is AddressesIntents.ChangeDistrictValue -> _addressState.value = _addressState.value.copy(district = intent.district)
             is AddressesIntents.ChangeExtraInfoValue -> _addressState.value = _addressState.value.copy(extraInfo = intent.extraInfo)
             is AddressesIntents.ChangeFloorNumValue -> _addressState.value = _addressState.value.copy(floorNumber = intent.floorNum)
-            is AddressesIntents.ChangePhone1Value -> _addressState.value = _addressState.value.copy(phone = intent.phone1)
-            is AddressesIntents.ChangePhone2Value -> _addressState.value = _addressState.value.copy(secondPhoneNum = intent.phone2)
+            is AddressesIntents.ChangePhone1Value ->{ _addressState.value =
+                _addressState.value.copy(phone = intent.phone1, phoneError = null)
+            }
+            is AddressesIntents.ChangePhone2Value ->{
+                _addressState.value = _addressState.value.copy(secondPhoneNum = intent.phone2, secondPhoneNumError = null)
+            }
             is AddressesIntents.ChangeSpecialSignValue -> _addressState.value = _addressState.value.copy(specialSign = intent.specialSign)
-            is AddressesIntents.ChangeStreetValue -> _addressState.value = _addressState.value.copy(street = intent.street)
-            is AddressesIntents.ChangeRegionId -> {
-                val newRegionId = intent.regionId
+            is AddressesIntents.ChangeStreetValue -> {
                 _addressState.value = _addressState.value.copy(
-                    regionId = newRegionId,
-                    regionError = if (newRegionId == 0) context.getString(R.string.region_is_requierd) else null
+                    street = intent.street,
+                    streetError = null
                 )
-                if (newRegionId != 0) {
-                    getAreaByRegionId(newRegionId)
-                }
+            }
+            is AddressesIntents.ChangeRegionId -> {
+//                val newRegionId = intent.regionId
+//                _addressState.value = _addressState.value.copy(
+//                    regionId = newRegionId,
+//                    regionError = if (newRegionId == 0) context.getString(R.string.region_is_requierd) else null
+//                )
+//                if (newRegionId != 0) {
+//                    getAreaByRegionId(newRegionId)
+//                }
             }
             is AddressesIntents.ChangeAreaId -> _addressState.value = _addressState.value.copy(
                 areaId = intent.areaId.toString(),
-                areaError = if (intent.areaId == 0) context.getString(R.string.area_is_requied) else null
+//                areaError = if (intent.areaId == 0) context.getString(R.string.area_is_requied) else null
             )
             is AddressesIntents.DeleteAddress -> deleteAddress(intent.id)
         }
@@ -148,38 +165,40 @@ class AddressesViewModel @Inject constructor(
     }
 
     private fun saveNewAddress(lat: String, long: String) {
-        val regionResult = validateText.execute(_addressState.value.regionId.toString())
-        val areaResult = validateText.execute(_addressState.value.areaId)
-        val districtResult = validateText.execute(_addressState.value.district)
+//        val areaResult = validateText.execute(_addressState.value.areaId)
+//        val districtResult = validateText.execute(_addressState.value.district)
         val streetValue = validateText.execute(_addressState.value.street)
         val phoneNum = validatePhoneNumber.execute(_addressState.value.phone)
-        val hasError = listOf(regionResult, areaResult, districtResult, streetValue, phoneNum).any { !it.successful }
+        val secondNum =  validatePhoneNumber.execute(_addressState.value.secondPhoneNum)
+        val hasError = listOf( streetValue, secondNum,phoneNum).any { !it.successful }
 
-        val regionIdError = if (_addressState.value.regionId == 0) context.getString(R.string.region_is_requierd) else null
-        val areaIdError = if (_addressState.value.areaId.isEmpty() || _addressState.value.areaId == "0") context.getString(R.string.area_is_requied) else null
-        val districtError = if (districtResult.successful) null else context.getString(R.string.your_district_required)
+//        val areaIdError = if (_addressState.value.areaId.isEmpty() || _addressState.value.areaId == "0") context.getString(R.string.area_is_requied) else null
+//        val districtError = if (districtResult.successful) null else context.getString(R.string.your_district_required)
         val streetError = if (streetValue.successful) null else context.getString(R.string.your_street_requied)
         val phoneError = if (phoneNum.successful) null else context.getString(R.string.invalid_phone_number_format)
+        val secondPhoneError = if (secondNum.successful) null else context.getString(R.string.invalid_phone_number_format)
 
-        if (hasError || regionIdError != null || areaIdError != null) {
+        if (hasError) {
             _addressState.value = _addressState.value.copy(
-                regionError = regionIdError,
-                areaError = areaIdError,
-                districtError = districtError,
+//                districtError = districtError,
                 streetError = streetError,
-                phoneError = phoneError
+                phoneError = phoneError,
+                secondPhoneNumError = secondPhoneError
             )
             return
         }
 
-        _addressState.value = _addressState.value.copy(isLoading = true)
+        _addressState.value = _addressState.value.copy(
+            isLoading = true,
+            streetError=null,
+            phoneError = null,
+            secondPhoneNumError = null
+        )
 
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val createNewAddressRequest = CreateNewAddressRequest(
-                    region_id = _addressState.value.regionId.toString(),
                     area_id = _addressState.value.areaId,
-                    sub_region = _addressState.value.district,
                     street = _addressState.value.street,
                     main_phone = _addressState.value.phone,
                     building_number = _addressState.value.buildingNumber,
@@ -232,24 +251,24 @@ class AddressesViewModel @Inject constructor(
         }
     }
 
-    private fun getRegions() {
-        _addressState.value = _addressState.value.copy(isLoading = true)
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                val response = getRegionsUseCase()
-                _addressState.value = _addressState.value.copy(
-                    isLoading = false,
-                    regions = response
-                )
-            }.onFailure {
-                _addressState.value = _addressState.value.copy(
-                    isLoading = false,
-                    errorMsg = it.message
-                )
-                Log.e("failed to get regions", it.message.toString())
-            }
-        }
-    }
+//    private fun getRegions() {
+//        _addressState.value = _addressState.value.copy(isLoading = true)
+//        viewModelScope.launch(Dispatchers.IO) {
+//            runCatching {
+//                val response = getRegionsUseCase()
+//                _addressState.value = _addressState.value.copy(
+//                    isLoading = false,
+//                    regions = response
+//                )
+//            }.onFailure {
+//                _addressState.value = _addressState.value.copy(
+//                    isLoading = false,
+//                    errorMsg = it.message
+//                )
+//                Log.e("failed to get regions", it.message.toString())
+//            }
+//        }
+//    }
 
     private fun getAllAddress() {
         _addressState.value = _addressState.value.copy(isLoading = true)

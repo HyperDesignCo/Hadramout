@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.main.navcontroller
 
 import MenuScreen
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -165,28 +166,31 @@ fun AppNavigation(startDestination: String) {
                 composable(Screen.PrivacyPolicyScreen.route) { PrivacyPolicyScreen() }
 
                 composable(
-                    Screen.AllAddressesScreen.route,
-                    arguments = listOf(navArgument("screenType") { type = NavType.StringType })
+                    "${Screen.AllAddressesScreen.route}?lat={lat}&lng={lng}&areaId={areaId}",
+                    arguments = listOf(
+                        navArgument("lat") { type = NavType.StringType; defaultValue = "" },
+                        navArgument("lng") { type = NavType.StringType; defaultValue = "" },
+                        navArgument("areaId") { type = NavType.StringType; defaultValue = "" },
+                        navArgument("screenType") { type = NavType.StringType })
                 ) { navBackStack ->
                     val screenType = navBackStack.arguments?.getString("screenType")
-                    AllAddressesScreen(screenType)
+                    AllAddressesScreen(screenType,navBackStack)
                 }
 
                 composable(
-                    Screen.UpdateAddressScreen.route,
+                    "${Screen.UpdateAddressScreen.route}?lat={lat}&lng={lng}&areaId={areaId}",
                     arguments = listOf(
-                        navArgument("addressId") { type = NavType.StringType },
-                        navArgument("lat") { type = NavType.StringType },
-                        navArgument("long") { type = NavType.StringType }
+                        navArgument("areaId") { type = NavType.StringType ;defaultValue = "" },
+                        navArgument("lat") { type = NavType.StringType;defaultValue = ""  },
+                        navArgument("long") { type = NavType.StringType;defaultValue = ""  },
+                        navArgument("addressId") { type = NavType.StringType }
                     )
                 ) { navBackStack ->
                     val addressId = navBackStack.arguments?.getString("addressId")
-                    val lat = navBackStack.arguments?.getString("lat")
-                    val long = navBackStack.arguments?.getString("long")
                     UpdateAddressScreen(
                         addressId = addressId.orEmpty(),
-                        lat = lat.orEmpty(),
-                        long = long.orEmpty()
+                        navBackStackEntry=navBackStack
+
                     )
                 }
 
@@ -198,12 +202,17 @@ fun AppNavigation(startDestination: String) {
                         navArgument("navigateFrom") {
                             type = NavType.StringType
                             defaultValue = ""
+                        },
+                        navArgument("addressId") {
+                            type = NavType.StringType
+                            defaultValue = ""
                         }
                     )
                 ) { backStackEntry ->
                     val navigateFrom = backStackEntry.arguments?.getString("navigateFrom")?.trim() ?: ""
-                    Log.d("AppNavigation", "MapScreen navigateFrom: $navigateFrom")
-                    MapScreen(navigateFrom = navigateFrom)
+                    val addressId = backStackEntry.arguments?.getString("addressId")?.let { Uri.decode(it) } ?: ""  // Decode here
+                    Log.d("AppNavigation", "MapScreen navigateFrom: $navigateFrom, addressId: $addressId")  // Log for debugging
+                    MapScreen(navigateFrom = navigateFrom, addressId = addressId)  // Pass addressId directly
                 }
             }
         }

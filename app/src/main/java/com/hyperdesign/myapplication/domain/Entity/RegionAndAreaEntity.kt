@@ -17,9 +17,7 @@ data class RegionResponseEntity(
 
 
 data class CreateNewAddressRequest(
-    val region_id: String,
     val area_id: String,
-    val sub_region: String,
     val street: String,
     val main_phone: String,
     val phone: String,
@@ -39,9 +37,7 @@ data class DeleteAddressRequest(
 data class updateAddressRequest(
 
     val id:String,
-    val region_id: String,
     val area_id: String,
-    val sub_region: String,
     val street: String,
     val main_phone: String,
     val phone: String,

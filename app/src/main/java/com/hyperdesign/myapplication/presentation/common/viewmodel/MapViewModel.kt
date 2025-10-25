@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.common.viewmodel
 
+import android.R
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -195,17 +196,18 @@ class MapViewModel(
         }
     }
 
-    fun checkLocationDelivery(context: Context, lat: String, lng: String, callback: (String, String?) -> Unit) {
+    fun checkLocationDelivery(context: Context, lat: String, lng: String, callback: (String, String?,String) -> Unit) {
         viewModelScope.launch {
             try {
                 val request = checkLocationRequest(lat, lng)
                 val response = checkLocationUseCase(request)
                 val deliveryStatus = response.data.deliveryStatus
                 val currentRestaurantBranch = response.data.currentResturantBranch
-                callback(deliveryStatus, currentRestaurantBranch)
+                val areaId = response.data.currentArea
+                callback(deliveryStatus, currentRestaurantBranch,areaId)
             } catch (e: Exception) {
                 Log.e("MapViewModel", "Delivery check error", e)
-                callback("0", null)
+                callback("0", null,"")
             }
         }
     }

@@ -9,13 +9,13 @@ data class AddressesModelState(
     val isLoading: Boolean = false,
     val errorMsg: String? = null,
     val addresses: AddressResponseEntity? = null,
-    val regions: RegionResponseEntity? = null,
+//    val regions: RegionResponseEntity? = null,
     val area: AreaResponseEntity? = null,
-    val regionIdValue: String = "",
-    val regionError: String? = null,
+//    val regionIdValue: String = "",
+//    val regionError: String? = null,
     val areaIdValue: String = "",
     val areaId: String = "",
-    val areaError: String? = null,
+//    val areaError: String? = null,
     val district: String = "",
     val districtError: String? = null,
     val street: String = "",
@@ -29,8 +29,9 @@ data class AddressesModelState(
     val extraInfo: String = "",
     val regionId: Int = 0,
     val secondPhoneNum: String = "",
+    val secondPhoneNumError:String?=null,
     val createNewAddressRespnse: AddToCartResponseEntity?=null,
     val deleteAddressRespnse: AddToCartResponseEntity?=null,
-    val lat: String = "", // Added latitude
-    val long: String = "" // Added longitude
+    var lat: String = "", // Added latitude
+    var long: String = "" // Added longitude
 )

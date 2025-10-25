@@ -79,58 +79,40 @@ fun AddNewAddressBottomSheet(
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp)
                 ) {
-                    item {
-                        Spacer(modifier = Modifier.padding(vertical = 10.dp))
-                        Text(stringResource(R.string.region), fontSize = 17.sp, color = Color.Black)
-                        Spacer(modifier = Modifier.padding(vertical = 5.dp))
+//
+//                    item {
+//                        Spacer(modifier = Modifier.padding(vertical = 10.dp))
+//                        Text(stringResource(R.string.area), fontSize = 17.sp, color = Color.Black)
+//                        Spacer(modifier = Modifier.padding(vertical = 5.dp))
+//                        CustomSearchableDropdownMenu(
+//                            items = state.area?.areas.orEmpty(),
+//                            onItemSelected = { /* Not needed */ },
+//                            onItemSelectId = { selected ->
+//                                viewModel.handleIntents(AddressesIntents.ChangeAreaId(selected.id))
+//                            },
+//                            selectedItem = state.areaIdValue,
+//                            isError = state.areaError != null,
+//                            errorMessage = state.areaError,
+//                            selectedId = state.areaId.toIntOrNull(),
+//                            modifier = Modifier.fillMaxWidth()
+//                        )
+//                    }
 
-                        CustomSearchableDropdownMenu(
-                            items = state.regions?.regions.orEmpty(),
-                            onItemSelected = { /* Not needed */ },
-                            onItemSelectId = { selected ->
-                                viewModel.handleIntents(AddressesIntents.ChangeRegionId(selected.id))
-                            },
-                            selectedItem = state.regionIdValue,
-                            isError = state.regionError != null,
-                            errorMessage = state.regionError,
-                            selectedId = state.regionId,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.padding(vertical = 10.dp))
-                        Text(stringResource(R.string.area), fontSize = 17.sp, color = Color.Black)
-                        Spacer(modifier = Modifier.padding(vertical = 5.dp))
-                        CustomSearchableDropdownMenu(
-                            items = state.area?.areas.orEmpty(),
-                            onItemSelected = { /* Not needed */ },
-                            onItemSelectId = { selected ->
-                                viewModel.handleIntents(AddressesIntents.ChangeAreaId(selected.id))
-                            },
-                            selectedItem = state.areaIdValue,
-                            isError = state.areaError != null,
-                            errorMessage = state.areaError,
-                            selectedId = state.areaId.toIntOrNull(),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.padding(vertical = 10.dp))
-                        Text(stringResource(R.string.district), fontSize = 17.sp, color = Color.Black)
-                        Spacer(modifier = Modifier.padding(vertical = 5.dp))
-                        CustomTextField(
-                            value = state.district,
-                            onValueChange = { viewModel.handleIntents(AddressesIntents.ChangeDistrictValue(it)) },
-                            borderWidth = 1f,
-                            isError = state.districtError != null,
-                            errorMessage = state.districtError,
-                            modifier = Modifier.fillMaxWidth(),
-                            focusRequester = districtFocusRequester,
-                            nextFocusRequester = streetFocusRequester
-                        )
-                    }
+//                    item {
+//                        Spacer(modifier = Modifier.padding(vertical = 10.dp))
+//                        Text(stringResource(R.string.district), fontSize = 17.sp, color = Color.Black)
+//                        Spacer(modifier = Modifier.padding(vertical = 5.dp))
+//                        CustomTextField(
+//                            value = state.district,
+//                            onValueChange = { viewModel.handleIntents(AddressesIntents.ChangeDistrictValue(it)) },
+//                            borderWidth = 1f,
+//                            isError = state.districtError != null,
+//                            errorMessage = state.districtError,
+//                            modifier = Modifier.fillMaxWidth(),
+//                            focusRequester = districtFocusRequester,
+//                            nextFocusRequester = streetFocusRequester
+//                        )
+//                    }
 
                     item {
                         Spacer(modifier = Modifier.padding(vertical = 10.dp))
@@ -174,6 +156,8 @@ fun AddNewAddressBottomSheet(
                             onValueChange = { viewModel.handleIntents(AddressesIntents.ChangePhone2Value(it)) },
                             borderWidth = 1f,
                             keyboardType = KeyboardType.Number,
+                            isError = state.secondPhoneNumError!=null,
+                            errorMessage = state.secondPhoneNumError,
                             modifier = Modifier.fillMaxWidth(),
                             focusRequester = secondPhoneFocusRequester,
                             nextFocusRequester = buildingNumberFocusRequester
@@ -272,8 +256,11 @@ fun AddNewAddressBottomSheet(
                                         long = long
                                     )
                                 )
-                                onDismissRequest()
-                                onBackClick()
+                                if (state.phone.isNotEmpty()&&state.street.isNotEmpty()&&state.secondPhoneNum.isNotEmpty()&&state.secondPhoneNumError==null&&state.phoneError==null&&state.streetError==null){
+                                    onDismissRequest()
+                                    onBackClick()
+                                }
+
                             }
                         )
                     }

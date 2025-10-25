@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.Entity.CreateNewAddressRequest
 import com.hyperdesign.myapplication.domain.Entity.updateAddressRequest
 import com.hyperdesign.myapplication.domain.usecase.profile.GetAreaUseCase
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +28,7 @@ class UpdateAddressViewModel(
     private val updateAddressUseCase: UpdateAddressUseCase,
     private val getRegionsUseCase: GetRegionsUseCase,
     private val getAreaUseCase: GetAreaUseCase,
+    val tokenManager: TokenManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -36,14 +39,15 @@ class UpdateAddressViewModel(
     val addressChannel = _addressChannel.receiveAsFlow()
 
     init {
-        getRegions() // Fetch regions on initialization
     }
+
+
 
     fun handleIntents(intent: UpdateAddressIntents) {
         when (intent) {
             is UpdateAddressIntents.FetchAddress -> fetchAddress(intent.addressId)
             is UpdateAddressIntents.SaveUpdatedAddress -> saveUpdatedAddress(
-                intent.regionId, intent.areaId, intent.district, intent.street,
+                 intent.areaId, intent.street,
                 intent.firstPhoneNum, intent.secondPhoneNum, intent.buildingNum,
                 intent.floorNum, intent.apartmentNum, intent.specialSign,
                 intent.extraInfo, intent.lat, intent.long
@@ -58,20 +62,14 @@ class UpdateAddressViewModel(
             is UpdateAddressIntents.ChangeSpecialSignValue -> _addressState.value = _addressState.value.copy(specialSign = intent.specialSign)
             is UpdateAddressIntents.ChangeStreetValue -> _addressState.value = _addressState.value.copy(street = intent.street)
             is UpdateAddressIntents.ChangeRegionId -> {
-                val newRegionId = intent.regionId
-                _addressState.value = _addressState.value.copy(
-                    regionId = newRegionId,
-                    regionError = if (newRegionId == 0) "Region is required" else null
-                )
-                if (newRegionId != 0) {
-                    getAreaByRegionId(newRegionId)
-                }
+
             }
             is UpdateAddressIntents.ChangeAreaId -> _addressState.value = _addressState.value.copy(
                 areaId = intent.areaId.toString(),
-                areaError = if (intent.areaId == 0) "Area is required" else null
             )
-            UpdateAddressIntents.GetRegions -> getRegions()
+            UpdateAddressIntents.GetRegions -> {
+
+            }
         }
     }
 
@@ -110,7 +108,7 @@ class UpdateAddressViewModel(
     }
 
     private fun saveUpdatedAddress(
-        regionId: String, areaId: String, district: String, street: String,
+         areaId: String, street: String,
         firstPhoneNum: String, secondPhoneNum: String, buildingNum: String,
         floorNum: String, apartmentNum: String, specialSign: String,
         extraInfo: String, lat: String, long: String
@@ -119,10 +117,8 @@ class UpdateAddressViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val request = updateAddressRequest(
-                    id = _addressState.value.addressId,
-                    region_id = regionId,
+                    id = tokenManager.getAddressId().toString(),
                     area_id = areaId,
-                    sub_region = district,
                     street = street,
                     main_phone = firstPhoneNum,
                     phone = secondPhoneNum,
@@ -155,24 +151,6 @@ class UpdateAddressViewModel(
         }
     }
 
-    private fun getRegions() {
-        _addressState.value = _addressState.value.copy(isLoading = true)
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                val response = getRegionsUseCase() // Assuming ShowAddressUseCase has this method
-                _addressState.value = _addressState.value.copy(
-                    isLoading = false,
-                    regions = response
-                )
-            }.onFailure {
-                _addressState.value = _addressState.value.copy(
-                    isLoading = false,
-                    errorMsg = it.message
-                )
-                Log.e("UpdateAddressViewModel", "Get regions failed: ${it.message}")
-            }
-        }
-    }
 
     private fun getAreaByRegionId(regionId: Int) {
         _addressState.value = _addressState.value.copy(isLoading = true)
