@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">Hadramout</string>
+    <string name="app_name">حضرموت</string>
     <string name="phone_number">رقم الهاتف</string>
     <string name="coninue">متابعة</string>
     <string name="login_as_a_guest">تسجيل الدخول كضيف</string>
@@ -27,7 +26,7 @@
     <string name="profile">الملف الشخصي</string>
     <string name="menu">القائمة</string>
     <string name="hello">مرحباً</string>
-    <string name="delevery_to">التوصيل من</string>
+    <string name="delevery_to">التوصيل إلى</string>
     <string name="offers">العروض</string>
     <string name="featured">مميز</string>
     <string name="my_orders">طلباتي</string>
@@ -72,7 +71,7 @@
     <string name="price">السعر</string>
     <string name="delivery">التوصيل</string>
     <string name="total_price">السعر الإجمالي</string>
-    <string name="please_enter_your_email_to_receive_the_verification_code">يرجى إدخال بريدك الإلكتروني لتلقي رمز التحقق.</string>
+    <string name="please_enter_your_email_to_receive_the_verification_code">يرجى إدخال بريدك الإلكتروني لتلقي رمز التحقق</string>
     <string name="send">إرسال</string>
     <string name="enter_your_new_password">أدخل كلمة المرور الجديدة</string>
     <string name="new_password_is_required">كلمة المرور الجديدة مطلوبة</string>
@@ -115,7 +114,7 @@
     <string name="special_sign">علامة خاصة</string>
     <string name="extra_info">معلومات إضافية</string>
     <string name="save">حفظ</string>
-    <string name="deny">Deny</string>
+    <string name="deny">رفض</string>
     <string name="second_phone_number">رقم هاتف ثانٍ</string>
     <string name="region_is_requierd">المنطقة مطلوبة</string>
     <string name="area_is_requied">المنطقة الفرعية مطلوبة</string>
@@ -129,28 +128,37 @@
     <string name="pickup_from">استلام من</string>
     <string name="are_you_sure_you_want_to_change_to">هل أنت متأكد أنك تريد التحول إلى %1$s؟</string>
     <string name="egy2">ج.م</string>
-    <string name="you_must_choose">(يجب اختيار %1$d)</string>
-    <string name="you_can_choose">(يمكنك اختيار %1$d)</string>
-    <string name="quantity">Quantity: %1$s</string>
-    <string name="meal_details_fragment_choice_adapter_maximum_choose_text">you can choose</string>
-    <string name="meal_details_fragment_choice_adapter_must_choose_choose_text">Must choose</string>
-    <string name="meal_details_fragment_choice_adapter_minimum_choose_text">Minimum choose</string>
-    <string name="meal_details_fragment_choice_adapter_bracket_choose_text">choose at least</string>
-    <string name="validation_error_min_choices">Please select at least %d options</string>
-    <string name="validation_error_max_choices">You can select up to %d options</string>
-    <string name="validation_error_general">Please fix the selection errors before adding to cart</string>
-    <string name="best_selling">Best Selling</string>
-    <string name="visitor">Visitor</string>
-    <string name="update_data">Update Data</string>
-    <string name="profile_updated_successfully">Profile updated successfully!</string>
-    <string name="you_should_loginin_firstly">You should login fistly to can continue</string>
-    <string name="cancel">Cancel</string>
-    <string name="search">Search</string>
-    <string name="selected_location_is">Selected Location Is</string>
-    <string name="choose_location">Choose Location</string>
-    <string name="current_branches_not_equal">CCurrent Branch Not Equal</string>
-    <string name="change_location_not_work">Please chanmge your location</string>
-    <string name="no_delivery_available">عفوا ,هذا المكان خارج نطاق التوصيل</string>
-    <string name="confirm">Confirm</string>
-    <string name="change_Location">Change Location</string>
+    <string name="you_must_choose">يجب اختيار %1$d</string>
+    <string name="you_can_choose">يمكنك اختيار %1$d</string>
+    <string name="quantity">الكمية: %1$s</string>
+    <string name="meal_details_fragment_choice_adapter_maximum_choose_text">يمكنك اختيار</string>
+    <string name="meal_details_fragment_choice_adapter_must_choose_choose_text">يجب اختيار</string>
+    <string name="meal_details_fragment_choice_adapter_minimum_choose_text">الحد الأدنى للاختيار</string>
+    <string name="meal_details_fragment_choice_adapter_bracket_choose_text">اختر على الأقل</string>
+    <string name="validation_error_min_choices">يرجى اختيار %d خيارات على الأقل</string>
+    <string name="validation_error_max_choices">يمكنك اختيار ما يصل إلى %d خيارات</string>
+    <string name="validation_error_general">يرجى تصحيح أخطاء الاختيار قبل الإضافة إلى السلة</string>
+    <string name="best_selling">الأكثر مبيعاً</string>
+    <string name="visitor">زائر</string>
+    <string name="update_data">تحديث البيانات</string>
+    <string name="profile_updated_successfully">تم تحديث الملف الشخصي بنجاح!</string>
+    <string name="you_should_loginin_firstly">يجب تسجيل الدخول أولاً للمتابعة</string>
+    <string name="cancel">إلغاء</string>
+    <string name="search">بحث</string>
+    <string name="selected_location_is">الموقع المختار هو</string>
+    <string name="choose_location">اختر الموقع</string>
+    <string name="current_branches_not_equal">الفرع الحالي غير متطابق</string>
+    <string name="change_location_not_work">يرجى تغيير موقعك</string>
+    <string name="no_delivery_available">عفواً، هذا المكان خارج نطاق التوصيل</string>
+    <string name="confirm">تأكيد</string>
+    <string name="change_Location">تغيير الموقع</string>
+    <string name="update_your_profile">تحديث ملفك الشخصي</string>
+    <string name="minutes">%1$s دقيقة</string>
+    <string name="pickup_time">استلام خلال</string>
+    <string name="delivery_time">التوصيل خلال</string>
+    <string name="location_permission_required">مطلوب إذن الموقع للمتابعة</string>
+    <string name="grant_permission">منح الإذن</string>
+    <string name="change_branch">Change Branch</string>
+    <string name="different_branch">عند التغيير الى هذا الموقع قد تختلف اتاحية العناصر, لذلك سيتم افراغ عربة التسوق الخاصه بك
+هل ترغب بالإستمرار</string>
 </resources>

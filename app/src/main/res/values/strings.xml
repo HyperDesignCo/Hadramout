@@ -148,7 +148,15 @@
     <string name="choose_location">Choose Location</string>
     <string name="current_branches_not_equal">CCurrent Branch Not Equal</string>
     <string name="change_location_not_work">Please chanmge your location</string>
-    <string name="no_delivery_available">عفوا ,هذا المكان خارج نطاق التوصيل</string>
     <string name="confirm">Confirm</string>
     <string name="change_Location">Change Location</string>
+    <string name="update_your_profile">Update Your Profile</string>
+    <string name="minutes">%1$s minutes</string>
+    <string name="location_permission_required">Location permission is required to proceed</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="no_delivery_available">Sorry, this location is outside the delivery range</string>
+    <string name="pickup_time">Pickup within</string>
+    <string name="delivery_time">Delivery within</string>
+    <string name="change_branch">Change Branch</string>
+    <string name="different_branch">When you switch to this site, the availability of items may vary, so your shopping cart will be emptied.\nDo you want to continue?</string>
 </resources>

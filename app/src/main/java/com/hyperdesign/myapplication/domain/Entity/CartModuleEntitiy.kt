@@ -1,10 +1,12 @@
 package com.hyperdesign.myapplication.domain.Entity
 
 import com.google.gson.annotations.SerializedName
+import org.checkerframework.checker.units.qual.Time
 
 data class CartResponseEntity(
     val cart: CartEntity?, // Made nullable to handle cart=null
-    val message: String?
+    val message: String?,
+    val deliveryTime: String?=null
 )
 
 data class CartEntity(
@@ -47,14 +49,19 @@ data class CartMealEntity(
 
 data class ShowCartRequest(
     @SerializedName("branch_id")
-    val branchId: String
+    val branchId: String,
+    @SerializedName("area_id")
+    val areaId: String,
+
 )
 
 data class DeleteCartRequest(
     @SerializedName("cart_id")
     val cartId: String,
     @SerializedName("item_id")
-    val itemId: String
+    val itemId: String,
+    @SerializedName("area_id")
+    val areaId: String,
 )
 
 data class UpdateCartItemQuantityRequest(
@@ -63,7 +70,9 @@ data class UpdateCartItemQuantityRequest(
     @SerializedName("item_id")
     val itemId: String,
     @SerializedName("new_quantity")
-    val newQuantity: String
+    val newQuantity: String,
+    @SerializedName("area_id")
+    val areaId: String,
 )
 
 data class CheckCouponRequest(

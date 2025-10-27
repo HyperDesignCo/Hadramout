@@ -170,7 +170,7 @@ fun OrderItem(
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Text(
-                    text = meal.mealTitle,
+                    text = meal.mealTitle.orEmpty(),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = Secondry,
@@ -180,7 +180,7 @@ fun OrderItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = order.createdAt,
+                    text = order.createdAt.orEmpty(),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     maxLines = 3,
@@ -190,7 +190,7 @@ fun OrderItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = stringResource(R.string.quantity, meal.quantity),
+                    text = stringResource(R.string.quantity, meal.quantity.orEmpty()),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     maxLines = 3,
@@ -200,7 +200,7 @@ fun OrderItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = stringResource(R.string.egy, meal.price),
+                    text = stringResource(R.string.egy, meal.price.orEmpty()),
                     fontSize = 16.sp,
                     color = Color.Gray,
                     maxLines = 3,

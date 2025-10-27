@@ -51,6 +51,7 @@ fun SlideShow.toDomain(): SlideShowEntity{
 
 fun HomeResponseDTO.toDomain(): HomeResponse {
     return HomeResponse(
+        phone = phone,
         homeMenus = homeMenus.map { it.toDomain() },
         bestSalesMeals = bestSalesMeals.map { it.toDomain() },
         ads = ads?.map { it.toDomain() },

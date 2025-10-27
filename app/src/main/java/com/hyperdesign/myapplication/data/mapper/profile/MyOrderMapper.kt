@@ -19,107 +19,116 @@ import com.hyperdesign.myapplication.domain.Entity.PaymentMethodOrderEntity
 import com.hyperdesign.myapplication.domain.Entity.RegionOrderEntity
 import com.hyperdesign.myapplication.domain.Entity.UserOrderEntity
 
-
-fun OrdersResponseDTO.toEntity(): OrdersResponseEntity {
+fun OrdersResponseDTO?.toEntity(): OrdersResponseEntity {
     return OrdersResponseEntity(
-        orders = this.orders.map { it.toEntity() },
-        message = this.message
+        orders = this?.orders?.map { it.toEntity() } ?: emptyList(),
+        message = this?.message
     )
 }
 
-fun OrderDTO.toEntity(): OrderEntity {
+fun OrderDTO?.toEntity(): OrderEntity {
     return OrderEntity(
-        id = this.id,
-        branch = this.branch.toEntity(),
-        paymentMethod = this.paymentMethod?.toEntity(),
-        address = this.address?.toEntity(),
-        distance = this.distance,
-        status = this.status,
-        statusCode = this.statusCode,
-        paymentStatus = this.paymentStatus,
-        user = this.user.toEntity(),
-        referenceNumber = this.referenceNumber,
-        primaryPrice = this.primaryPrice,
-        serviceChargeCost = this.serviceChargeCost,
-        vatCost = this.vatCost,
-        deliveryCost = this.deliveryCost,
-        coupon = this.coupon,
-        couponCost = this.couponCost,
-        offerDiscount = this.offerDiscount,
-        netPrice = this.netPrice,
-        createdAt = this.createdAt,
-        meals = this.meals.map { it.toEntity() }
+        id = this?.id,
+        branch = this?.branch?.toEntity(),
+        paymentMethod = this?.paymentMethod?.toEntity(),
+        address = this?.address?.toEntity(),
+        distance = this?.distance,
+        status = this?.status,
+        statusCode = this?.statusCode,
+        paymentStatus = this?.paymentStatus,
+        user = this?.user?.toEntity(),
+        referenceNumber = this?.referenceNumber,
+        primaryPrice = this?.primaryPrice,
+        serviceChargeCost = this?.serviceChargeCost,
+        vatCost = this?.vatCost,
+        deliveryCost = this?.deliveryCost,
+        coupon = this?.coupon,
+        couponCost = this?.couponCost,
+        offerDiscount = this?.offerDiscount,
+        netPrice = this?.netPrice,
+        createdAt = this?.createdAt,
+        meals = this?.meals?.map { it.toEntity() } ?: emptyList()
     )
 }
 
-fun BranchOrderDTO.toEntity(): BranchOrderEntity {
+fun BranchOrderDTO?.toEntity(): BranchOrderEntity {
     return BranchOrderEntity(
-        id = this.id,
-        title = this.title,
-        lat = this.lat,
-        lng = this.lng
+        id = this?.id,
+        title = this?.title,
+        lat = this?.lat,
+        lng = this?.lng
     )
 }
 
-fun PaymentMethodOrderDTO.toEntity(): PaymentMethodOrderEntity {
-    return PaymentMethodOrderEntity(
-        id = this.id,
-        title = this.title
-    )
+fun PaymentMethodOrderDTO?.toEntity(): PaymentMethodOrderEntity? {
+    return this?.let {
+        PaymentMethodOrderEntity(
+            id = it.id,
+            title = it.title
+        )
+    }
 }
 
-fun AddressOrderDTO.toEntity(): AddressOrderEntity {
-    return AddressOrderEntity(
-        id = this.id,
-        region = this.region.toEntity(),
-        area = this.area.toEntity(),
-        subRegion = this.subRegion,
-        street = this.street,
-        specialSign = this.specialSign,
-        buildingNumber = this.buildingNumber,
-        floorNumber = this.floorNumber,
-        mainPhone = this.mainPhone,
-        phone = this.phone,
-        apartmentNumber = this.apartmentNumber,
-        extraInfo = this.extraInfo,
-        latitude = this.latitude,
-        longitude = this.longitude
-    )
+fun AddressOrderDTO?.toEntity(): AddressOrderEntity? {
+    return this?.let {
+        AddressOrderEntity(
+            id = it.id,
+            region = it.region?.toEntity(),
+            area = it.area?.toEntity(),
+            subRegion = it.subRegion,
+            street = it.street,
+            specialSign = it.specialSign,
+            buildingNumber = it.buildingNumber,
+            floorNumber = it.floorNumber,
+            mainPhone = it.mainPhone,
+            phone = it.phone,
+            apartmentNumber = it.apartmentNumber,
+            extraInfo = it.extraInfo,
+            latitude = it.latitude,
+            longitude = it.longitude
+        )
+    }
 }
 
-fun RegionOrderDTO.toEntity(): RegionOrderEntity {
-    return RegionOrderEntity(
-        id = this.id,
-        name = this.name
-    )
+fun RegionOrderDTO?.toEntity(): RegionOrderEntity? {
+    return this?.let {
+        RegionOrderEntity(
+            id = it.id,
+            name = it.name
+        )
+    }
 }
 
-fun AreaOrderDTO.toEntity(): AreaOrderEntity {
-    return AreaOrderEntity(
-        id = this.id,
-        name = this.name
-    )
+fun AreaOrderDTO?.toEntity(): AreaOrderEntity? {
+    return this?.let {
+        AreaOrderEntity(
+            id = it.id,
+            name = it.name
+        )
+    }
 }
 
-fun UserDTO.toEntity(): UserOrderEntity {
-    return UserOrderEntity(
-        id = this.id,
-        name = this.name
-    )
+fun UserDTO?.toEntity(): UserOrderEntity? {
+    return this?.let {
+        UserOrderEntity(
+            id = it.id,
+            name = it.name
+        )
+    }
 }
 
-fun MealOrderDTO.toEntity(): MealOrderEntity {
+fun MealOrderDTO?.toEntity(): MealOrderEntity {
     return MealOrderEntity(
-        id = this.id,
-        mealTitle = this.mealTitle,
-        mealImage = this.mealImage,
-        sizeTitle = this.sizeTitle,
-        price = this.price,
-        quantity = this.quantity,
-        subChoicesPrice = this.subChoicesPrice,
-        primaryPrice = this.primaryPrice,
-        totalPrice = this.totalPrice,
-        comment = this.comment,
-        choices = this.choices
+        id = this?.id,
+        mealTitle = this?.mealTitle,
+        mealImage = this?.mealImage,
+        sizeTitle = this?.sizeTitle,
+        price = this?.price,
+        quantity = this?.quantity,
+        subChoicesPrice = this?.subChoicesPrice,
+        primaryPrice = this?.primaryPrice,
+        totalPrice = this?.totalPrice,
+        comment = this?.comment,
+        choices = this?.choices ?: emptyList()
     )
 }

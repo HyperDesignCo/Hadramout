@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName
 
 data class CartResponseDto(
     val cart: CartDto?, // Made nullable to handle cart=null case
+    @SerializedName("delivery_time")
+    val deliveryTime:String?=null,
     val message: String
 )
 

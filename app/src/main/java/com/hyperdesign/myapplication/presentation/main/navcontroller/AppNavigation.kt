@@ -154,7 +154,16 @@ fun AppNavigation(startDestination: String) {
                     MealDetailsScreen(mealJson = mealInput)
                 }
 
-                composable(Screen.CheckOutScreen.route) { CheckOutScreen() }
+                composable("${Screen.CheckOutScreen.route}?deliveryTime={deliveryTime}",
+                    arguments = listOf(
+                        navArgument("deliveryTime"){type= NavType.StringType;defaultValue=""}
+                    )
+                    ) {backStack->
+                    val time = backStack.arguments?.getString("deliveryTime")
+                    CheckOutScreen(
+                        deliveryTime =time
+                    )
+                }
                 composable(Screen.CartScreen.route) { CartScreen() }
                 composable(Screen.SignUpScreen.route) { SignUpScreen() }
                 composable(Screen.MyOrders.route) { MyOrderScreen() }

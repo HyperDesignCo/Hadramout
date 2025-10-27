@@ -29,7 +29,6 @@ class HomeViewModel(
     var showAuthDialoge = mutableStateOf(false)
 
 
-    var setChangeLocation = mutableStateOf(false)
 
 
 
@@ -90,6 +89,9 @@ class HomeViewModel(
                         isLoading = false
 
                       )
+                }
+                if (response.data.currentArea.isNotEmpty()){
+                    tokenManager.saveAreaId(response.data.currentArea)
 
                 }
             }.onSuccess {
@@ -131,6 +133,7 @@ class HomeViewModel(
                     isLoading = false,
                     homeMenues = response
                 )
+                tokenManager.saveHomeHotline(response.phone)
             }.onSuccess {
                 _homeState.value = _homeState.value.copy(isLoading = false)
                 Log.d("HomeViewModel", "getHomeMenuSuccess: ${_homeState.value.homeMenues}")

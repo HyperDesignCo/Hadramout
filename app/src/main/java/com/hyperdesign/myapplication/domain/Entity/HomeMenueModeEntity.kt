@@ -3,6 +3,7 @@ package com.hyperdesign.myapplication.domain.Entity
 import com.google.gson.annotations.SerializedName
 
 data class HomeResponse(
+    val phone:String,
     val homeMenus: List<HomeMenu>,
     val bestSalesMeals: List<Meal>,
     val ads : List<AdsEntity>?,

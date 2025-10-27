@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName
 
 
 data class HomeResponseDTO(
+
+    val phone :String,
     @SerializedName("home_menus")
     val homeMenus: List<HomeMenuDTO>,
     @SerializedName("best_sales_meals")

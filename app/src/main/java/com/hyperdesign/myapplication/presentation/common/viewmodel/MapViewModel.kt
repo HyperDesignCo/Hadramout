@@ -1,6 +1,5 @@
 package com.hyperdesign.myapplication.presentation.common.viewmodel
 
-import android.R
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -29,8 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.util.Locale
 
 class MapViewModel(
@@ -40,7 +37,7 @@ class MapViewModel(
     private val checkLocationUseCase: CheckLocationUseCase,
     val tokenManger: TokenManager,
     private val context: Context
-) : ViewModel(), KoinComponent {
+) : ViewModel() {
 
     data class UiState(
         val predictions: List<AutocompletePrediction> = emptyList(),
@@ -57,28 +54,6 @@ class MapViewModel(
 
     init {
         sessionToken = AutocompleteSessionToken.newInstance()
-        loadSavedLocation()
-    }
-
-    private fun loadSavedLocation() {
-        val lat = sharedPreferences.getFloat("latitude", Float.MIN_VALUE).toDouble()
-        val lng = sharedPreferences.getFloat("longitude", Float.MIN_VALUE).toDouble()
-        if (lat != Float.MIN_VALUE.toDouble() && lng != Float.MIN_VALUE.toDouble() &&
-            lat in -90.0..90.0 && lng in -180.0..180.0) {
-            val latLng = LatLng(lat, lng)
-            viewModelScope.launch {
-                val address = reverseGeocode(latLng)
-                _uiState.update { it.copy(targetLatLng = latLng, detectedAddress = address, isLoading = false) }
-                Log.d("MapViewModel", "Loaded saved location: $latLng, Address: $address")
-            }
-        } else {
-            sharedPreferences.edit {
-                remove("latitude")
-                remove("longitude")
-            }
-            _uiState.update { it.copy(isLoading = false) }
-            Log.d("MapViewModel", "No valid saved location found")
-        }
     }
 
     fun searchPlaces(query: String) {
@@ -144,7 +119,7 @@ class MapViewModel(
     }
 
     @SuppressLint("MissingPermission")
-    fun requestCurrentLocation(context: Context) {
+    fun requestCurrentLocation(context: Context, callback: (LatLng) -> Unit) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
@@ -155,6 +130,7 @@ class MapViewModel(
                     _uiState.update { it.copy(targetLatLng = latLng, detectedAddress = address, isLoading = false) }
                     saveLocation(latLng)
                     Log.d("MapViewModel", "Current location set: $latLng")
+                    callback(latLng)
                 } else {
                     val currentLocation = fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
                     if (currentLocation != null) {
@@ -163,14 +139,17 @@ class MapViewModel(
                         _uiState.update { it.copy(targetLatLng = latLng, detectedAddress = address, isLoading = false) }
                         saveLocation(latLng)
                         Log.d("MapViewModel", "Current location set (fallback): $latLng")
+                        callback(latLng)
                     } else {
                         _uiState.update { it.copy(error = "Failed to get current location", isLoading = false) }
                         Log.e("MapViewModel", "Current location is null")
+                        callback(LatLng(30.0444, 31.2357)) // Fallback to default
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Failed to get current location: ${e.message}", isLoading = false) }
                 Log.e("MapViewModel", "Failed to get current location", e)
+                callback(LatLng(30.0444, 31.2357)) // Fallback to default
             }
         }
     }
@@ -196,7 +175,7 @@ class MapViewModel(
         }
     }
 
-    fun checkLocationDelivery(context: Context, lat: String, lng: String, callback: (String, String?,String) -> Unit) {
+    fun checkLocationDelivery(context: Context, lat: String, lng: String, callback: (String, String?, String) -> Unit) {
         viewModelScope.launch {
             try {
                 val request = checkLocationRequest(lat, lng)
@@ -204,10 +183,10 @@ class MapViewModel(
                 val deliveryStatus = response.data.deliveryStatus
                 val currentRestaurantBranch = response.data.currentResturantBranch
                 val areaId = response.data.currentArea
-                callback(deliveryStatus, currentRestaurantBranch,areaId)
+                callback(deliveryStatus, currentRestaurantBranch, areaId)
             } catch (e: Exception) {
                 Log.e("MapViewModel", "Delivery check error", e)
-                callback("0", null,"")
+                callback("0", null, "")
             }
         }
     }

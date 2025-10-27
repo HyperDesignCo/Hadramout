@@ -131,11 +131,11 @@ fun MyOrderScreenContent(onReOrder:(String)-> Unit, orders: List<OrderEntity>, o
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
 
-                items(orders, key = {order-> order.id}){order->
+                items(orders, key = {order-> order.id.orEmpty() }){ order->
                     var meal : MealOrderEntity?=null
-                   order.meals.forEach { meal=it }
+                   order.meals?.forEach { meal=it }
                     meal?.let { OrderItem(order =order, meal = it , onReOrder = {
-                        onReOrder(order.id)
+                        onReOrder(order.id.orEmpty())
                     }) }
 
                     Spacer(modifier = Modifier.height(10.dp))

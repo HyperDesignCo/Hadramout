@@ -10,7 +10,8 @@ import com.hyperdesign.myapplication.domain.Entity.CartResponseEntity
 fun CartResponseDto.toEntity(): CartResponseEntity {
     return CartResponseEntity(
         cart = cart?.toEntity(),
-        message = message.orEmpty()
+        message = message.orEmpty(),
+        deliveryTime = deliveryTime ?:""
     )
 }
 

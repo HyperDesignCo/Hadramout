@@ -54,6 +54,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CheckOutScreen(
+    deliveryTime:String?,
     checkOutViewModel: CheckOutViewModel = koinViewModel(),
     loginViewModel: LoginViewModel = koinViewModel()
 ) {
@@ -149,8 +150,9 @@ fun CheckOutScreen(
             Log.d("CheckOutScreen", "Finish order message: $finishOrderMsg")
             if (finishOrderMsg == "Your order has been sent successfully") {
                 Toast.makeText(context, context.getString(R.string.your_order_has_been_sent_successfully), Toast.LENGTH_SHORT).show()
-                navController.navigate(Screen.HomeScreen.route) {
-                    popUpTo(Screen.HomeScreen.route) { inclusive = false }
+                navController.navigate("${Screen.HomeScreen.route}?lat=noDialoge") {
+                    popUpTo(Screen.HomeScreen.route) { inclusive = true }
+                    launchSingleTop=true
                 }
             } else {
                 Toast.makeText(context, finishOrderMsg, Toast.LENGTH_SHORT).show()
@@ -200,6 +202,8 @@ fun CheckOutScreen(
                 pickUpStatus = deliveryStatus,
                 branchName = if(loginViewModel.tokenManager.getLanguage()=="en") checkState.checkOutResponse?.branch?.titleEn else checkState.checkOutResponse?.branch?.titleAr,
                 branchAddress =if(loginViewModel.tokenManager.getLanguage()=="en") checkState.checkOutResponse?.branch?.addressEn else checkState.checkOutResponse?.branch?.addressAr,
+                deliveryTime = deliveryTime?:""
+
             )
         }
         if (checkState.isLoading) {
@@ -234,7 +238,9 @@ fun CheckOutScreenContent(
     onClickToAddNewAddress: () -> Unit,
     pickUpStatus : Boolean,
     branchName: String?,
-    branchAddress:String?
+    branchAddress:String?,
+    deliveryTime:String
+
 
 ) {
     Log.d("pickUpStatus",pickUpStatus.toString())
@@ -344,7 +350,9 @@ fun CheckOutScreenContent(
             onPayClick = {
                 finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
             },
-            pickUpStatus = pickUpStatus
-        )
+            pickUpStatus = pickUpStatus,
+            deliveryTime = deliveryTime,
+
+            )
     }
 }

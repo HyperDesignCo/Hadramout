@@ -144,11 +144,12 @@ fun CartScreen(
                         )
                     )
                 },
-                onGoToCheckOutScreen = { navController.navigate(Screen.CheckOutScreen.route) },
+                onGoToCheckOutScreen = { navController.navigate("${Screen.CheckOutScreen.route}?deliveryTime=${cartMealState.showCartDate?.deliveryTime.orEmpty()}") },
                 deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
                 totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString() ?: "0",
                 totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString() ?: "0.00",
-                pickUpStatus = deliveryStatus
+                pickUpStatus = deliveryStatus,
+                deliveryTime = cartMealState.showCartDate?.deliveryTime.orEmpty()
             )
         }
         if (cartMealState.isLoading) {
@@ -182,6 +183,7 @@ fun CartScreenContent(
     onCheckCoponClick: () -> Unit,
     onGoToCheckOutScreen: () -> Unit,
     pickUpStatus : Boolean,
+    deliveryTime:String
 ) {
     Column(
         modifier = Modifier
@@ -247,7 +249,8 @@ fun CartScreenContent(
             totalPrice = totalPrice,
             buttonText = stringResource(R.string.complete_order),
             onPayClick = { onGoToCheckOutScreen() },
-            pickUpStatus=pickUpStatus
+            pickUpStatus=pickUpStatus,
+            deliveryTime = deliveryTime,
         )
     }
 }

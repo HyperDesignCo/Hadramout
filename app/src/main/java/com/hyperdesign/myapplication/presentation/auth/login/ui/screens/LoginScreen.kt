@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.auth.login.ui.screens
 
+import android.Manifest
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginIntents
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginStateModel
@@ -38,11 +41,27 @@ import com.hyperdesign.myapplication.presentation.utilies.ValidationEvent
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun LoginScreen(viewModel: LoginViewModel = koinViewModel()) {
     val navController = LocalNavController.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Location permission handling
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
+
+    // Trigger permission request on first composition
+    LaunchedEffect(Unit) {
+        if (!permissionState.allPermissionsGranted) {
+            permissionState.launchMultiplePermissionRequest()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.validationEvents.collectLatest { event ->

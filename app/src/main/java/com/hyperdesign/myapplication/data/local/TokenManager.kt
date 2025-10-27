@@ -21,7 +21,9 @@ class TokenManager(private val context: Context) {
         private const val BRANCH_ID = "branch_id"
 
         private const val ADDRESS_ID ="address_id"
+        private const val HOTLINE ="hotline"
 
+        private const val AREAID = "area_id"
         private const val CURRENT_RESTURANT_BRANCH="current_resturent_Branch"
         private const val STATUS = "status"
     }
@@ -67,6 +69,22 @@ class TokenManager(private val context: Context) {
             .putString(ACCESS_TOKEN, accessToken)
             .apply()
     }
+
+    fun saveHomeHotline(phone:String){
+        encryptedSharedPreferences.edit()
+            .putString(HOTLINE,phone)
+            .apply()
+    }
+
+    fun getHomeHotline() = encryptedSharedPreferences.getString(HOTLINE,"")
+
+    fun saveAreaId(areaId:String){
+        encryptedSharedPreferences.edit()
+            .putString(AREAID,areaId)
+            .apply()
+    }
+
+    fun getAreaId() = encryptedSharedPreferences.getString(AREAID,"")
 
 
     fun setAddressId(addressId:String){

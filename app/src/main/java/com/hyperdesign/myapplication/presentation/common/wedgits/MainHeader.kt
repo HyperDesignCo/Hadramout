@@ -117,24 +117,24 @@ fun MainHeader(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.CenterEnd
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .padding(bottom = 27.dp, end = 3.dp)
-                                .size(17.dp)
-                                .background(color = Color.Red, shape = CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = cardCount ?: "",
-                                modifier = Modifier
-                                    .padding(bottom = 2.dp)
-                                    .fillMaxSize(),
-                                textAlign = TextAlign.Center,
-                                color = Color.White,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+//                        Box(
+//                            modifier = Modifier
+//                                .padding(bottom = 27.dp, end = 3.dp)
+//                                .size(17.dp)
+//                                .background(color = Color.Red, shape = CircleShape),
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Text(
+//                                text = cardCount ?: "",
+//                                modifier = Modifier
+//                                    .padding(bottom = 2.dp)
+//                                    .fillMaxSize(),
+//                                textAlign = TextAlign.Center,
+//                                color = Color.White,
+//                                fontSize = 9.sp,
+//                                fontWeight = FontWeight.Bold
+//                            )
+//                        }
 
                         IconButton(
                             onClick = onCartPressed,

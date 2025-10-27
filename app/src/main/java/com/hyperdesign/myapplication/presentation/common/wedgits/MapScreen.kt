@@ -1,7 +1,6 @@
 package com.hyperdesign.myapplication.presentation.common.wedgits
 
 import android.Manifest
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -28,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -49,7 +47,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun MapScreen(
     navigateFrom: String = "",
-    addressId: String = "",  // New parameter
+    addressId: String = "",
     mapViewModel: MapViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -60,12 +58,13 @@ fun MapScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
-    Log.d("MapScreen", "Received navigateFrom: $navigateFrom, addressId: $addressId")  // Log here to confirm
+    Log.d("MapScreen", "Received navigateFrom: $navigateFrom, addressId: $addressId")
     val scope = rememberCoroutineScope()
     val uiState by mapViewModel.uiState.collectAsState()
     val defaultZoom = 15f
     val defaultLatLng = LatLng(30.0444, 31.2357) // Default to Cairo
     val cameraPositionState = rememberCameraPositionState {
+        // Initialize with a placeholder position, will be updated after location is determined
         position = CameraPosition.fromLatLngZoom(defaultLatLng, defaultZoom)
     }
     val density = LocalDensity.current
@@ -73,28 +72,51 @@ fun MapScreen(
     var showDiffBranchDialog by remember { mutableStateOf(false) }
     var isInitialLocationSet by remember { mutableStateOf(false) }
 
-    // Load saved location on startup
+    // Function to check if location is invalid (0,0)
+    fun isInvalidLocation(latLng: LatLng?): Boolean {
+        return latLng == null || (latLng.latitude == 0.0 && latLng.longitude == 0.0)
+    }
+
+    // Load saved or current location on startup
     LaunchedEffect(Unit) {
         if (!permissionState.allPermissionsGranted) {
             permissionState.launchMultiplePermissionRequest()
         } else {
             // Check for saved location first
             val savedLocation = mapViewModel.getSavedLocation()
-            if (savedLocation != null) {
-                Log.d("MapScreen", "Loaded saved location: $savedLocation")
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(savedLocation, defaultZoom)
-                mapViewModel.updateTargetLocation(savedLocation)
+            if (!isInvalidLocation(savedLocation)) {
+                Log.d("MapScreen", "Loaded valid saved location: $savedLocation")
+                savedLocation?.let {
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(it, defaultZoom)
+                    mapViewModel.updateTargetLocation(it)
+                }
                 isInitialLocationSet = true
             } else {
-                Log.d("MapScreen", "No saved location, requesting current location")
-                mapViewModel.requestCurrentLocation(context)
+                Log.d("MapScreen", "No valid saved location, requesting current location")
+                mapViewModel.requestCurrentLocation(context) { latLng ->
+                    if (!isInvalidLocation(latLng)) {
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, defaultZoom)
+                        mapViewModel.updateTargetLocation(latLng)
+                        isInitialLocationSet = true
+                    } else {
+                        Log.w("MapScreen", "Invalid current location, falling back to default")
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(defaultLatLng, defaultZoom)
+                        mapViewModel.updateTargetLocation(defaultLatLng)
+                        isInitialLocationSet = true
+                    }
+                }
             }
         }
     }
 
     LaunchedEffect(uiState.targetLatLng) {
         uiState.targetLatLng?.let { latLng ->
-            if (!isInitialLocationSet) {
+            if (isInvalidLocation(latLng)) {
+                Log.w("MapScreen", "Invalid target location detected, falling back to default")
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLngZoom(defaultLatLng, defaultZoom)
+                )
+            } else if (!isInitialLocationSet) {
                 cameraPositionState.animate(
                     CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom)
                 )
@@ -111,14 +133,30 @@ fun MapScreen(
         if (!cameraPositionState.isMoving) {
             delay(300)
             val target = cameraPositionState.position.target
-            mapViewModel.updateTargetLocation(target)
-            Log.d("MapScreen", "Camera idle, updated location: $target")
+            if (!isInvalidLocation(target)) {
+                mapViewModel.updateTargetLocation(target)
+                Log.d("MapScreen", "Camera idle, updated location: $target")
+            } else {
+                Log.w("MapScreen", "Invalid camera target, not updating")
+            }
         }
     }
 
     if (!permissionState.allPermissionsGranted) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Location permission is required to show the map")
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(stringResource(R.string.location_permission_required))
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { permissionState.launchMultiplePermissionRequest() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF15A25))
+                ) {
+                    Text(stringResource(R.string.grant_permission), color = Color.White)
+                }
+            }
         }
         return
     }
@@ -145,63 +183,6 @@ fun MapScreen(
                 .align(Alignment.Center)
                 .offset(y = (-16).dp)
         )
-
-        // Search bar and predictions (commented out as in original code)
-        /*
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .background(Color.White, RoundedCornerShape(25.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .width(300.dp)
-        ) {
-            var query by remember { mutableStateOf("") }
-            TextField(
-                value = query,
-                onValueChange = {
-                    query = it
-                    mapViewModel.searchPlaces(it)
-                },
-                placeholder = { Text(stringResource(R.string.search_for_an_location)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                ),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = ""
-                    )
-                }
-            )
-            if (uiState.predictions.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .heightIn(max = 200.dp)
-                        .background(Color.White)
-                        .fillMaxWidth()
-                ) {
-                    items(uiState.predictions) { prediction ->
-                        ListItem(
-                            headlineContent = { Text(prediction.getPrimaryText(null).toString()) },
-                            supportingContent = { Text(prediction.getSecondaryText(null).toString()) },
-                            modifier = Modifier
-                                .clickable {
-                                    mapViewModel.selectPlace(prediction.placeId)
-                                    query = prediction.getPrimaryText(null).toString()
-                                }
-                                .fillMaxWidth()
-                        )
-                    }
-                }
-            }
-        }
-        */
 
         uiState.detectedAddress?.let { address ->
             Card(
@@ -243,7 +224,7 @@ fun MapScreen(
                             context,
                             latLng.latitude.toString(),
                             latLng.longitude.toString()
-                        ) { deliveryStatus, currentRestaurantBranch,areaId ->
+                        ) { deliveryStatus, currentRestaurantBranch, areaId ->
                             Log.d("MapScreen", "checkLocationDelivery result: deliveryStatus=$deliveryStatus, currentRestaurantBranch=$currentRestaurantBranch")
                             Log.d("MapScreen", "Stored Current restaurant branch: ${mapViewModel.tokenManger.getCurrentResturentBranch()}")
                             when (deliveryStatus) {
@@ -268,8 +249,7 @@ fun MapScreen(
                                                 Log.e("MapScreen", "Navigation failed: ${e.message}", e)
                                                 Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
                                             }
-                                        }
-                                        else if(navigateFrom =="addAddress"){
+                                        } else if (navigateFrom == "addAddress") {
                                             val route = "all_address_screen/{screenType}?lat=${latLng.latitude}&lng=${latLng.longitude}&areaId=${areaId}"
                                             Log.d("MapScreen", "Navigating to: $route")
                                             try {
@@ -281,8 +261,7 @@ fun MapScreen(
                                                 Log.e("MapScreen", "Navigation failed: ${e.message}", e)
                                                 Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
                                             }
-
-                                        } else if(navigateFrom =="editAddress"){
+                                        } else if (navigateFrom == "editAddress") {
                                             val route = "update_address_screen/{addressId}?lat=${latLng.latitude}&lng=${latLng.longitude}&areaId=${areaId}"
                                             Log.d("MapScreen", "Navigating to: $route")
                                             try {
@@ -294,10 +273,7 @@ fun MapScreen(
                                                 Log.e("MapScreen", "Navigation failed: ${e.message}", e)
                                                 Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
                                             }
-
-                                        }
-
-                                        else {
+                                        } else {
                                             Log.w("MapScreen", "Navigation not implemented for navigateFrom=$navigateFrom")
                                             Toast.makeText(context, "Navigation not implemented for $navigateFrom", Toast.LENGTH_SHORT).show()
                                         }
@@ -335,6 +311,38 @@ fun MapScreen(
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
             )
+        }
+
+        if (uiState.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = uiState.error ?: "Unknown error",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    Button(
+                        onClick = {
+                            mapViewModel.requestCurrentLocation(context){
+
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF15A25))
+                    ) {
+                        Text("Retry Location", color = Color.White)
+                    }
+                }
+            }
         }
 
         if (showNoDeliveryDialog) {
@@ -394,22 +402,31 @@ fun NoDeliveryDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.no_delivery_available), fontWeight = FontWeight.Bold, fontSize = 15.sp) },
-
+        title = {
+            Text(
+                stringResource(R.string.no_delivery_available),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+        },
         confirmButton = {
-            TextButton(modifier = Modifier.fillMaxWidth(),onClick = onDismiss) {
-                Text(stringResource(R.string.confirm),modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, fontSize = 16.sp,color = Color(0xFFFCB203))
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onDismiss
+            ) {
+                Text(
+                    stringResource(R.string.confirm),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color(0xFFFCB203)
+                )
             }
         },
-//        dismissButton = {
-//            TextButton(onClick = onDismiss) {
-//                Text("Change Location", color = Color(0xFFF15A25))
-//            }
-//        },
-        containerColor = Color.White,
-       /* modifier = Modifier
-            .width(350.dp)
-            .height(420.dp)*/
+        containerColor = Color.White
     )
 }
 
@@ -421,21 +438,45 @@ fun DiffBranchDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Different Branch", fontWeight = FontWeight.Bold) },
-        text = { Text(message, fontSize = 14.sp) },
+        title = {
+            Text(
+                text = stringResource(R.string.different_branch),
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 13.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+
+        },
         confirmButton = {
-            TextButton(onClick = onChangeBranch) {
-                Text("Change Branch", color = Color(0xFFF15A25))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                TextButton(onClick = onChangeBranch) {
+                    Text(
+                        text = stringResource(R.string.yes),
+                        color = Color(0xFFF15A25),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                TextButton(onClick = onDismiss) {
+                    Text(
+                        text = stringResource(R.string.no),
+                        color = Color(0xFFF15A25),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = Color(0xFFF15A25))
-            }
-        },
-        containerColor = Color.White,
-        modifier = Modifier
-            .width(350.dp)
-            .height(420.dp)
+        dismissButton = {},
+        containerColor = Color.White
     )
 }
