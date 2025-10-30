@@ -14,7 +14,12 @@ fun CheckOutResponseDto.toDomain(): CheckOutResponseEntity{
         cart = cart.toEntity(),
         message = message,
         addresses = addresses.map { it.toDomain() },
-        payment_methods = payment_methods.map { it.toDomain() }
+        payment_methods = payment_methods.map { it.toDomain() },
+        preOrder = preOrder,
+        dateTimeOrder = dateTimeOrder,
+        preOrderText = preOrderText,
+        preOrderTextStatus = preOrderTextStatus
+
     )
 }
 

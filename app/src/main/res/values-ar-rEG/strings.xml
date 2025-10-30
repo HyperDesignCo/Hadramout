@@ -161,4 +161,6 @@
     <string name="change_branch">Change Branch</string>
     <string name="different_branch">عند التغيير الى هذا الموقع قد تختلف اتاحية العناصر, لذلك سيتم افراغ عربة التسوق الخاصه بك
 هل ترغب بالإستمرار</string>
+    <string name="cart_meals">وجبات السلة</string>
+    <string name="you_can_order_also">يمكنك ان تطلب ايضا</string>
 </resources>

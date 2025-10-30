@@ -6,9 +6,23 @@ data class CartResponseDto(
     val cart: CartDto?, // Made nullable to handle cart=null case
     @SerializedName("delivery_time")
     val deliveryTime:String?=null,
+    @SerializedName("cross_selling_meal")
+    val crossSellingMeal : List<SellingMealDto>?=null,
+    @SerializedName("up_selling_meal")
+    val upSellingMeal: List<SellingMealDto>?=null,
     val message: String
 )
 
+
+data class SellingMealDto(
+    val id :String,
+    val title:String,
+    val description:String,
+    val image:String,
+    val price:String,
+    @SerializedName("discount_price")
+    val discountPrice:String?=null
+)
 data class CartDto(
     val id: String,
     @SerializedName("service_charge")

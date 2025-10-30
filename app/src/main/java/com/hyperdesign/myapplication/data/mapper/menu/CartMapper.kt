@@ -3,18 +3,33 @@ package com.hyperdesign.myapplication.data.mapper.menu
 import com.hyperdesign.myapplication.data.dto.CartDto
 import com.hyperdesign.myapplication.data.dto.CartMealDto
 import com.hyperdesign.myapplication.data.dto.CartResponseDto
+import com.hyperdesign.myapplication.data.dto.SellingMealDto
 import com.hyperdesign.myapplication.domain.Entity.CartEntity
 import com.hyperdesign.myapplication.domain.Entity.CartMealEntity
 import com.hyperdesign.myapplication.domain.Entity.CartResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.SellingMealEntity
 
 fun CartResponseDto.toEntity(): CartResponseEntity {
     return CartResponseEntity(
         cart = cart?.toEntity(),
         message = message.orEmpty(),
-        deliveryTime = deliveryTime ?:""
+        deliveryTime = deliveryTime ?:"",
+        upSellingMeal = upSellingMeal?.map { it.toDomain() },
+        crossSellingMeal = crossSellingMeal?.map { it.toDomain() }
+
     )
 }
 
+fun SellingMealDto.toDomain(): SellingMealEntity{
+    return SellingMealEntity(
+        id =id,
+        title=title,
+        description = description,
+        image = image,
+        price = price,
+        discountPrice = discountPrice
+    )
+}
 fun CartDto.toEntity(): CartEntity {
     return CartEntity(
         id = id.orEmpty(),

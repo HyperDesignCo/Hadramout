@@ -6,6 +6,10 @@ import kotlinx.serialization.Serializable
 
 data class CheckOutResponseEntity(
     val branch : BranchInfoEntity?,
+    val preOrder:Int,//check to put cart of orders or not
+    val dateTimeOrder:Int,//check if orderLater will show or not,
+    val preOrderText:String,//display text from backend,
+    val preOrderTextStatus:Int, // check if display preOrderText or not
     val cart: CartEntity,
     val message: String,
     val addresses: List<AddressEntity>,

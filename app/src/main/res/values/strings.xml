@@ -159,4 +159,6 @@
     <string name="delivery_time">Delivery within</string>
     <string name="change_branch">Change Branch</string>
     <string name="different_branch">When you switch to this site, the availability of items may vary, so your shopping cart will be emptied.\nDo you want to continue?</string>
+    <string name="cart_meals">Cart Meals</string>
+    <string name="you_can_order_also">You can order also</string>
 </resources>

@@ -340,6 +340,19 @@ fun CheckOutScreenContent(
                     }
                 }
             }
+
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
+                    colors = CardDefaults.cardColors(Gray),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+
+
+                }
+
+            }
         }
 
         CartBottomBar(

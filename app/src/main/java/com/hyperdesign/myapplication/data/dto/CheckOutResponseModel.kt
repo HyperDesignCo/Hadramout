@@ -8,7 +8,15 @@ data class CheckOutResponseDto(
     val cart: CartDto,
     val message: String,
     val addresses: List<AddressDto>,
-    val payment_methods: List<PaymentMethodDto>
+    val payment_methods: List<PaymentMethodDto>,
+    @SerializedName("pre_order")
+    val preOrder:Int,//check to put cart of orders or not
+    @SerializedName("date_time_order")
+    val dateTimeOrder:Int,//check if orderLater will show or not,
+    @SerializedName("pre_order_text")
+    val preOrderText:String,//display text from backend,
+    @SerializedName("pre_order_text_status")
+    val preOrderTextStatus:Int // check if display preOrderText or not
 )
 
 

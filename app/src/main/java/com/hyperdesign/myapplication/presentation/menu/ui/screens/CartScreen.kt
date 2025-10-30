@@ -27,15 +27,19 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.CartMealEntity
+import com.hyperdesign.myapplication.domain.Entity.SellingMealEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
+import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDeataisWithString
+import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDetails
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartIntents
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartViewModel
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CartBottomBar
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PromoCodeInput
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SwipeToDismissCartItem
+import com.hyperdesign.myapplication.presentation.menu.ui.widgets.UpSellingComponent
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -149,7 +153,13 @@ fun CartScreen(
                 totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString() ?: "0",
                 totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString() ?: "0.00",
                 pickUpStatus = deliveryStatus,
-                deliveryTime = cartMealState.showCartDate?.deliveryTime.orEmpty()
+                deliveryTime = cartMealState.showCartDate?.deliveryTime.orEmpty(),
+                upSellingMeals = cartMealState.showCartDate?.upSellingMeal.orEmpty(),
+                onNavToMealDetails = {mealId->
+                    val route = goToScreenMealDeataisWithString(mealId)
+                    navController.navigate(route)
+
+                }
             )
         }
         if (cartMealState.isLoading) {
@@ -169,6 +179,7 @@ fun CartScreen(
 fun CartScreenContent(
     onBackPressesd: () -> Unit,
     cartMeals: List<CartMealEntity>,
+    upSellingMeals:List<SellingMealEntity>,
     totalItems: String,
     totalPrice: String,
     copoun: String,
@@ -183,7 +194,8 @@ fun CartScreenContent(
     onCheckCoponClick: () -> Unit,
     onGoToCheckOutScreen: () -> Unit,
     pickUpStatus : Boolean,
-    deliveryTime:String
+    deliveryTime:String,
+    onNavToMealDetails:(String)->Unit
 ) {
     Column(
         modifier = Modifier
@@ -208,6 +220,10 @@ fun CartScreenContent(
             item {
                 Spacer(modifier = Modifier.height(5.dp))
             }
+            item {
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(text = stringResource(R.string.cart_meals), fontSize = 15.sp, fontWeight = FontWeight.Bold,modifier = Modifier.padding(horizontal = 16.dp))
+            }
             items(cartMeals, key = { cart -> cart.id }) { cartMeal ->
                 SwipeToDismissCartItem(
                     cartMeal = cartMeal,
@@ -225,6 +241,26 @@ fun CartScreenContent(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
+
+            if (!upSellingMeals.isEmpty()){
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(text = stringResource(R.string.you_can_order_also), fontSize = 15.sp, fontWeight = FontWeight.Bold,modifier = Modifier.padding(horizontal = 16.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                }
+                items(upSellingMeals, key = {meal->meal.id}){meal->
+
+                    UpSellingComponent(meal) {
+                        onNavToMealDetails(meal.id)
+
+                    }
+
+                }
+            }
+
+
+
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(

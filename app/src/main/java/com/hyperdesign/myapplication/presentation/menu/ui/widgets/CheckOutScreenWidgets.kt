@@ -284,6 +284,49 @@ fun showBranchDetails(
     }
 }
 
+
+
+@Composable
+fun OrderOptions(order: String, selectedOrder: String, onSelected: (String) -> Unit){
+
+    Card(
+        modifier = Modifier.padding(horizontal = 5.dp).fillMaxWidth(),
+        colors = CardDefaults.cardColors(Color.White),
+        shape = RoundedCornerShape(10.dp)
+    )
+    {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 6.dp, horizontal = 12.dp)
+                .background(color = Color.White)
+                .border(
+                    1.dp,
+                    color = if (selectedOrder == order) Color(0xFFFCB203) else Color.Transparent
+                )
+                .clip(RoundedCornerShape(8.dp))
+
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                order,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (selectedOrder == order) Color(0xFFFCB203) else Color.Black
+            )
+
+            RadioButton(
+                colors = RadioButtonDefaults.colors(if (selectedOrder == order) Color(0xFFFCB203) else Color.Black),
+                selected = selectedOrder == order,
+                onClick = { onSelected(order) }
+            )
+
+        }
+    }
+}
+
 //@Composable
 //@Preview(showBackground = true, showSystemUi = true)
 //fun Preview(){

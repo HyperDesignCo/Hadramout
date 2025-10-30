@@ -1,14 +1,23 @@
 package com.hyperdesign.myapplication.domain.Entity
 
 import com.google.gson.annotations.SerializedName
-import org.checkerframework.checker.units.qual.Time
 
 data class CartResponseEntity(
     val cart: CartEntity?, // Made nullable to handle cart=null
     val message: String?,
+    val crossSellingMeal : List<SellingMealEntity>?=null,
+    val upSellingMeal: List<SellingMealEntity>?=null,
     val deliveryTime: String?=null
 )
 
+data class SellingMealEntity(
+    val id :String,
+    val title:String,
+    val description:String,
+    val image:String,
+    val price:String,
+    val discountPrice:String?=null
+)
 data class CartEntity(
     val id: String,
     val serviceCharge: Double,
