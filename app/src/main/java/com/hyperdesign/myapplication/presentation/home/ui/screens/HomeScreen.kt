@@ -83,9 +83,18 @@ fun HomeScreen(
 
     var userLocation by remember { mutableStateOf(LatLng(30.0444, 31.2357)) } // Default to Cairo
     var isFetchingLocation by remember { mutableStateOf(false) }
+    var makePichUp by remember { mutableStateOf(false) }
     var checkValueEqualZoroOrNot by remember { mutableStateOf(1) }
     val scope = rememberCoroutineScope()
     var selectedBranchState by remember { mutableStateOf("") }
+
+    var newBranchId by remember { mutableStateOf(0) }
+
+    LaunchedEffect(newBranchId) {
+        if (newBranchId!=0){
+            homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(newBranchId))
+        }
+    }
 
     // Track navigation arguments to trigger recomposition
     val navArgsKey by rememberUpdatedState(
@@ -93,6 +102,8 @@ fun HomeScreen(
     )
 
     Log.d("HomeScreen", "Composing HomeScreen with navArgsKey=$navArgsKey")
+
+    Log.d("makeupd",makePichUp.toString())
 
     LaunchedEffect(Unit) {
 
@@ -104,7 +115,6 @@ fun HomeScreen(
             }else{
                 isFetchingLocation = true
                 if(navArgsKey.isEmpty() || navArgsKey=="::"){
-                    Log.d("anaaslan,","ana aslan wwad ")
                     scope.launch {
                         try {
                             val lastLocation = fusedLocationClient.lastLocation.await()
@@ -182,7 +192,6 @@ fun HomeScreen(
         return
     }
 
-    // === FIX: Prevent infinite dialog loop ===
     var hasShownNoDeliveryDialog by remember { mutableStateOf(false) }
     var showPickupBranchDialog by remember { mutableStateOf(false) }
     val deliveryStatus = homeState.checkLocationResponseEntity?.data?.deliveryStatus
@@ -204,7 +213,9 @@ fun HomeScreen(
             offers = homeState.homeMenues?.slideshow.orEmpty(),
             homeMenus = homeState.homeMenues?.homeMenus.orEmpty(),
             onBranchSelected = { branchId ->
-                homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(branchId))
+                newBranchId=branchId
+                Log.d("ourBranch",branchId.toString())
+
                 if (checkValueEqualZoroOrNot!=0){
                     homeViewModel.tokenManager.saveBranchId(branchId)
 
@@ -244,7 +255,8 @@ fun HomeScreen(
             },
             currentResturentBranch = homeState.checkLocationResponseEntity?.data?.currentResturantBranch.orEmpty(),
             selectedBranchState = remember { mutableStateOf(selectedBranchState) },
-            onShowPickupDialog = { showPickupBranchDialog = true }
+            onShowPickupDialog = { showPickupBranchDialog = true },
+            makePickup = makePichUp
         )
 
         if (showAuthDialoge) {
@@ -286,7 +298,8 @@ fun HomeScreen(
                 branches = homeState.branches?.branches.orEmpty(),
                 currentBranchId = homeViewModel.tokenManager.getBranchId() ?: homeState.branches?.branches?.firstOrNull()?.id ?: 0,
                 onBranchSelected = { branch ->
-                    homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(branch.id))
+                    makePichUp=true
+//                    homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(branch.id))
                     homeViewModel.tokenManager.saveBranchId(branch.id)
                     selectedBranchState = branch.title
                     showPickupBranchDialog = false
@@ -329,7 +342,8 @@ fun HomeScreenContent(
     currentResturentBranch: String,
     checkOnZeroOrNot:(Int)->Unit={},
     selectedBranchState: MutableState<String>,
-    onShowPickupDialog: () -> Unit
+    onShowPickupDialog: () -> Unit,
+    makePickup:Boolean =false
 ) {
     val navController = LocalNavController.current
     val configuration = LocalConfiguration.current
@@ -349,7 +363,6 @@ fun HomeScreenContent(
     LaunchedEffect(branches, myStatus, getBranchId, currentResturentBranch) {
         if (branches.isNotEmpty()) {
             if (myStatus == 0) {
-                Log.d("getBranchId","getBranchId inside mystatus")
 
                 // Wait for currentResturentBranch to set selectedBranch
                 if(getBranchId==0 && currentResturentBranch.isEmpty()){
@@ -359,13 +372,14 @@ fun HomeScreenContent(
 //                    saveBranchId(branches[0].id)
                     Log.d("getBranchId","getBranchId inside getBranchId")
                 }else if(currentResturentBranch.isEmpty()){
+                    Log.d("getBranchId","getBranchId inside mystatuselseif")
                     selectedBranchState.value = branches[0].title
                     onBranchSelected(branches[0].id)
                 }
             } else {
                 Log.d("getBranchId","getBranchId inside else")
 
-                if (getBranchId != 0) {
+                if (getBranchId != 0 ) {
                     val selected = branches.find { it.id == getBranchId }
                     if (selected != null) {
                         selectedBranchState.value = selected.title
@@ -379,10 +393,13 @@ fun HomeScreenContent(
                         Log.d("HomeScreen", "Fallback to first branch: ${branches[0].title}")
                     }
                 } else {
-                    selectedBranchState.value = branches[0].title
-                    onBranchSelected(branches[0].id)
-                    saveBranchId(branches[0].id)
-                    Log.d("HomeScreen", "Default to first branch: ${branches[0].title}")
+                    if (currentResturentBranch.isEmpty()){
+                        selectedBranchState.value = branches[0].title
+                        onBranchSelected(branches[0].id)
+                        saveBranchId(branches[0].id)
+                        Log.d("HomeScreen", "Default to first branch: ${branches[0].title}")
+                    }
+
                 }
             }
         }
@@ -409,7 +426,8 @@ fun HomeScreenContent(
             myStatus = myStatus,
             goToMap = {
                 navToMap()
-            }
+            },
+            makePickup = makePickup
         )
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -633,14 +651,14 @@ fun NoDeliveryDialogHome(
             }
         },
         dismissButton = {
-//            TextButton(onClick = onPickUp) {
-//                Text(
-//                    stringResource(R.string.pick_up),
-//                    color = Color(0xFFF15A25),
-//                    modifier = Modifier.weight(1f),
-//                    textAlign = TextAlign.Center
-//                )
-//            }
+            TextButton(onClick = onPickUp) {
+                Text(
+                    stringResource(R.string.pick_up),
+                    color = Color(0xFFF15A25),
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+            }
         },
         containerColor = Color.White
     )

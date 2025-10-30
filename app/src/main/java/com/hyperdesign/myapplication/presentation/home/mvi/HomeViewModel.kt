@@ -46,7 +46,7 @@ class HomeViewModel(
 //                getHomeMenuById()
             }
             is HomeIntents.GetHomeMenuId -> {
-                getHomeMenuById()
+                getHomeMenuById(intent.id)
             }
 
             is HomeIntents.ChangeLat -> {
@@ -119,7 +119,7 @@ class HomeViewModel(
         getBranches() // Only fetch branches initially
     }
 
-    private fun getHomeMenuById() {
+    private fun getHomeMenuById(branchId:Int) {
         if (_homeState.value.branchId == 0) {
             Log.d("HomeViewModel", "Skipping getHomeMenuById: branchId is 0")
             return // Avoid fetching with invalid branchId
@@ -127,7 +127,8 @@ class HomeViewModel(
         _homeState.value = _homeState.value.copy(isLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val response = getHomeMenuByIdUseCase.invoke(_homeState.value.branchId)
+
+                val response = getHomeMenuByIdUseCase.invoke(branchId)
                 Log.d("HomeViewModel", "Raw HomeResponse: $response")
                 _homeState.value = _homeState.value.copy(
                     isLoading = false,

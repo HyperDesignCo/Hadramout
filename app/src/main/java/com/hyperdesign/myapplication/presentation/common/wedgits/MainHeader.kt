@@ -57,6 +57,7 @@ fun MainHeader(
     showStatus: Boolean = false,
     onClickChangStatus: (Boolean) -> Unit = {}, // Updated to pass the new status
     myStatus:Int?=null,
+    makePickup: Boolean =false,
     goToMap:()->Unit={}
 ) {
     var statusState by remember { mutableStateOf(if(myStatus==0)false else true) }
@@ -161,11 +162,12 @@ fun MainHeader(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Image(
-                                painter = if (!statusState) painterResource(R.drawable.ic_pickup) else painterResource(R.drawable.delivery),
+
+                                painter = if(makePickup==true) painterResource(R.drawable.delivery) else  if (!statusState) painterResource(R.drawable.ic_pickup) else painterResource(R.drawable.delivery),
                                 contentDescription = ""
                             )
                             Spacer(modifier = Modifier.width(5.dp))
-                            Text(if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery), color = Color.White)
+                            Text(if(makePickup==true) stringResource(R.string.delivery) else if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery), color = Color.White)
                         }
                     }
                 }
@@ -203,7 +205,7 @@ fun MainHeader(
                     Text(
                         text = stringResource(
                             R.string.are_you_sure_you_want_to_change_to,
-                            if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery)
+                            if(makePickup==true)stringResource(R.string.delivery) else if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery)
                         ),
                         fontSize = 16.sp,
                         color = Color.Gray,
@@ -216,18 +218,26 @@ fun MainHeader(
                 confirmButton = {
                     Row(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(), horizontalArrangement =Arrangement.SpaceBetween ) {
                         Text(
-                            text = if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery),
+                            text = if(makePickup==true)stringResource(R.string.delivery) else if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Secondry,
                             modifier = Modifier
                                 .clickable {
-                                    statusState = !statusState
-                                    onClickChangStatus(statusState) // Pass the new status
-                                    if (!statusState){
+                                    if(makePickup==true){
+                                        statusState=false
+                                        onClickChangStatus(false)
                                         goToMap()
+                                        showDialog = false
+                                    }else{
+                                        statusState = !statusState
+                                        onClickChangStatus(statusState) // Pass the new status
+                                        if (!statusState){
+                                            goToMap()
+                                        }
+                                        showDialog = false
                                     }
-                                    showDialog = false
+
                                 }
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
