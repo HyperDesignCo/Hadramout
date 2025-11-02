@@ -24,6 +24,11 @@ data class LocationDto(
     val currentResturantBranchEn :String,
     @SerializedName("delivery_status")
     val deliveryStatus :String,
+    @SerializedName("current_resturant_branch_open_time")
+    val currentResturantBranchOpenTime:String?=null,
+    @SerializedName("current_resturant_branch_close_time")
+    val currentResturantBranchCloseTime:String?=null,
+
 
 
 )

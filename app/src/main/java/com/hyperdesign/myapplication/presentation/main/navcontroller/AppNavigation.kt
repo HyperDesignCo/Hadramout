@@ -26,6 +26,7 @@ import com.hyperdesign.myapplication.presentation.menu.ui.MealDetailsScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.MealInput
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CartScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.screens.CheckOutScreen
+import com.hyperdesign.myapplication.presentation.menu.ui.screens.IslamicDateTimePicker
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens.AllAddressesScreen
 import com.hyperdesign.myapplication.presentation.profile.addresses.ui.screens.UpdateAddressScreen
 import com.hyperdesign.myapplication.presentation.profile.common.ui.screens.ProfileScreen
@@ -154,14 +155,17 @@ fun AppNavigation(startDestination: String) {
                     MealDetailsScreen(mealJson = mealInput)
                 }
 
-                composable("${Screen.CheckOutScreen.route}?deliveryTime={deliveryTime}",
+                composable("${Screen.CheckOutScreen.route}?deliveryTime={deliveryTime}&dateTimePiker={dateTimePiker}",
                     arguments = listOf(
-                        navArgument("deliveryTime"){type= NavType.StringType;defaultValue=""}
+                        navArgument("deliveryTime"){type= NavType.StringType;defaultValue=""},
+                        navArgument("dateTimePiker"){type= NavType.StringType;defaultValue=""}
                     )
                     ) {backStack->
                     val time = backStack.arguments?.getString("deliveryTime")
+                    val dateTimePicker = backStack.arguments?.getString("dateTimePiker")
                     CheckOutScreen(
-                        deliveryTime =time
+                        deliveryTime =time,
+                        dateTimePicker = dateTimePicker
                     )
                 }
                 composable(Screen.CartScreen.route) { CartScreen() }
@@ -223,6 +227,8 @@ fun AppNavigation(startDestination: String) {
                     Log.d("AppNavigation", "MapScreen navigateFrom: $navigateFrom, addressId: $addressId")  // Log for debugging
                     MapScreen(navigateFrom = navigateFrom, addressId = addressId)  // Pass addressId directly
                 }
+
+                composable(Screen.DateTimePicker.route) { IslamicDateTimePicker() }
             }
         }
     }

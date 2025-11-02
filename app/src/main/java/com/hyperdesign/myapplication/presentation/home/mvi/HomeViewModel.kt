@@ -94,6 +94,15 @@ class HomeViewModel(
                     tokenManager.saveAreaId(response.data.currentArea)
 
                 }
+                if (!response.data.currentResturentBranchOpenTime.isNullOrEmpty()){
+                    tokenManager.saveOpenTimeBranch(response.data.currentResturentBranchOpenTime)
+                }
+
+                if (!response.data.currentResturentBranchCloseTime.isNullOrEmpty()){
+                    tokenManager.saveCloseTimeBranch(response.data.currentResturentBranchCloseTime)
+                }
+
+
             }.onSuccess {
                 Log.d("HomeViewModel", "checkLocationSuccess: ${_homeState.value.checkLocationResponseEntity}")
 

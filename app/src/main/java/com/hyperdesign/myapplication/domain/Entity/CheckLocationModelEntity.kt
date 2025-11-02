@@ -17,6 +17,8 @@ data class LocationEntity(
     val currentResturantBranch :String,
     val currentResturantBranchAr :String,
     val currentResturantBranchEn :String,
+    val currentResturentBranchOpenTime:String?=null,
+    val currentResturentBranchCloseTime:String?=null,
     val deliveryStatus :String,
 
     )

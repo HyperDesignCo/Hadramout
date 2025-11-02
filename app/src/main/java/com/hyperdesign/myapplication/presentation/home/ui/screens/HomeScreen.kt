@@ -45,6 +45,7 @@ import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeIntents
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
+import com.hyperdesign.myapplication.presentation.home.HomeObject
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.AdsWdegit
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.FeaturedWedgits
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.OffersList
@@ -80,6 +81,9 @@ fun HomeScreen(
     val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(context)
     }
+
+    Log.d("HomeScreen", "open branch=${homeViewModel.tokenManager.getOpenTimeBranch()}")
+    Log.d("HomeScreen", "close branch=${homeViewModel.tokenManager.getCloseTimeBranch()}")
 
     var userLocation by remember { mutableStateOf(LatLng(30.0444, 31.2357)) } // Default to Cairo
     var isFetchingLocation by remember { mutableStateOf(false) }
@@ -196,9 +200,11 @@ fun HomeScreen(
     var showPickupBranchDialog by remember { mutableStateOf(false) }
     val deliveryStatus = homeState.checkLocationResponseEntity?.data?.deliveryStatus
 
+    Log.d("HomeScreen", "Delivery status: $deliveryStatus")
+
     // Only trigger dialog when deliveryStatus becomes "0"
     LaunchedEffect(deliveryStatus) {
-        if (deliveryStatus == "0" && !hasShownNoDeliveryDialog && navArgsKey!="noDialoge" && navArgsKey!="noDialoge::") {
+        if (deliveryStatus == "0" && HomeObject.status==0 &&  !hasShownNoDeliveryDialog && navArgsKey!="noDialoge" && navArgsKey!="noDialoge::") {
             hasShownNoDeliveryDialog = true
             Log.d("HomeScreen", "Delivery status is 0 → showing No Delivery dialog")
         }else{
@@ -638,7 +644,10 @@ fun NoDeliveryDialogHome(
         confirmButton = {
             TextButton(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onChangeLocation
+                onClick = {
+                    onChangeLocation()
+                    HomeObject.updateStatus(1)
+                }
             ) {
                 Text(
                     stringResource(R.string.change_Location),
@@ -651,7 +660,11 @@ fun NoDeliveryDialogHome(
             }
         },
         dismissButton = {
-            TextButton(onClick = onPickUp) {
+            TextButton(onClick = {
+                onPickUp()
+                HomeObject.updateStatus(1)
+
+            }) {
                 Text(
                     stringResource(R.string.pick_up),
                     color = Color(0xFFF15A25),

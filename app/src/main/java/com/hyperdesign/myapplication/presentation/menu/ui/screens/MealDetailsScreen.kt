@@ -226,7 +226,9 @@ fun MealDetailsScreen(
                                 popUpTo(Screen.MealDetailsScreen.route) { inclusive = true }
                             }
                         },
-                        onGoToMenu = { navController.popBackStack() }
+                        onGoToMenu = {  navController.navigate(Screen.MenueScreen.route) {
+                            popUpTo(Screen.MealDetailsScreen.route) { inclusive = true }
+                        } }
                     )
                 }
             }

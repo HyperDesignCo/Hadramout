@@ -287,10 +287,10 @@ fun showBranchDetails(
 
 
 @Composable
-fun OrderOptions(order: String, selectedOrder: String, onSelected: (String) -> Unit){
+fun OrderOptions(timepicker: String?,order: String, selectedOrder: String, onSelected: (String) -> Unit){
 
     Card(
-        modifier = Modifier.padding(horizontal = 5.dp).fillMaxWidth(),
+        modifier = Modifier.padding(vertical = 10.dp,horizontal = 10.dp).fillMaxWidth(),
         colors = CardDefaults.cardColors(Color.White),
         shape = RoundedCornerShape(10.dp)
     )
@@ -298,24 +298,35 @@ fun OrderOptions(order: String, selectedOrder: String, onSelected: (String) -> U
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 12.dp)
                 .background(color = Color.White)
-                .border(
-                    1.dp,
-                    color = if (selectedOrder == order) Color(0xFFFCB203) else Color.Transparent
-                )
-                .clip(RoundedCornerShape(8.dp))
+//                .border(
+//                    1.dp,
+//                    color = if (selectedOrder == order) Color(0xFFFCB203) else Color.Transparent
+//                )
+                .clip(RoundedCornerShape(10.dp))
 
-                .padding(12.dp),
+                ,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                order,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (selectedOrder == order) Color(0xFFFCB203) else Color.Black
-            )
+            Row (horizontalArrangement = Arrangement.Absolute.SpaceBetween){
+                Text(
+                    order,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    fontWeight = FontWeight.Medium,
+                    color = if (selectedOrder == order) Color(0xFFFCB203) else Color.Black
+                )
+
+                Text(
+                    timepicker.orEmpty(),
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+            }
+
 
             RadioButton(
                 colors = RadioButtonDefaults.colors(if (selectedOrder == order) Color(0xFFFCB203) else Color.Black),

@@ -50,18 +50,18 @@ class CheckOutViewModel(
                 )
             }
             is CheckOutIntents.FinishOrder ->{
-                finishOrder(intent.cartId,intent.userId)
+                finishOrder(intent.cartId,intent.userId,intent.is_preorder,intent.order_time,intent.order_date)
             }
         }
     }
 
-    private fun finishOrder(cartId: String, userId: String) {
+    private fun finishOrder(cartId: String, userId: String,is_preorder: String,order_time: String,order_date: String) {
         _checkOutState.value=_checkOutState.value.copy(
             isLoading = true
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val finishOrderRequest = FinishOrderRequest(cartId = cartId, paymentMethodId = _checkOutState.value.paymentMethodId, specialRequest = _checkOutState.value.specialRequest, userAddressId = userId)
+                val finishOrderRequest = FinishOrderRequest(cartId = cartId, paymentMethodId = _checkOutState.value.paymentMethodId, specialRequest = _checkOutState.value.specialRequest, userAddressId = userId, isPreOrder = is_preorder, orderTime = order_time, orderDate = order_date)
                 val response = finishOrderUseCase(finishOrderRequest)
                 _checkOutState.value=_checkOutState.value.copy(
                     isLoading = false,

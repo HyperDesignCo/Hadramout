@@ -37,4 +37,6 @@ object ScreensConst {
     const val USER_PROFILE_SCREEN ="user_profile_screen"
 
     const val MAP_SCREEN = "map_screen"
+
+    const val DATE_TIME_PICKER ="date_time_picker"
 }

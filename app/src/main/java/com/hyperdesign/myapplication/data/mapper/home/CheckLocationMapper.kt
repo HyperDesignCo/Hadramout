@@ -22,6 +22,8 @@ fun LocationDto.toDomain(): LocationEntity{
         currentResturantBranchEn = currentResturantBranchEn,
         currentAreaNameEn = currentAreaNameEn,
         currentResturantBranchAr = currentResturantBranchAr,
-        deliveryStatus = deliveryStatus
+        deliveryStatus = deliveryStatus,
+        currentResturentBranchOpenTime = currentResturantBranchOpenTime,
+        currentResturentBranchCloseTime = currentResturantBranchCloseTime
     )
 }

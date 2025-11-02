@@ -57,5 +57,11 @@ data class FinishOrderRequest(
     @SerializedName("special_requests")
     val specialRequest:String,
     @SerializedName("user_address_id")
-    val userAddressId:String
+    val userAddressId:String,
+    @SerializedName("is_preorder")
+    val isPreOrder:String,
+    @SerializedName("order_time")
+    val orderTime:String,
+    @SerializedName("order_date")
+    val orderDate:String
 )

@@ -138,7 +138,7 @@ fun OrderItem(
         modifier = Modifier
             .padding(horizontal = 10.dp)
             .fillMaxWidth()
-            .height(190.dp) // Fixed height for consistent card size
+            .height(200.dp) // Fixed height for consistent card size
             .clip(RoundedCornerShape(8.dp)),
         colors = cardColors(containerColor = Gray),
     ) {
@@ -213,8 +213,10 @@ fun OrderItem(
             }
         }
             Box(modifier = Modifier
-                .padding(bottom = 15.dp)
+//                .padding(bottom = 15.dp)
                 .fillMaxWidth(), contentAlignment = Alignment.Center) {
+
+
                 Button(
                     onClick = {
                         onReOrder()
@@ -241,7 +243,7 @@ fun OrderItem(
                     Text(
                         text = stringResource(R.string.reorder),
                         color = Color.White,
-                        fontSize = 16.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                     )
                 }

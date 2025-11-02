@@ -46,6 +46,7 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
     object UserProfileScreen: Screen(ScreensConst.USER_PROFILE_SCREEN)
 
     object MapScreen : Screen("${ScreensConst.MAP_SCREEN}/{navigateFrom}")
+    object DateTimePicker :Screen(ScreensConst.DATE_TIME_PICKER)
 }
 
 

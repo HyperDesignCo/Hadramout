@@ -147,7 +147,10 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:2.3.12")
 
     // Koin
-    implementation(libs.bundles.koin)
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
 
     // Testing
     testImplementation(libs.junit)

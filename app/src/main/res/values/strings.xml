@@ -161,4 +161,8 @@
     <string name="different_branch">When you switch to this site, the availability of items may vary, so your shopping cart will be emptied.\nDo you want to continue?</string>
     <string name="cart_meals">Cart Meals</string>
     <string name="you_can_order_also">You can order also</string>
+    <string name="order_later">Order Later</string>
+    <string name="order_now">Order Now</string>
+    <string name="branch_opens_at">الرجاء العلم الفرع يفتح الساعة</string>
+    <string name="branch_closes_at">و يغلق في الساعة</string>
 </resources>

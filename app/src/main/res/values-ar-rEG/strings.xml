@@ -163,4 +163,8 @@
 هل ترغب بالإستمرار</string>
     <string name="cart_meals">وجبات السلة</string>
     <string name="you_can_order_also">يمكنك ان تطلب ايضا</string>
+    <string name="order_later">اطلب لاحقا</string>
+    <string name="order_now">اطلب الان</string>
+    <string name="branch_opens_at">الرجاء العلم الفرع يفتح الساعة</string>
+    <string name="branch_closes_at">و يغلق في الساعة</string>
 </resources>

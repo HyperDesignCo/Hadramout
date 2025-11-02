@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
-import com.hyperdesign.myapplication.domain.Entity.BranchInfoEntity
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
 import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
@@ -45,16 +44,20 @@ import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutStateModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutViewModel
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CartBottomBar
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CheckOutHeader
+import com.hyperdesign.myapplication.presentation.menu.ui.widgets.OrderOptions
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PaymentsOption
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.ShowAddress
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SpecialRequestEditText
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.showBranchDetails
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun CheckOutScreen(
-    deliveryTime:String?,
+    deliveryTime: String?,
+    dateTimePicker: String?,
     checkOutViewModel: CheckOutViewModel = koinViewModel(),
     loginViewModel: LoginViewModel = koinViewModel()
 ) {
@@ -63,16 +66,37 @@ fun CheckOutScreen(
     var subRegion by remember { mutableStateOf("") }
     var allAddress by remember { mutableStateOf("") }
     var selectedPayment by remember { mutableStateOf("") }
+    var selectedOrder by remember { mutableStateOf("") }
+    var selectedPreOrder by remember { mutableStateOf("") }
     val context = LocalContext.current
     var finishOrderMsg by remember { mutableStateOf("") }
     var paymentId by remember { mutableStateOf("") }
     var addressList by remember { mutableStateOf<List<Pair<String, String>>?>(null) }
     var justAdded by remember { mutableStateOf(false) }
     var deliveryStatus by remember { mutableStateOf(false) }
-    Log.d("lang",loginViewModel.tokenManager.getLanguage().toString())
 
+    // State to hold the selected delivery time from DateTimePicker
+    var selectedDeliveryTime by remember { mutableStateOf(dateTimePicker ?: "") }
 
+    Log.d("lang", loginViewModel.tokenManager.getLanguage().toString())
+    Log.d("order", selectedOrder)
+    Log.d("preOrder", selectedPreOrder)
+    Log.d("CheckOutScreen", "dateTimePicker param: $dateTimePicker")
+    Log.d("CheckOutScreen", "deliveryTime param: $deliveryTime")
 
+    // Listen for selected delivery time from DateTimePicker via savedStateHandle
+    val returnedDeliveryTime by navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.getStateFlow<String?>("selected_delivery_time", null)
+        ?.collectAsStateWithLifecycle(initialValue = null) ?: remember { mutableStateOf(null) }
+
+    // Update selectedDeliveryTime when new time is returned from DateTimePicker
+    LaunchedEffect(returnedDeliveryTime) {
+        if (!returnedDeliveryTime.isNullOrEmpty()) {
+            selectedDeliveryTime = returnedDeliveryTime.toString()
+            Log.d("CheckOutScreen", "Updated delivery time from picker: $returnedDeliveryTime")
+        }
+    }
 
     // Listen for address_added flag from AllAddressesScreen
     val addressAdded by navController.currentBackStackEntry
@@ -84,24 +108,24 @@ fun CheckOutScreen(
     LaunchedEffect(addressAdded) {
         if (addressAdded) {
             Log.d("CheckOutScreen", "address_added detected, refreshing data")
-            checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick("2"))
+            checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick(loginViewModel.tokenManager.getBranchId().toString()))
             checkOutViewModel.handleIntents(CheckOutIntents.GetAddress)
-            delay(1000) // Add delay to account for potential backend synchronization delay
+            delay(1000)
             justAdded = true
             navController.currentBackStackEntry?.savedStateHandle?.set("address_added", false)
         }
     }
 
+
     // Initial data fetch
     LaunchedEffect(Unit) {
         Log.d("CheckOutScreen", "Initial data fetch")
-        checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick("2"))
+        checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick(loginViewModel.tokenManager.getBranchId().toString()))
     }
 
     // Update UI when checkState changes
     LaunchedEffect(checkState) {
         Log.d("CheckOutScreen", "checkState updated, addresses: ${checkState.address?.addresses?.size}")
-        // Select the most recently added address (last in the list)
         val address = checkState.address?.addresses?.firstOrNull()
         subRegion = listOfNotNull(
             address?.area?.name?.takeIf { it.isNotEmpty() },
@@ -117,6 +141,14 @@ fun CheckOutScreen(
         paymentId = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.id.toString()
         selectedPayment = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.title.toString()
         finishOrderMsg = checkState.finishOrderResponse?.message.orEmpty()
+        if(selectedDeliveryTime.isEmpty()){
+            selectedOrder = context.getString(R.string.order_now)
+            selectedPreOrder="0"
+
+        }else{
+            selectedOrder = context.getString(R.string.order_later)
+            selectedPreOrder="1"
+        }
 
         addressList = checkState.address?.addresses?.map { addr ->
             val district = listOfNotNull(
@@ -133,15 +165,13 @@ fun CheckOutScreen(
             Pair(district, addressDetails)
         } ?: emptyList()
 
-        // Auto-select the latest address if a new one was added
         if (addressList?.isNotEmpty() == true && justAdded) {
             Log.d("CheckOutScreen", "Auto-selecting latest address: ${addressList!!.last()}")
             subRegion = addressList!!.last().first
             allAddress = addressList!!.last().second
             justAdded = false
         }
-        deliveryStatus=if(checkState.checkOutResponse?.cart?.pickUpStatus=="0") true else false
-
+        deliveryStatus = if (checkState.checkOutResponse?.cart?.pickUpStatus == "0") true else false
     }
 
     // Handle order completion messages
@@ -150,9 +180,9 @@ fun CheckOutScreen(
             Log.d("CheckOutScreen", "Finish order message: $finishOrderMsg")
             if (finishOrderMsg == "Your order has been sent successfully") {
                 Toast.makeText(context, context.getString(R.string.your_order_has_been_sent_successfully), Toast.LENGTH_SHORT).show()
-                navController.navigate("${Screen.HomeScreen.route}?lat=noDialoge") {
-                    popUpTo(Screen.HomeScreen.route) { inclusive = true }
-                    launchSingleTop=true
+                navController.navigate(Screen.MyOrders.route) {
+                    popUpTo(Screen.CartScreen.route) { inclusive = true }
+//                    launchSingleTop = true
                 }
             } else {
                 Toast.makeText(context, finishOrderMsg, Toast.LENGTH_SHORT).show()
@@ -179,12 +209,23 @@ fun CheckOutScreen(
                 selectedPayemnt = selectedPayment,
                 onChangePaymentId = { paymentIdd -> paymentId = paymentIdd },
                 finishOrder = { cartId ->
+                    // Parse the selectedDeliveryTime to extract date and time
+                    val (orderDate, orderTime) = parseDateTime(selectedDeliveryTime)
+
+                    Log.d("CheckOutScreen", "Sending order with:")
+                    Log.d("CheckOutScreen", "order_date: $orderDate")
+                    Log.d("CheckOutScreen", "order_time: $orderTime")
+                    Log.d("CheckOutScreen", "is_preorder: $selectedPreOrder")
+
                     checkOutViewModel.handleIntents(
                         CheckOutIntents.FinishOrder(
                             cartId = cartId,
                             paymentMethodId = paymentId,
                             specialRequest = checkState.specialRequest,
-                            userId = loginViewModel.tokenManager.getUserData()?.id.toString()
+                            userId = loginViewModel.tokenManager.getUserData()?.id.toString(),
+                            is_preorder = selectedPreOrder,
+                            order_time = orderTime,
+                            order_date = orderDate
                         )
                     )
                 },
@@ -200,10 +241,24 @@ fun CheckOutScreen(
                     navController.navigate(Screen.AllAddressesScreen.route.replace("{screenType}", screenType))
                 },
                 pickUpStatus = deliveryStatus,
-                branchName = if(loginViewModel.tokenManager.getLanguage()=="en") checkState.checkOutResponse?.branch?.titleEn else checkState.checkOutResponse?.branch?.titleAr,
-                branchAddress =if(loginViewModel.tokenManager.getLanguage()=="en") checkState.checkOutResponse?.branch?.addressEn else checkState.checkOutResponse?.branch?.addressAr,
-                deliveryTime = deliveryTime?:""
-
+                branchName = if (loginViewModel.tokenManager.getLanguage() == "en")
+                    checkState.checkOutResponse?.branch?.titleEn
+                else
+                    checkState.checkOutResponse?.branch?.titleAr,
+                branchAddress = if (loginViewModel.tokenManager.getLanguage() == "en")
+                    checkState.checkOutResponse?.branch?.addressEn
+                else
+                    checkState.checkOutResponse?.branch?.addressAr,
+                deliveryTime = deliveryTime.orEmpty(),
+                dateTimePicker = selectedDeliveryTime,
+                onSelectedOredrNow = { order,preorderType ->
+                    selectedOrder = order
+                    selectedPreOrder = preorderType
+                },
+                selctedOrder = selectedOrder,
+                onNavToTimeDatePickerScreen = {
+                    navController.navigate(Screen.DateTimePicker.route)
+                }
             )
         }
         if (checkState.isLoading) {
@@ -219,6 +274,87 @@ fun CheckOutScreen(
     }
 }
 
+
+fun parseDateTime(dateTimeString: String): Pair<String, String> {
+    if (dateTimeString.isEmpty()) {
+        return Pair("", "")
+    }
+
+    return try {
+        // Split by " - " to separate date and time parts
+        val parts = dateTimeString.split(" - ")
+        if (parts.size != 2) {
+            Log.e("parseDateTime", "Invalid format: $dateTimeString")
+            return Pair("", "")
+        }
+
+        // Extract date part: "الأحد 15 نوفمبر 2025"
+        val datePart = parts[0].trim()
+        // Extract time part: "14:30 م"
+        val timePart = parts[1].trim()
+
+        // Parse date
+        val dateComponents = datePart.split(" ")
+        if (dateComponents.size < 4) {
+            Log.e("parseDateTime", "Invalid date format: $datePart")
+            return Pair("", "")
+        }
+
+        val day = dateComponents[1].toIntOrNull() ?: return Pair("", "")
+        val monthArabic = dateComponents[2]
+        val year = dateComponents[3].toIntOrNull() ?: return Pair("", "")
+
+        // Map Arabic months to numbers
+        val monthsMap = mapOf(
+            "يناير" to 1, "فبراير" to 2, "مارس" to 3, "أبريل" to 4,
+            "مايو" to 5, "يونيو" to 6, "يوليو" to 7, "أغسطس" to 8,
+            "سبتمبر" to 9, "أكتوبر" to 10, "نوفمبر" to 11, "ديسمبر" to 12
+        )
+
+        val month = monthsMap[monthArabic] ?: return Pair("", "")
+
+        // Format date as "YYYY-MM-DD"
+        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
+
+        // Parse time
+        val timeComponents = timePart.split(" ")
+        if (timeComponents.size != 2) {
+            Log.e("parseDateTime", "Invalid time format: $timePart")
+            return Pair("", "")
+        }
+
+        val timeValue = timeComponents[0] // "14:30"
+        val period = timeComponents[1] // "م" or "ص"
+
+        val timeValues = timeValue.split(":")
+        if (timeValues.size != 2) {
+            Log.e("parseDateTime", "Invalid time value: $timeValue")
+            return Pair("", "")
+        }
+
+        var hour = timeValues[0].toIntOrNull() ?: return Pair("", "")
+        val minute = timeValues[1].toIntOrNull() ?: return Pair("", "")
+
+        // Convert to 24-hour format
+        if (period == "م" && hour != 12) { // PM and not 12
+            hour += 12
+        } else if (period == "ص" && hour == 12) { // AM and 12
+            hour = 0
+        }
+
+        // Format time as "HH:MM:SS"
+        val formattedTime = String.format("%02d:%02d:00", hour, minute)
+
+        Log.d("parseDateTime", "Parsed - Date: $formattedDate, Time: $formattedTime")
+
+        return Pair(formattedDate, formattedTime)
+
+    } catch (e: Exception) {
+        Log.e("parseDateTime", "Error parsing datetime: ${e.message}")
+        return Pair("", "")
+    }
+}
+
 @Composable
 fun CheckOutScreenContent(
     addressList: List<Pair<String, String>>,
@@ -226,7 +362,9 @@ fun CheckOutScreenContent(
     finishOrder: (String) -> Unit,
     onChangePaymentId: (String) -> Unit,
     selectedPayemnt: String,
+    selctedOrder: String,
     onSelectedPayemt: (String) -> Unit,
+    onSelectedOredrNow: (String,String) -> Unit,
     subRegion: String,
     allAddress: String,
     state: CheckOutStateModel,
@@ -236,14 +374,17 @@ fun CheckOutScreenContent(
     image: String? = null,
     onBackedBresed: () -> Unit,
     onClickToAddNewAddress: () -> Unit,
-    pickUpStatus : Boolean,
+    pickUpStatus: Boolean,
     branchName: String?,
-    branchAddress:String?,
-    deliveryTime:String
-
-
+    branchAddress: String?,
+    deliveryTime: String,
+    dateTimePicker: String,
+    onNavToTimeDatePickerScreen: () -> Unit
 ) {
-    Log.d("pickUpStatus",pickUpStatus.toString())
+    Log.d("pickUpStatus", pickUpStatus.toString())
+    Log.d("CheckOutScreenContent", "deliveryTime: $deliveryTime")
+    Log.d("CheckOutScreenContent", "dateTimePicker: $dateTimePicker")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -267,7 +408,7 @@ fun CheckOutScreenContent(
                 Spacer(modifier = Modifier.height(10.dp))
             }
             item {
-                if(pickUpStatus){
+                if (pickUpStatus) {
                     if (allAddress.isNotEmpty() && subRegion.isNotEmpty()) {
                         ShowAddress(
                             district = subRegion,
@@ -278,7 +419,6 @@ fun CheckOutScreenContent(
                         Spacer(modifier = Modifier.height(8.dp))
                         CustomButton(
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
                                 .padding(horizontal = 15.dp)
                                 .fillMaxWidth(),
                             text = stringResource(R.string.add_new_address),
@@ -287,16 +427,15 @@ fun CheckOutScreenContent(
                     } else {
                         CustomButton(
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
                                 .padding(horizontal = 15.dp)
                                 .fillMaxWidth(),
                             text = stringResource(R.string.add_new_address),
                             onClick = onClickToAddNewAddress
                         )
                     }
-                }else{
+                } else {
                     showBranchDetails(
-                        branchName =branchName,
+                        branchName = branchName,
                         branchaddress = branchAddress
                     )
                 }
@@ -305,7 +444,9 @@ fun CheckOutScreenContent(
             }
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp),
                     colors = CardDefaults.cardColors(Gray),
                     shape = RoundedCornerShape(10.dp)
                 ) {
@@ -341,17 +482,49 @@ fun CheckOutScreenContent(
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
-                    colors = CardDefaults.cardColors(Gray),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
+            if (state.checkOutResponse?.preOrder == 1) {
+                item {
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(Gray),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        OrderOptions(
+                            order = stringResource(R.string.order_now),
+                            onSelected = {
+                                onSelectedOredrNow(it,"0")
+                            },
+                            selectedOrder = selctedOrder,
+                            timepicker = ""
+                        )
 
+                        if (state.checkOutResponse.dateTimeOrder == 1) {
+                            OrderOptions(
+                                order = stringResource(R.string.order_later),
+                                onSelected = {
+                                    onSelectedOredrNow(it,"1")
+                                    onNavToTimeDatePickerScreen()
+                                },
+                                selectedOrder = selctedOrder,
+                                timepicker = dateTimePicker
+                            )
+                        }
 
+                        if (state.checkOutResponse.preOrderTextStatus == 1) {
+                            OrderOptions(
+                                order = state.checkOutResponse.preOrderText,
+                                onSelected = {
+                                    onSelectedOredrNow(it,"2")
+                                },
+                                selectedOrder = selctedOrder,
+                                timepicker = ""
+                            )
+                        }
+                    }
                 }
-
             }
         }
 
@@ -364,8 +537,7 @@ fun CheckOutScreenContent(
                 finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
             },
             pickUpStatus = pickUpStatus,
-            deliveryTime = deliveryTime,
-
-            )
+            deliveryTime = deliveryTime
+        )
     }
 }

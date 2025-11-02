@@ -25,6 +25,9 @@ class TokenManager(private val context: Context) {
 
         private const val AREAID = "area_id"
         private const val CURRENT_RESTURANT_BRANCH="current_resturent_Branch"
+        private const val CURRENT_RESTURANT_BRANCH_OPEN_TIME ="current_resturant_branch_open_time"
+        private const val CURRENT_RESTURANT_BRANCH_CLOSE_TIME ="current_resturant_branch_close_time"
+
         private const val STATUS = "status"
     }
 
@@ -83,6 +86,22 @@ class TokenManager(private val context: Context) {
             .putString(AREAID,areaId)
             .apply()
     }
+
+    fun saveOpenTimeBranch(openTime:String){
+        encryptedSharedPreferences.edit()
+            .putString(CURRENT_RESTURANT_BRANCH_OPEN_TIME,openTime)
+            .apply()
+    }
+
+    fun getOpenTimeBranch():String? = encryptedSharedPreferences.getString(CURRENT_RESTURANT_BRANCH_OPEN_TIME,"")
+
+    fun saveCloseTimeBranch(closeTime:String){
+            encryptedSharedPreferences.edit()
+                .putString(CURRENT_RESTURANT_BRANCH_CLOSE_TIME,closeTime)
+                .apply()
+        }
+
+    fun getCloseTimeBranch():String? = encryptedSharedPreferences.getString(CURRENT_RESTURANT_BRANCH_CLOSE_TIME,"")
 
     fun getAreaId() = encryptedSharedPreferences.getString(AREAID,"")
 
