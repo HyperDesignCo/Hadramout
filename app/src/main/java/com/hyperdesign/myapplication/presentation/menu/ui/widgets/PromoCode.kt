@@ -44,7 +44,7 @@ fun PromoCodeInput(onClickCoponCkeck:()->Unit,copoun:String, copounMessage:Strin
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 8.dp)
                 .background(Gray, shape = RoundedCornerShape(8.dp))
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically

@@ -9,7 +9,9 @@ fun BranchDTO.toDomain(): Branch {
     return Branch(
         id = id,
         title = title,
-        slug = slug
+        slug = slug,
+        openTime = openTime,
+        closeTime = closeTime
     )
 }
 

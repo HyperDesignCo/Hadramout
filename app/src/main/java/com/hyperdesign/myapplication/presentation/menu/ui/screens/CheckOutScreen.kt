@@ -2,26 +2,19 @@ package com.hyperdesign.myapplication.presentation.menu.ui.screens
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,17 +35,14 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutIntents
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutStateModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutViewModel
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CartBottomBar
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CheckOutHeader
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.OrderOptions
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PaymentsOption
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.ShowAddress
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SpecialRequestEditText
-import com.hyperdesign.myapplication.presentation.menu.ui.widgets.showBranchDetails
+import com.hyperdesign.myapplication.presentation.menu.ui.widgets.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
+
+/* ============================================================= */
+/* =====================  CHECK-OUT SCREEN  ==================== */
+/* ============================================================= */
 
 @Composable
 fun CheckOutScreen(
@@ -63,51 +53,61 @@ fun CheckOutScreen(
 ) {
     val navController = LocalNavController.current
     val checkState by checkOutViewModel.checkOutState.collectAsStateWithLifecycle()
+
+    // ---------- UI state ----------
     var subRegion by remember { mutableStateOf("") }
     var allAddress by remember { mutableStateOf("") }
     var selectedPayment by remember { mutableStateOf("") }
     var selectedOrder by remember { mutableStateOf("") }
     var selectedPreOrder by remember { mutableStateOf("") }
-    val context = LocalContext.current
+    var selectedDeliveryTime by remember { mutableStateOf(dateTimePicker ?: "") }
+    var paymentId by remember { mutableStateOf("1") }
     var finishOrderMsg by remember { mutableStateOf("") }
-    var paymentId by remember { mutableStateOf("") }
     var addressList by remember { mutableStateOf<List<Pair<String, String>>?>(null) }
     var justAdded by remember { mutableStateOf(false) }
     var deliveryStatus by remember { mutableStateOf(false) }
 
-    // State to hold the selected delivery time from DateTimePicker
-    var selectedDeliveryTime by remember { mutableStateOf(dateTimePicker ?: "") }
+    // Scroll-driven expand/collapse state
+    var isBottomBarExpanded by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
 
-    Log.d("lang", loginViewModel.tokenManager.getLanguage().toString())
-    Log.d("order", selectedOrder)
-    Log.d("preOrder", selectedPreOrder)
-    Log.d("CheckOutScreen", "dateTimePicker param: $dateTimePicker")
-    Log.d("CheckOutScreen", "deliveryTime param: $deliveryTime")
+    val context = LocalContext.current
 
-    // Listen for selected delivery time from DateTimePicker via savedStateHandle
+    /* -------------------- SCROLL DETECTION -------------------- */
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
+        }
+            .distinctUntilChanged()
+            .collect { (index, offset) ->
+                if (index > 0 || offset > 100) {
+                    isBottomBarExpanded = true
+                } else if (index == 0 && offset < 50) {
+                    isBottomBarExpanded = false
+                }
+            }
+    }
+
+    /* -------------------- TIME PICKER RETURN -------------------- */
     val returnedDeliveryTime by navController.currentBackStackEntry
         ?.savedStateHandle
         ?.getStateFlow<String?>("selected_delivery_time", null)
         ?.collectAsStateWithLifecycle(initialValue = null) ?: remember { mutableStateOf(null) }
 
-    // Update selectedDeliveryTime when new time is returned from DateTimePicker
     LaunchedEffect(returnedDeliveryTime) {
-        if (!returnedDeliveryTime.isNullOrEmpty()) {
-            selectedDeliveryTime = returnedDeliveryTime.toString()
-            Log.d("CheckOutScreen", "Updated delivery time from picker: $returnedDeliveryTime")
+        returnedDeliveryTime?.let {
+            selectedDeliveryTime = it
         }
     }
 
-    // Listen for address_added flag from AllAddressesScreen
+    /* -------------------- ADDRESS ADDED FLAG -------------------- */
     val addressAdded by navController.currentBackStackEntry
         ?.savedStateHandle
         ?.getStateFlow<Boolean>("address_added", false)
         ?.collectAsStateWithLifecycle(initialValue = false) ?: remember { mutableStateOf(false) }
 
-    // Refresh data when address_added is true
     LaunchedEffect(addressAdded) {
         if (addressAdded) {
-            Log.d("CheckOutScreen", "address_added detected, refreshing data")
             checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick(loginViewModel.tokenManager.getBranchId().toString()))
             checkOutViewModel.handleIntents(CheckOutIntents.GetAddress)
             delay(1000)
@@ -116,73 +116,74 @@ fun CheckOutScreen(
         }
     }
 
-
-    // Initial data fetch
+    /* -------------------- INITIAL DATA -------------------- */
     LaunchedEffect(Unit) {
-        Log.d("CheckOutScreen", "Initial data fetch")
         checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick(loginViewModel.tokenManager.getBranchId().toString()))
     }
 
-    // Update UI when checkState changes
+    /* -------------------- STATE UPDATE -------------------- */
     LaunchedEffect(checkState) {
-        Log.d("CheckOutScreen", "checkState updated, addresses: ${checkState.address?.addresses?.size}")
         val address = checkState.address?.addresses?.firstOrNull()
         subRegion = listOfNotNull(
             address?.area?.name?.takeIf { it.isNotEmpty() },
             address?.region?.name?.takeIf { it.isNotEmpty() }
-        ).joinToString(separator = ",")
+        ).joinToString(separator = ", ")
+
         allAddress = listOfNotNull(
             address?.sub_region?.takeIf { it.isNotEmpty() },
             address?.street?.takeIf { it.isNotEmpty() },
             address?.special_sign?.takeIf { it.isNotEmpty() },
             address?.building_number?.takeIf { it.isNotEmpty() },
             address?.floor_number?.takeIf { it.isNotEmpty() }
-        ).joinToString(separator = ",")
-        paymentId = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.id.toString()
-        selectedPayment = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.title.toString()
-        finishOrderMsg = checkState.finishOrderResponse?.message.orEmpty()
-        if(selectedDeliveryTime.isEmpty()){
-            selectedOrder = context.getString(R.string.order_now)
-            selectedPreOrder="0"
+        ).joinToString(separator = ", ")
 
-        }else{
+        paymentId = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.id.toString()
+        Log.d("paymentId", paymentId)
+        selectedPayment = checkState.checkOutResponse?.payment_methods?.firstOrNull()?.title.orEmpty()
+        finishOrderMsg = checkState.finishOrderResponse?.message.orEmpty()
+
+        if (selectedDeliveryTime.isEmpty()) {
+            selectedOrder = context.getString(R.string.order_now)
+            selectedPreOrder = "0"
+        } else {
             selectedOrder = context.getString(R.string.order_later)
-            selectedPreOrder="1"
+            selectedPreOrder = "1"
         }
 
         addressList = checkState.address?.addresses?.map { addr ->
             val district = listOfNotNull(
                 addr.area?.name?.takeIf { it.isNotEmpty() },
                 addr.region?.name?.takeIf { it.isNotEmpty() }
-            ).joinToString(separator = ",")
-            val addressDetails = listOfNotNull(
+            ).joinToString(separator = ", ")
+
+            val details = listOfNotNull(
                 addr.sub_region?.takeIf { it.isNotEmpty() },
                 addr.street?.takeIf { it.isNotEmpty() },
                 addr.special_sign?.takeIf { it.isNotEmpty() },
                 addr.building_number?.takeIf { it.isNotEmpty() },
                 addr.floor_number?.takeIf { it.isNotEmpty() }
-            ).joinToString(separator = ",")
-            Pair(district, addressDetails)
+            ).joinToString(separator = ", ")
+
+            Pair(district, details)
         } ?: emptyList()
 
         if (addressList?.isNotEmpty() == true && justAdded) {
-            Log.d("CheckOutScreen", "Auto-selecting latest address: ${addressList!!.last()}")
-            subRegion = addressList!!.last().first
-            allAddress = addressList!!.last().second
+            val last = addressList!!.last()
+            subRegion = last.first
+            allAddress = last.second
             justAdded = false
         }
-        deliveryStatus = if (checkState.checkOutResponse?.cart?.pickUpStatus == "0") true else false
+
+        deliveryStatus = checkState.checkOutResponse?.cart?.pickUpStatus == "0"
     }
 
-    // Handle order completion messages
+    /* -------------------- FINISH ORDER MESSAGE -------------------- */
     LaunchedEffect(finishOrderMsg) {
         if (finishOrderMsg.isNotEmpty()) {
-            Log.d("CheckOutScreen", "Finish order message: $finishOrderMsg")
             if (finishOrderMsg == "Your order has been sent successfully") {
                 Toast.makeText(context, context.getString(R.string.your_order_has_been_sent_successfully), Toast.LENGTH_SHORT).show()
                 navController.navigate(Screen.MyOrders.route) {
                     popUpTo(Screen.CartScreen.route) { inclusive = true }
-//                    launchSingleTop = true
                 }
             } else {
                 Toast.makeText(context, finishOrderMsg, Toast.LENGTH_SHORT).show()
@@ -190,6 +191,7 @@ fun CheckOutScreen(
         }
     }
 
+    /* -------------------- UI -------------------- */
     Box(modifier = Modifier.fillMaxSize()) {
         addressList?.let { addresses ->
             CheckOutScreenContent(
@@ -197,26 +199,15 @@ fun CheckOutScreen(
                 phoneNumber = loginViewModel.tokenManager.getUserData()?.mobile.orEmpty(),
                 image = loginViewModel.tokenManager.getUserData()?.image.orEmpty(),
                 state = checkState,
-                onChangeSpecialRequest = {
-                    checkOutViewModel.handleIntents(CheckOutIntents.OnChangeSpecialRequest(it))
-                },
-                onBackedBresed = {
-                    navController.popBackStack()
-                },
+                onChangeSpecialRequest = { checkOutViewModel.handleIntents(CheckOutIntents.OnChangeSpecialRequest(it)) },
+                onBackedBresed = { navController.popBackStack() },
                 subRegion = subRegion,
                 allAddress = allAddress,
-                onSelectedPayemt = { payment -> selectedPayment = payment },
+                onSelectedPayemt = { selectedPayment = it },
                 selectedPayemnt = selectedPayment,
-                onChangePaymentId = { paymentIdd -> paymentId = paymentIdd },
+                onChangePaymentId = { paymentId = it },
                 finishOrder = { cartId ->
-                    // Parse the selectedDeliveryTime to extract date and time
                     val (orderDate, orderTime) = parseDateTime(selectedDeliveryTime)
-
-                    Log.d("CheckOutScreen", "Sending order with:")
-                    Log.d("CheckOutScreen", "order_date: $orderDate")
-                    Log.d("CheckOutScreen", "order_time: $orderTime")
-                    Log.d("CheckOutScreen", "is_preorder: $selectedPreOrder")
-
                     checkOutViewModel.handleIntents(
                         CheckOutIntents.FinishOrder(
                             cartId = cartId,
@@ -231,12 +222,10 @@ fun CheckOutScreen(
                 },
                 addressList = addresses,
                 onAddressSelected = { district, details ->
-                    Log.d("CheckOutScreen", "Address selected: $district, $details")
                     subRegion = district
                     allAddress = details
                 },
                 onClickToAddNewAddress = {
-                    Log.d("CheckOutScreen", "Navigating to AllAddressesScreen")
                     val screenType = "checkOutScreen"
                     navController.navigate(Screen.AllAddressesScreen.route.replace("{screenType}", screenType))
                 },
@@ -251,16 +240,17 @@ fun CheckOutScreen(
                     checkState.checkOutResponse?.branch?.addressAr,
                 deliveryTime = deliveryTime.orEmpty(),
                 dateTimePicker = selectedDeliveryTime,
-                onSelectedOredrNow = { order,preorderType ->
+                onSelectedOredrNow = { order, preOrderType ->
                     selectedOrder = order
-                    selectedPreOrder = preorderType
+                    selectedPreOrder = preOrderType
                 },
                 selctedOrder = selectedOrder,
-                onNavToTimeDatePickerScreen = {
-                    navController.navigate(Screen.DateTimePicker.route)
-                }
+                onNavToTimeDatePickerScreen = { navController.navigate(Screen.DateTimePicker.route) },
+                listState = listState,
+                isBottomBarExpanded = isBottomBarExpanded
             )
         }
+
         if (checkState.isLoading) {
             Box(
                 modifier = Modifier
@@ -274,86 +264,9 @@ fun CheckOutScreen(
     }
 }
 
-
-fun parseDateTime(dateTimeString: String): Pair<String, String> {
-    if (dateTimeString.isEmpty()) {
-        return Pair("", "")
-    }
-
-    return try {
-        // Split by " - " to separate date and time parts
-        val parts = dateTimeString.split(" - ")
-        if (parts.size != 2) {
-            Log.e("parseDateTime", "Invalid format: $dateTimeString")
-            return Pair("", "")
-        }
-
-        // Extract date part: "الأحد 15 نوفمبر 2025"
-        val datePart = parts[0].trim()
-        // Extract time part: "14:30 م"
-        val timePart = parts[1].trim()
-
-        // Parse date
-        val dateComponents = datePart.split(" ")
-        if (dateComponents.size < 4) {
-            Log.e("parseDateTime", "Invalid date format: $datePart")
-            return Pair("", "")
-        }
-
-        val day = dateComponents[1].toIntOrNull() ?: return Pair("", "")
-        val monthArabic = dateComponents[2]
-        val year = dateComponents[3].toIntOrNull() ?: return Pair("", "")
-
-        // Map Arabic months to numbers
-        val monthsMap = mapOf(
-            "يناير" to 1, "فبراير" to 2, "مارس" to 3, "أبريل" to 4,
-            "مايو" to 5, "يونيو" to 6, "يوليو" to 7, "أغسطس" to 8,
-            "سبتمبر" to 9, "أكتوبر" to 10, "نوفمبر" to 11, "ديسمبر" to 12
-        )
-
-        val month = monthsMap[monthArabic] ?: return Pair("", "")
-
-        // Format date as "YYYY-MM-DD"
-        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
-
-        // Parse time
-        val timeComponents = timePart.split(" ")
-        if (timeComponents.size != 2) {
-            Log.e("parseDateTime", "Invalid time format: $timePart")
-            return Pair("", "")
-        }
-
-        val timeValue = timeComponents[0] // "14:30"
-        val period = timeComponents[1] // "م" or "ص"
-
-        val timeValues = timeValue.split(":")
-        if (timeValues.size != 2) {
-            Log.e("parseDateTime", "Invalid time value: $timeValue")
-            return Pair("", "")
-        }
-
-        var hour = timeValues[0].toIntOrNull() ?: return Pair("", "")
-        val minute = timeValues[1].toIntOrNull() ?: return Pair("", "")
-
-        // Convert to 24-hour format
-        if (period == "م" && hour != 12) { // PM and not 12
-            hour += 12
-        } else if (period == "ص" && hour == 12) { // AM and 12
-            hour = 0
-        }
-
-        // Format time as "HH:MM:SS"
-        val formattedTime = String.format("%02d:%02d:00", hour, minute)
-
-        Log.d("parseDateTime", "Parsed - Date: $formattedDate, Time: $formattedTime")
-
-        return Pair(formattedDate, formattedTime)
-
-    } catch (e: Exception) {
-        Log.e("parseDateTime", "Error parsing datetime: ${e.message}")
-        return Pair("", "")
-    }
-}
+/* ============================================================= */
+/* ===================  CHECK-OUT SCREEN CONTENT  =============== */
+/* ============================================================= */
 
 @Composable
 fun CheckOutScreenContent(
@@ -364,7 +277,7 @@ fun CheckOutScreenContent(
     selectedPayemnt: String,
     selctedOrder: String,
     onSelectedPayemt: (String) -> Unit,
-    onSelectedOredrNow: (String,String) -> Unit,
+    onSelectedOredrNow: (String, String) -> Unit,
     subRegion: String,
     allAddress: String,
     state: CheckOutStateModel,
@@ -379,17 +292,17 @@ fun CheckOutScreenContent(
     branchAddress: String?,
     deliveryTime: String,
     dateTimePicker: String,
-    onNavToTimeDatePickerScreen: () -> Unit
+    onNavToTimeDatePickerScreen: () -> Unit,
+    listState: LazyListState,
+    isBottomBarExpanded: Boolean
 ) {
-    Log.d("pickUpStatus", pickUpStatus.toString())
-    Log.d("CheckOutScreenContent", "deliveryTime: $deliveryTime")
-    Log.d("CheckOutScreenContent", "dateTimePicker: $dateTimePicker")
-
+    // <<< FIXED >>> Single Column layout (exactly like CartScreen)
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
+        // Header
         CheckOutHeader(
             userName = name,
             phoneNumber = phoneNumber,
@@ -397,16 +310,20 @@ fun CheckOutScreenContent(
             onBackPressed = onBackedBresed
         )
 
+        // Scrollable content
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = 240.dp) // Space for bottom sections
         ) {
             item {
                 Spacer(modifier = Modifier.height(20.dp))
                 SpecialRequestEditText(state = state, onChangeSpecialRequest = onChangeSpecialRequest)
                 Spacer(modifier = Modifier.height(10.dp))
             }
+
             item {
                 if (pickUpStatus) {
                     if (allAddress.isNotEmpty() && subRegion.isNotEmpty()) {
@@ -439,9 +356,9 @@ fun CheckOutScreenContent(
                         branchaddress = branchAddress
                     )
                 }
-
                 Spacer(modifier = Modifier.height(10.dp))
             }
+
             item {
                 Card(
                     modifier = Modifier
@@ -473,6 +390,7 @@ fun CheckOutScreenContent(
                                 payment = payment.title,
                                 selectedPayment = selectedPayemnt,
                                 onSelected = {
+                                    Log.d("payment", payment.id)
                                     onSelectedPayemt(it)
                                     onChangePaymentId(payment.id)
                                 }
@@ -494,9 +412,7 @@ fun CheckOutScreenContent(
                     ) {
                         OrderOptions(
                             order = stringResource(R.string.order_now),
-                            onSelected = {
-                                onSelectedOredrNow(it,"0")
-                            },
+                            onSelected = { onSelectedOredrNow(it, "0") },
                             selectedOrder = selctedOrder,
                             timepicker = ""
                         )
@@ -505,7 +421,7 @@ fun CheckOutScreenContent(
                             OrderOptions(
                                 order = stringResource(R.string.order_later),
                                 onSelected = {
-                                    onSelectedOredrNow(it,"1")
+                                    onSelectedOredrNow(it, "1")
                                     onNavToTimeDatePickerScreen()
                                 },
                                 selectedOrder = selctedOrder,
@@ -516,9 +432,7 @@ fun CheckOutScreenContent(
                         if (state.checkOutResponse.preOrderTextStatus == 1) {
                             OrderOptions(
                                 order = state.checkOutResponse.preOrderText,
-                                onSelected = {
-                                    onSelectedOredrNow(it,"2")
-                                },
+                                onSelected = { onSelectedOredrNow(it, "2") },
                                 selectedOrder = selctedOrder,
                                 timepicker = ""
                             )
@@ -528,16 +442,174 @@ fun CheckOutScreenContent(
             }
         }
 
+        // <<< FIXED >>> Special Request / Address section (always visible, like promo in CartScreen)
+        // (You can move this above LazyColumn if you want it to scroll with content)
+
+        // <<< FIXED >>> Animated Price Details Box (exactly like CartScreen)
+        AnimatedVisibility(
+            visible = isBottomBarExpanded,
+            enter = expandVertically(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            ),
+            exit = shrinkVertically(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp)
+            ) {
+                // Price row
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(R.string.price),
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = state.checkOutResponse?.cart?.primaryPrice?.toString() ?: "0.00",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Secondry
+                    )
+                }
+
+                // Delivery row (if pickUpStatus is true)
+                if (pickUpStatus) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(R.string.delivery),
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                        Text(
+                            text = state.checkOutResponse?.cart?.deliveryCost?.toString() ?: "0.00",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondry
+                        )
+                    }
+                }
+
+                // Delivery/Pickup time row
+                Spacer(modifier = Modifier.height(8.dp))
+                if(pickUpStatus){
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.delivery_time
+                            ),
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                        Text(
+                            text = stringResource(R.string.minutes, deliveryTime),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Secondry
+                        )
+                    }
+                }
+
+
+                // Divider
+                Spacer(modifier = Modifier.height(12.dp))
+                Divider(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth(),
+                    color = Color.LightGray
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
+        // <<< FIXED >>> Bottom Bar with Total Price (Always visible)
         CartBottomBar(
             priceItems = state.checkOutResponse?.cart?.primaryPrice?.toString() ?: "0.00",
             deliveryPrice = state.checkOutResponse?.cart?.deliveryCost?.toString() ?: "0.00",
             totalPrice = state.checkOutResponse?.cart?.totalPrice?.toString() ?: "0.00",
             buttonText = stringResource(R.string.checkout),
-            onPayClick = {
-                finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
-            },
-            pickUpStatus = pickUpStatus,
-            deliveryTime = deliveryTime
+            deliveryTime = deliveryTime,
+            onPayClick = { finishOrder(state.checkOutResponse?.cart?.id.orEmpty()) },
+            pickUpStatus = pickUpStatus
         )
+    }
+}
+
+/* ============================================================= */
+/* =====================  DATE-TIME PARSER  =================== */
+/* ============================================================= */
+
+fun parseDateTime(dateTimeString: String): Pair<String, String> {
+    if (dateTimeString.isEmpty()) return Pair("", "")
+
+    return try {
+        val parts = dateTimeString.split(" - ")
+        if (parts.size != 2) return Pair("", "")
+
+        val datePart = parts[0].trim()
+        val timePart = parts[1].trim()
+
+        val dateComponents = datePart.split(" ")
+        if (dateComponents.size < 4) return Pair("", "")
+
+        val day = dateComponents[1].toIntOrNull() ?: return Pair("", "")
+        val monthArabic = dateComponents[2]
+        val year = dateComponents[3].toIntOrNull() ?: return Pair("", "")
+
+        val monthsMap = mapOf(
+            "يناير" to 1, "فبراير" to 2, "مارس" to 3, "أبريل" to 4,
+            "مايو" to 5, "يونيو" to 6, "يوليو" to 7, "أغسطس" to 8,
+            "سبتمبر" to 9, "أكتوبر" to 10, "نوفمبر" to 11, "ديسمبر" to 12
+        )
+        val month = monthsMap[monthArabic] ?: return Pair("", "")
+        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
+
+        val timeComponents = timePart.split(" ")
+        if (timeComponents.size != 2) return Pair("", "")
+
+        val timeValue = timeComponents[0]
+        val period = timeComponents[1]
+
+        val timeValues = timeValue.split(":")
+        if (timeValues.size != 2) return Pair("", "")
+
+        var hour = timeValues[0].toIntOrNull() ?: return Pair("", "")
+        val minute = timeValues[1].toIntOrNull() ?: return Pair("", "")
+
+        if (period == "م" && hour != 12) hour += 12
+        else if (period == "ص" && hour == 12) hour = 0
+
+        val formattedTime = String.format("%02d:%02d:00", hour, minute)
+
+        Pair(formattedDate, formattedTime)
+    } catch (e: Exception) {
+        Log.e("parseDateTime", "Error: ${e.message}")
+        Pair("", "")
     }
 }

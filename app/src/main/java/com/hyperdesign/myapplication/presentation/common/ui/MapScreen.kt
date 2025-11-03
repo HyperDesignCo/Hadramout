@@ -1,4 +1,4 @@
-package com.hyperdesign.myapplication.presentation.common.wedgits
+package com.hyperdesign.myapplication.presentation.common.ui
 
 import android.Manifest
 import android.os.Bundle
@@ -7,13 +7,8 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -35,8 +29,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import com.hyperdesign.myapplication.R
-import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.hyperdesign.myapplication.presentation.common.viewmodel.MapViewModel
+import com.hyperdesign.myapplication.presentation.home.HomeObject
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import kotlinx.coroutines.launch
@@ -347,7 +341,6 @@ fun MapScreen(
 
         if (showNoDeliveryDialog) {
             NoDeliveryDialog(
-                message = stringResource(R.string.change_location_not_work),
                 onDismiss = { showNoDeliveryDialog = false },
                 onPickupClick = {
                     showNoDeliveryDialog = false
@@ -361,6 +354,7 @@ fun MapScreen(
                         Log.e("MapScreen", "Pickup navigation failed: ${e.message}", e)
                         Toast.makeText(context, "Pickup navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
                     }
+                    HomeObject.updateStatus(0)
                 }
             )
         }
@@ -396,12 +390,11 @@ fun MapScreen(
 
 @Composable
 fun NoDeliveryDialog(
-    message: String,
     onDismiss: () -> Unit,
     onPickupClick: () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {},
         title = {
             Text(
                 stringResource(R.string.no_delivery_available),
@@ -417,12 +410,24 @@ fun NoDeliveryDialog(
                 onClick = onDismiss
             ) {
                 Text(
-                    stringResource(R.string.confirm),
+                    stringResource(R.string.change_Location),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color(0xFFFCB203)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                onPickupClick()
+            }) {
+                Text(
+                    stringResource(R.string.pick_up),
+                    color = Color(0xFFF15A25),
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
                 )
             }
         },

@@ -3,7 +3,9 @@ package com.hyperdesign.myapplication.domain.Entity
 data class Branch(
     val id: Int,
     val title: String,
-    val slug: String
+    val slug: String,
+    val openTime:String,
+    val closeTime:String
 )
 
 // Optionally, if you need the response wrapper in the domain layer:

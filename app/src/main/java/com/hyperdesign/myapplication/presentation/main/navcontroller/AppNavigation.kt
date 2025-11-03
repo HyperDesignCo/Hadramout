@@ -20,7 +20,7 @@ import com.hyperdesign.myapplication.presentation.auth.forgotpassword.ui.screens
 import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreen
 import com.hyperdesign.myapplication.presentation.auth.login.ui.screens.LoginScreenStepTwo
 import com.hyperdesign.myapplication.presentation.auth.signup.ui.SignUpScreen
-import com.hyperdesign.myapplication.presentation.common.wedgits.MapScreen
+import com.hyperdesign.myapplication.presentation.common.ui.MapScreen
 import com.hyperdesign.myapplication.presentation.home.ui.screens.HomeScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.MealDetailsScreen
 import com.hyperdesign.myapplication.presentation.menu.ui.MealInput

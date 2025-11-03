@@ -109,6 +109,9 @@ fun HomeScreen(
 
     Log.d("makeupd",makePichUp.toString())
 
+    var hasShownNoDeliveryDialog by remember { mutableStateOf(false) }
+    var showPickupBranchDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
 
         if (!permissionState.allPermissionsGranted) {
@@ -181,9 +184,10 @@ fun HomeScreen(
                 }
             }
 
-            if (pickup == "1") {
+            if (pickup == "1"&&HomeObject.status==0) {
                 status = true
                 homeViewModel.tokenManager.saveStatus(1)
+                showPickupBranchDialog = true
                 Log.d("HomeScreen", "Switched to pickup mode via navigation")
             }
         }
@@ -196,8 +200,7 @@ fun HomeScreen(
         return
     }
 
-    var hasShownNoDeliveryDialog by remember { mutableStateOf(false) }
-    var showPickupBranchDialog by remember { mutableStateOf(false) }
+
     val deliveryStatus = homeState.checkLocationResponseEntity?.data?.deliveryStatus
 
     Log.d("HomeScreen", "Delivery status: $deliveryStatus")
@@ -262,7 +265,13 @@ fun HomeScreen(
             currentResturentBranch = homeState.checkLocationResponseEntity?.data?.currentResturantBranch.orEmpty(),
             selectedBranchState = remember { mutableStateOf(selectedBranchState) },
             onShowPickupDialog = { showPickupBranchDialog = true },
-            makePickup = makePichUp
+            makePickup = makePichUp,
+            saveOpenBranch = {
+                homeViewModel.tokenManager.saveOpenTimeBranch(it)
+            },
+            saveCloseBranch = {
+                homeViewModel.tokenManager.saveCloseTimeBranch(it)
+            }
         )
 
         if (showAuthDialoge) {
@@ -309,14 +318,16 @@ fun HomeScreen(
                     homeViewModel.tokenManager.saveBranchId(branch.id)
                     selectedBranchState = branch.title
                     showPickupBranchDialog = false
+                    HomeObject.updateStatus(1)
                 },
                 onDismiss = {
                     showPickupBranchDialog = false
+                    HomeObject.updateStatus(1)
                 }
             )
         }
 
-        if (homeState.isLoading || isFetchingLocation) {
+        if (homeState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -349,7 +360,9 @@ fun HomeScreenContent(
     checkOnZeroOrNot:(Int)->Unit={},
     selectedBranchState: MutableState<String>,
     onShowPickupDialog: () -> Unit,
-    makePickup:Boolean =false
+    makePickup:Boolean =false,
+    saveOpenBranch: (String)->Unit,
+    saveCloseBranch: (String)->Unit
 ) {
     val navController = LocalNavController.current
     val configuration = LocalConfiguration.current
@@ -361,6 +374,8 @@ fun HomeScreenContent(
             if (selected != null) {
                 selectedBranchState.value = selected.title
                 onBranchSelected(selected.id)
+                saveOpenBranch(selected.openTime)
+                saveCloseBranch(selected.closeTime)
                 Log.d("HomeScreen", "Updated selectedBranch to ${selected.title} based on currentResturentBranch=$currentResturentBranch")
             }
         }
@@ -373,6 +388,8 @@ fun HomeScreenContent(
                 // Wait for currentResturentBranch to set selectedBranch
                 if(getBranchId==0 && currentResturentBranch.isEmpty()){
                     selectedBranchState.value = branches[0].title
+                    saveOpenBranch(branches[0].openTime)
+                    saveCloseBranch(branches[0].closeTime)
                     checkOnZeroOrNot(0)
                     onBranchSelected(branches[0].id)
 //                    saveBranchId(branches[0].id)
@@ -381,6 +398,8 @@ fun HomeScreenContent(
                     Log.d("getBranchId","getBranchId inside mystatuselseif")
                     selectedBranchState.value = branches[0].title
                     onBranchSelected(branches[0].id)
+                    saveOpenBranch(branches[0].openTime)
+                    saveCloseBranch(branches[0].closeTime)
                 }
             } else {
                 Log.d("getBranchId","getBranchId inside else")
@@ -390,12 +409,16 @@ fun HomeScreenContent(
                     if (selected != null) {
                         selectedBranchState.value = selected.title
                         onBranchSelected(selected.id)
+                        saveOpenBranch(selected.openTime)
+                        saveCloseBranch(selected.closeTime)
                         Log.d("HomeScreen", "Set selectedBranch to ${selected.title} from getBranchId=$getBranchId")
                     } else {
                         saveBranchId(0)
                         selectedBranchState.value = branches[0].title
                         onBranchSelected(branches[0].id)
                         saveBranchId(branches[0].id)
+                        saveOpenBranch(branches[0].openTime)
+                        saveCloseBranch(branches[0].closeTime)
                         Log.d("HomeScreen", "Fallback to first branch: ${branches[0].title}")
                     }
                 } else {
@@ -403,6 +426,8 @@ fun HomeScreenContent(
                         selectedBranchState.value = branches[0].title
                         onBranchSelected(branches[0].id)
                         saveBranchId(branches[0].id)
+                        saveOpenBranch(branches[0].openTime)
+                        saveCloseBranch(branches[0].closeTime)
                         Log.d("HomeScreen", "Default to first branch: ${branches[0].title}")
                     }
 

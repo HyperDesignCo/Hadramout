@@ -60,119 +60,25 @@ fun CartBottomBar(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Price row
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Text(
-                    text = stringResource(R.string.price),
-                    fontSize = 16.sp,
-                    color = Color.Gray,
-//                    textAlign = if (isRtl) TextAlign.Start else TextAlign.End,
-//                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = priceItems,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Secondry,
-//                    textAlign = if (isRtl) TextAlign.End else TextAlign.Start,
-//                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            // Delivery row (if pickUpStatus is true)
-            if (pickUpStatus) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Text(
-                        text = stringResource(R.string.delivery),
-                        fontSize = 16.sp,
-                        color = Color.Gray,
-//                        textAlign = if (isRtl) TextAlign.Start else TextAlign.End,
-//                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text = deliveryPrice,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondry,
-//                        textAlign = if (isRtl) TextAlign.End else TextAlign.Start,
-//                        modifier = Modifier.weight(1f)
-                    )
-
-                }
-            }
-
-            // Delivery/Pickup time row
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Text(
-                    text = stringResource(
-                        if (!pickUpStatus) R.string.pickup_time else R.string.delivery_time
-                    ),
-                    fontSize = 16.sp,
-                    color = Color.Gray,
-//                    textAlign = if (isRtl) TextAlign.Start else TextAlign.End,
-//                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = stringResource(R.string.minutes, deliveryTime),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Secondry,
-//                    textAlign = if (isRtl) TextAlign.End else TextAlign.Start,
-//                    modifier = Modifier.weight(1f)
-                )
-
-            }
-
-            // Divider
-            Divider(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth(),
-                color = Color.LightGray
-            )
-
             // Total price row
             Row(
-                modifier = Modifier.padding(horizontal = 5.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .padding(horizontal = 5.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
                 Text(
                     text = stringResource(R.string.total_price),
                     fontSize = 18.sp,
-                    color = Color.Gray,
-//                    textAlign = if (isRtl) TextAlign.Start else TextAlign.End,
-//                    modifier = Modifier.weight(1f)
+                    color = Color.Gray
                 )
 
                 Text(
                     text = "${totalPrice} ${stringResource(R.string.egy2)}",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Secondry,
-//                    textAlign = if (isRtl) TextAlign.End else TextAlign.Start,
-//                    modifier = Modifier.weight(1f)
+                    color = Secondry
                 )
-
             }
 
             Spacer(modifier = Modifier.height(10.dp))
