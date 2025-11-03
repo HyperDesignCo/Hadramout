@@ -95,7 +95,7 @@ class CartViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val quantity = _cartState.value.quantity.toInt()+1
-                val updateRequest = UpdateCartItemQuantityRequest(cartId = cartId, itemId = itemId, newQuantity = quantity.toString(), areaId = tokenManager.getAreaId().toString())
+                val updateRequest = UpdateCartItemQuantityRequest(branchId = tokenManager.getBranchId().toString(),cartId = cartId, itemId = itemId, newQuantity = quantity.toString(), areaId = tokenManager.getAreaId().toString())
                 val response = updateCartItemQuantityUseCase.invoke(updateRequest)
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,
@@ -124,7 +124,7 @@ class CartViewModel(
                 if (quantity<1){
                     deleteCartItem(cartId,itemId)
                 }
-                val updateRequest = UpdateCartItemQuantityRequest(cartId = cartId, itemId = itemId, newQuantity = quantity.toString(), areaId = tokenManager.getAreaId().toString())
+                val updateRequest = UpdateCartItemQuantityRequest(branchId= tokenManager.getBranchId().toString(),cartId = cartId, itemId = itemId, newQuantity = quantity.toString(), areaId = tokenManager.getAreaId().toString())
                 val response = updateCartItemQuantityUseCase.invoke(updateRequest)
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,
@@ -152,7 +152,7 @@ class CartViewModel(
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val deleteRequest = DeleteCartRequest(cartId = cartId, itemId = itemId, areaId =tokenManager.getAreaId().toString() )
+                val deleteRequest = DeleteCartRequest(cartId = cartId, itemId = itemId, branchId = tokenManager.getBranchId().toString(), areaId =tokenManager.getAreaId().toString() )
                 val response = deleteCartItemUseCase.invoke(deleteRequest)
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,

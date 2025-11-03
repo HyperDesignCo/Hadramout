@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.data.local.TokenManager
+import com.hyperdesign.myapplication.data.remote.common.FirebaseRepository
 import com.hyperdesign.myapplication.domain.Entity.RegisterRequst
 import com.hyperdesign.myapplication.domain.usecase.auth.RegisterUseCase
 import com.hyperdesign.myapplication.presentation.utilies.ValidatePhoneNumber
@@ -25,6 +26,7 @@ class RegisterViewModel(
     private val validatePhoneNumber: ValidatePhoneNumber,
     private val tokenManager: TokenManager,
     private val registerUseCase: RegisterUseCase,
+    private val firebaseRepository: FirebaseRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -33,6 +35,13 @@ class RegisterViewModel(
 
     private var _validationEvent = Channel<ValidationEvent>()
     val validationEvent = _validationEvent.receiveAsFlow()
+
+    var firebaseToken: String? = null
+        private set
+
+    init {
+        fetchFirebaseToken()
+    }
 
     fun onIntentEvent(intent: RegisterIntents) {
         when (intent) {
@@ -67,6 +76,12 @@ class RegisterViewModel(
                 )
             }
             is RegisterIntents.RegisterClicked -> submitData()
+        }
+    }
+
+    private fun fetchFirebaseToken() {
+        viewModelScope.launch {
+            firebaseToken = firebaseRepository.getFirebaseToken()
         }
     }
 
@@ -122,7 +137,8 @@ class RegisterViewModel(
                         password = _state.value.password,
                         name = _state.value.userName,
                         mobile = _state.value.phoneNumber,
-                        device_token = ""
+                        device_token = firebaseToken?:"",
+//                        device_type = "android"
                     )
                 )
                 // Update state back on the main thread

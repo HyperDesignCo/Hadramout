@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "735252203734",
+    "project_id": "baitelmashweyat-44e88",
+    "storage_bucket": "baitelmashweyat-44e88.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735252203734:android:252406cf8784cad51ca177",
+        "android_client_info": {
+          "package_name": "com.hyperdesign.baitelmashweyat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyJyWzMPrK7ppkDly_d136IoYpdb4JuWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735252203734:android:0d9bb598fe8075921ca177",
+        "android_client_info": {
+          "package_name": "com.hyperdesign.baitelmashweyatdelivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyJyWzMPrK7ppkDly_d136IoYpdb4JuWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735252203734:android:47e677965478ee8b1ca177",
+        "android_client_info": {
+          "package_name": "com.hyperdesign.malky"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyJyWzMPrK7ppkDly_d136IoYpdb4JuWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735252203734:android:801cf94cbe8057611ca177",
+        "android_client_info": {
+          "package_name": "com.hyperdesign.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyJyWzMPrK7ppkDly_d136IoYpdb4JuWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,6 +14,8 @@ data class LoginRequest(
     val password: String,
     @SerializedName("device_token")
     val deviceToken: String? = null,
+    @SerializedName("device_type")
+    val deviceType: String? = null,
 )
 
 

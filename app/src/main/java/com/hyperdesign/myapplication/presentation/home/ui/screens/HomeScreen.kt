@@ -2,6 +2,7 @@ package com.hyperdesign.myapplication.presentation.home.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.foundation.background
@@ -29,7 +30,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -95,7 +98,7 @@ fun HomeScreen(
     var newBranchId by remember { mutableStateOf(0) }
 
     LaunchedEffect(newBranchId) {
-        if (newBranchId!=0){
+        if (newBranchId != 0) {
             homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(newBranchId))
         }
     }
@@ -106,22 +109,39 @@ fun HomeScreen(
     )
 
     Log.d("HomeScreen", "Composing HomeScreen with navArgsKey=$navArgsKey")
-
-    Log.d("makeupd",makePichUp.toString())
+    Log.d("makeupd", makePichUp.toString())
 
     var hasShownNoDeliveryDialog by remember { mutableStateOf(false) }
     var showPickupBranchDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
+    // === NOTIFICATION PERMISSION (Android 13+) ===
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val notificationPermissionState = rememberPermissionState(
+            permission = Manifest.permission.POST_NOTIFICATIONS
+        )
 
+        var hasRequestedNotificationPermission by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            if (!hasRequestedNotificationPermission &&
+                !notificationPermissionState.status.isGranted
+            ) {
+                hasRequestedNotificationPermission = true
+                notificationPermissionState.launchPermissionRequest()
+            }
+        }
+    }
+
+    // === LOCATION PERMISSION & FETCHING ===
+    LaunchedEffect(Unit) {
         if (!permissionState.allPermissionsGranted) {
             permissionState.launchMultiplePermissionRequest()
         } else {
-            if (navArgsKey=="noDialoge"||navArgsKey=="noDialoge::"){
-                Log.d("nodDialoge","nodDialoge")
-            }else{
+            if (navArgsKey == "noDialoge" || navArgsKey == "noDialoge::") {
+                Log.d("nodDialoge", "nodDialoge")
+            } else {
                 isFetchingLocation = true
-                if(navArgsKey.isEmpty() || navArgsKey=="::"){
+                if (navArgsKey.isEmpty() || navArgsKey == "::") {
                     scope.launch {
                         try {
                             val lastLocation = fusedLocationClient.lastLocation.await()
@@ -143,24 +163,17 @@ fun HomeScreen(
                             isFetchingLocation = false
                         }
 
-                        // Use actual user location — NO static test values
                         homeViewModel.handleIntents(HomeIntents.ChangeLat(userLocation.latitude.toString()))
                         homeViewModel.handleIntents(HomeIntents.ChangeLng(userLocation.longitude.toString()))
                         homeViewModel.handleIntents(HomeIntents.CheckLocation)
-
-
-
-
                         Log.d("HomeScreen", "Initial CheckLocation called with lat=${userLocation.latitude}, lng=${userLocation.longitude}")
                     }
                 }
             }
-
-
         }
     }
 
-    // === 2. HANDLE RETURN FROM MAPSCREEN — Runs ONLY when nav args change ===
+    // === HANDLE RETURN FROM MAPSCREEN ===
     LaunchedEffect(navArgsKey) {
         navBackStackEntry?.arguments?.let { args ->
             val lat = args.getString("lat")
@@ -177,14 +190,12 @@ fun HomeScreen(
                     Log.d("HomeScreen", "Processed location from MapScreen: $userLocation")
                 } catch (e: NumberFormatException) {
                     Log.e("HomeScreen", "Invalid lat/lng format: lat=$lat, lng=$lng", e)
-                }finally {
-
+                } finally {
                     isFetchingLocation = false
-
                 }
             }
 
-            if (pickup == "1"&&HomeObject.status==0) {
+            if (pickup == "1" && HomeObject.status == 0) {
                 status = true
                 homeViewModel.tokenManager.saveStatus(1)
                 showPickupBranchDialog = true
@@ -200,19 +211,15 @@ fun HomeScreen(
         return
     }
 
-
     val deliveryStatus = homeState.checkLocationResponseEntity?.data?.deliveryStatus
-
     Log.d("HomeScreen", "Delivery status: $deliveryStatus")
 
-    // Only trigger dialog when deliveryStatus becomes "0"
     LaunchedEffect(deliveryStatus) {
-        if (deliveryStatus == "0" && HomeObject.status==0 &&  !hasShownNoDeliveryDialog && navArgsKey!="noDialoge" && navArgsKey!="noDialoge::") {
+        if (deliveryStatus == "0" && HomeObject.status == 0 && !hasShownNoDeliveryDialog && navArgsKey != "noDialoge" && navArgsKey != "noDialoge::") {
             hasShownNoDeliveryDialog = true
             Log.d("HomeScreen", "Delivery status is 0 → showing No Delivery dialog")
-        }else{
-            homeViewModel.tokenManager.saveCurrentResturentBranch(homeState.checkLocationResponseEntity?.data?.currentResturantBranch?:"")
-
+        } else {
+            homeViewModel.tokenManager.saveCurrentResturentBranch(homeState.checkLocationResponseEntity?.data?.currentResturantBranch ?: "")
         }
     }
 
@@ -222,12 +229,10 @@ fun HomeScreen(
             offers = homeState.homeMenues?.slideshow.orEmpty(),
             homeMenus = homeState.homeMenues?.homeMenus.orEmpty(),
             onBranchSelected = { branchId ->
-                newBranchId=branchId
-                Log.d("ourBranch",branchId.toString())
-
-                if (checkValueEqualZoroOrNot!=0){
+                newBranchId = branchId
+                Log.d("ourBranch", branchId.toString())
+                if (checkValueEqualZoroOrNot != 0) {
                     homeViewModel.tokenManager.saveBranchId(branchId)
-
                 }
             },
             onBackPressed = { /* navController.popBackStack() */ },
@@ -236,7 +241,7 @@ fun HomeScreen(
                 status = newStatus
                 homeViewModel.tokenManager.saveStatus(if (newStatus) 1 else 0)
                 if (newStatus) {
-                    hasShownNoDeliveryDialog = false // Reset when switching to pickup
+                    hasShownNoDeliveryDialog = false
                     showPickupBranchDialog = true
                 }
             },
@@ -254,9 +259,8 @@ fun HomeScreen(
             myStatus = homeViewModel.tokenManager.getStatus(),
             bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
             ads = homeState.homeMenues?.ads.orEmpty(),
-            checkOnZeroOrNot = {valueEquealZoro->
-                checkValueEqualZoroOrNot=valueEquealZoro
-
+            checkOnZeroOrNot = { valueEquealZoro ->
+                checkValueEqualZoroOrNot = valueEquealZoro
             },
             navToMap = {
                 Log.d("HomeScreen", "Navigating to MapScreen with navigateFrom=Home")
@@ -288,7 +292,6 @@ fun HomeScreen(
             )
         }
 
-        // === Show No Delivery Dialog ONLY ONCE ===
         if (deliveryStatus == "0" && hasShownNoDeliveryDialog) {
             NoDeliveryDialogHome(
                 onPickUp = {
@@ -313,8 +316,7 @@ fun HomeScreen(
                 branches = homeState.branches?.branches.orEmpty(),
                 currentBranchId = homeViewModel.tokenManager.getBranchId() ?: homeState.branches?.branches?.firstOrNull()?.id ?: 0,
                 onBranchSelected = { branch ->
-                    makePichUp=true
-//                    homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(branch.id))
+                    makePichUp = true
                     homeViewModel.tokenManager.saveBranchId(branch.id)
                     selectedBranchState = branch.title
                     showPickupBranchDialog = false
@@ -357,12 +359,12 @@ fun HomeScreenContent(
     myStatus: Int?,
     navToMap: () -> Unit,
     currentResturentBranch: String,
-    checkOnZeroOrNot:(Int)->Unit={},
+    checkOnZeroOrNot: (Int) -> Unit = {},
     selectedBranchState: MutableState<String>,
     onShowPickupDialog: () -> Unit,
-    makePickup:Boolean =false,
-    saveOpenBranch: (String)->Unit,
-    saveCloseBranch: (String)->Unit
+    makePickup: Boolean = false,
+    saveOpenBranch: (String) -> Unit,
+    saveCloseBranch: (String) -> Unit
 ) {
     val navController = LocalNavController.current
     val configuration = LocalConfiguration.current
@@ -384,27 +386,23 @@ fun HomeScreenContent(
     LaunchedEffect(branches, myStatus, getBranchId, currentResturentBranch) {
         if (branches.isNotEmpty()) {
             if (myStatus == 0) {
-
-                // Wait for currentResturentBranch to set selectedBranch
-                if(getBranchId==0 && currentResturentBranch.isEmpty()){
+                if (getBranchId == 0 && currentResturentBranch.isEmpty()) {
                     selectedBranchState.value = branches[0].title
                     saveOpenBranch(branches[0].openTime)
                     saveCloseBranch(branches[0].closeTime)
                     checkOnZeroOrNot(0)
                     onBranchSelected(branches[0].id)
-//                    saveBranchId(branches[0].id)
-                    Log.d("getBranchId","getBranchId inside getBranchId")
-                }else if(currentResturentBranch.isEmpty()){
-                    Log.d("getBranchId","getBranchId inside mystatuselseif")
+                    Log.d("getBranchId", "getBranchId inside getBranchId")
+                } else if (currentResturentBranch.isEmpty()) {
+                    Log.d("getBranchId", "getBranchId inside mystatuselseif")
                     selectedBranchState.value = branches[0].title
                     onBranchSelected(branches[0].id)
                     saveOpenBranch(branches[0].openTime)
                     saveCloseBranch(branches[0].closeTime)
                 }
             } else {
-                Log.d("getBranchId","getBranchId inside else")
-
-                if (getBranchId != 0 ) {
+                Log.d("getBranchId", "getBranchId inside else")
+                if (getBranchId != 0) {
                     val selected = branches.find { it.id == getBranchId }
                     if (selected != null) {
                         selectedBranchState.value = selected.title
@@ -422,7 +420,7 @@ fun HomeScreenContent(
                         Log.d("HomeScreen", "Fallback to first branch: ${branches[0].title}")
                     }
                 } else {
-                    if (currentResturentBranch.isEmpty()){
+                    if (currentResturentBranch.isEmpty()) {
                         selectedBranchState.value = branches[0].title
                         onBranchSelected(branches[0].id)
                         saveBranchId(branches[0].id)
@@ -430,7 +428,6 @@ fun HomeScreenContent(
                         saveCloseBranch(branches[0].closeTime)
                         Log.d("HomeScreen", "Default to first branch: ${branches[0].title}")
                     }
-
                 }
             }
         }
@@ -449,15 +446,11 @@ fun HomeScreenContent(
             onBackPressesd = { onBackPressed() },
             showIcon = true,
             cardCount = "2",
-            onCartPressed = {
-                onCartPressed()
-            },
+            onCartPressed = { onCartPressed() },
             showStatus = true,
             onClickChangStatus = onStatusChanged,
             myStatus = myStatus,
-            goToMap = {
-                navToMap()
-            },
+            goToMap = { navToMap() },
             makePickup = makePickup
         )
 
@@ -654,9 +647,7 @@ fun NoDeliveryDialogHome(
     onChangeLocation: () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = {
-            // Prevent accidental dismissal
-        },
+        onDismissRequest = { },
         title = {
             Text(
                 stringResource(R.string.no_delivery_available),
@@ -688,7 +679,6 @@ fun NoDeliveryDialogHome(
             TextButton(onClick = {
                 onPickUp()
                 HomeObject.updateStatus(1)
-
             }) {
                 Text(
                     stringResource(R.string.pick_up),
@@ -701,6 +691,7 @@ fun NoDeliveryDialogHome(
         containerColor = Color.White
     )
 }
+
 @Composable
 fun PickupBranchDialog(
     branches: List<Branch>,
@@ -721,7 +712,7 @@ fun PickupBranchDialog(
         onDismissRequest = onDismiss,
         icon = {
             Icon(
-                painter = painterResource(id = R.drawable.ic_pickup), // Assuming you have an icon resource for the hand holding tray
+                painter = painterResource(id = R.drawable.ic_pickup),
                 contentDescription = "Pickup Icon",
                 tint = Color.Black,
                 modifier = Modifier.size(48.dp)
@@ -757,7 +748,7 @@ fun PickupBranchDialog(
                     Icon(
                         imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                         contentDescription = "Dropdown",
-                        tint = Color(0xFFF15A25) // Orange tint
+                        tint = Color(0xFFF15A25)
                     )
                 }
                 DropdownMenu(
@@ -789,13 +780,9 @@ fun PickupBranchDialog(
                     selectedBranch?.let { onBranchSelected(it) }
                     onDismiss()
                 },
-
                 modifier = Modifier.fillMaxWidth(),
-
                 text = stringResource(R.string.complete_order),
             )
-
-
         },
         containerColor = Color.White
     )

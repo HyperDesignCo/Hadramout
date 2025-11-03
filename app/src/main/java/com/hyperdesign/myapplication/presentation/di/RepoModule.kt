@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.di
 
+import com.hyperdesign.myapplication.data.remote.common.FirebaseRepository
 import com.hyperdesign.myapplication.data.repo.AuthRepo.AuthRepoImpl
 import com.hyperdesign.myapplication.data.repo.homerepo.HomeRepoImpl
 import com.hyperdesign.myapplication.data.repo.menurepo.MenuRepoImpl
@@ -35,6 +36,10 @@ val RepoModule = module {
 
     single<LanguageRepo> {
         LanguageRepoImpl(get())
+    }
+
+    single<FirebaseRepository> {
+        FirebaseRepository()
     }
 
 

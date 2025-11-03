@@ -50,9 +50,9 @@ val viewModels = module {
         Places.createClient(androidContext())
     }
 
-    viewModel<LoginViewModel> { LoginViewModel(get(), get(), get(), get()) }
+    viewModel<LoginViewModel> { LoginViewModel(get(), get(), get(), get(),get()) }
 
-    viewModel<RegisterViewModel> { RegisterViewModel(get(), get(), get(), get(), get()) }
+    viewModel<RegisterViewModel> { RegisterViewModel(get(), get(), get(), get(), get(),get()) }
 
     viewModel<HomeViewModel> { HomeViewModel(get(), get(), get(),get()) }
 

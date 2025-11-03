@@ -36,8 +36,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -51,9 +52,8 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
 @Composable
 fun CartItem(
     cartItem: CartMealEntity,
-    onDecrease:()->Unit,
-    onIncrease:()->Unit
-
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -89,7 +89,9 @@ fun CartItem(
                             .build(),
                         contentDescription = "Cart Item Image",
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(10.dp))
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(10.dp))
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -112,7 +114,7 @@ fun CartItem(
                             modifier = Modifier
                                 .size(20.dp)
                                 .background(Color.White, shape = CircleShape)
-                                .clickable { onDecrease()},
+                                .clickable { onDecrease() },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -121,8 +123,8 @@ fun CartItem(
                                 tint = Color.Black,
                                 modifier = Modifier
                                     .padding(bottom = 5.dp)
-                                    .fillMaxSize()// Explicit size for the icon
-                                    .align(Alignment.Center) // Ensure alignment within Box
+                                    .fillMaxSize()
+                                    .align(Alignment.Center)
                             )
                         }
                         Text(
@@ -134,7 +136,7 @@ fun CartItem(
                             modifier = Modifier
                                 .size(20.dp)
                                 .background(color = Primary, shape = CircleShape)
-                                .clickable {onIncrease() },
+                                .clickable { onIncrease() },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -142,8 +144,8 @@ fun CartItem(
                                 contentDescription = "Increase",
                                 tint = Color.White,
                                 modifier = Modifier
-                                    .size(16.dp) // Explicit size for the icon
-                                    .align(Alignment.Center) // Ensure alignment within Box
+                                    .size(16.dp)
+                                    .align(Alignment.Center)
                             )
                         }
                     }
@@ -159,12 +161,24 @@ fun CartItem(
 fun SwipeToDismissCartItem(
     cartMeal: CartMealEntity,
     onDelete: () -> Unit,
-    onDecrease:()->Unit,
-    onIncrease:()->Unit
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit
 ) {
+    // Get layout direction
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.StartToEnd) {
+        confirmValueChange = { dismissValue ->
+            // For LTR: Delete on StartToEnd (left to right)
+            // For RTL: Delete on EndToStart (right to left, which is natural left in RTL)
+            val shouldDelete = if (isRtl) {
+                dismissValue == SwipeToDismissBoxValue.EndToStart
+            } else {
+                dismissValue == SwipeToDismissBoxValue.StartToEnd
+            }
+
+            if (shouldDelete) {
                 onDelete()
                 true
             } else {
@@ -176,52 +190,44 @@ fun SwipeToDismissCartItem(
 
     SwipeToDismissBox(
         state = dismissState,
+        enableDismissFromStartToEnd = !isRtl, // Enable for LTR
+        enableDismissFromEndToStart = isRtl,  // Enable for RTL
         backgroundContent = {
             val color by animateColorAsState(
-                if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Color.Red else Color.Transparent
+                targetValue = when {
+                    // For LTR: Show red when swiping left to right
+                    !isRtl && dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd -> Color.Red
+                    // For RTL: Show red when swiping right to left
+                    isRtl && dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart -> Color.Red
+                    else -> Color.Transparent
+                },
+                label = "background_color"
             )
+
             Box(
-                Modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .background(color)
                     .padding(16.dp),
+                // Align delete icon to the left (start) for both LTR and RTL
                 contentAlignment = Alignment.CenterStart
             ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = Color.White
-                )
+                if (color != Color.Transparent) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
         },
         content = {
-            CartItem(cartItem = cartMeal, onIncrease =onIncrease, onDecrease = onDecrease)
+            CartItem(
+                cartItem = cartMeal,
+                onIncrease = onIncrease,
+                onDecrease = onDecrease
+            )
         }
     )
 }
-
-//@Composable
-//@Preview(showBackground = true, showSystemUi = true)
-//fun CartItemPreview() {
-//    CartItem(
-//        cartItem = CartMealEntity(
-//            mealTitle = "Test Meal",
-//            mealImage = "",
-//            onIncrease = {},
-//            onDecrease = {},
-//            price = 10.0,
-//            quantity = 1,
-//            id = "1",
-//            sizeId = "2",
-//            sizeTitle = "Small",
-//            cartItemId = "3",
-//            subChoicesPrice = 0.0,
-//            netPrice = 0.0,
-//            primaryPrice = 0.0,
-//            totalPrice = 0.0,
-//            choices = emptyList(),
-//            mealId = "4",
-//            comment = "",
-//        )
-//    )
-//}

@@ -71,6 +71,8 @@ data class DeleteCartRequest(
     val itemId: String,
     @SerializedName("area_id")
     val areaId: String,
+    @SerializedName("branch_id")
+    val branchId:String
 )
 
 data class UpdateCartItemQuantityRequest(
@@ -82,6 +84,8 @@ data class UpdateCartItemQuantityRequest(
     val newQuantity: String,
     @SerializedName("area_id")
     val areaId: String,
+    @SerializedName("branch_id")
+    val branchId:String
 )
 
 data class CheckCouponRequest(

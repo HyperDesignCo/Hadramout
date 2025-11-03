@@ -1,10 +1,12 @@
 package com.hyperdesign.myapplication.presentation.auth.login.mvi
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.data.local.TokenManager
+import com.hyperdesign.myapplication.data.remote.common.FirebaseRepository
 import com.hyperdesign.myapplication.domain.Entity.LoginRequest
 import com.hyperdesign.myapplication.domain.usecase.auth.LoginUseCase
 import com.hyperdesign.myapplication.presentation.utilies.ValidateText
@@ -26,6 +28,8 @@ class LoginViewModel(
     private val validateText: ValidateText,
     val tokenManager: TokenManager,
     @ApplicationContext private val context: Context,
+    private val firebaseRepository: FirebaseRepository,
+
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
@@ -34,6 +38,11 @@ class LoginViewModel(
 
     private val _validationEventChannel = Channel<ValidationEvent>()
     val validationEvents = _validationEventChannel.receiveAsFlow()
+
+    init {
+        fetchFirebaseToken()
+    }
+
 
     fun onIntent(intent: LoginIntents) {
         when (intent) {
@@ -96,7 +105,9 @@ class LoginViewModel(
                     LoginRequest(
                         email = _state.value.phoneNumber,
                         password = _state.value.password,
-                        deviceToken = ""
+                        deviceToken = firebaseToken?:"",
+                        deviceType = "android"
+
                     )
                 )
 
@@ -127,4 +138,14 @@ class LoginViewModel(
             }
         }
     }
+
+    fun fetchFirebaseToken() {
+        viewModelScope.launch {
+            firebaseToken = firebaseRepository.getFirebaseToken()
+        }
+        Log.d("FirebaseApp", "Firebase Token: $firebaseToken")
+    }
+
+    var firebaseToken: String? = null
+        private set
 }

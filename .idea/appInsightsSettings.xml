@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.hyperdesign.myapplication" />
+                  <option name="mobileSdkAppId" value="1:735252203734:android:801cf94cbe8057611ca177" />
+                  <option name="projectId" value="baitelmashweyat-44e88" />
+                  <option name="projectNumber" value="735252203734" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
