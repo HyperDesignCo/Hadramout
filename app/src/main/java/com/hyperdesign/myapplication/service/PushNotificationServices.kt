@@ -5,12 +5,17 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.hyperdesign.myapplication.R
@@ -34,16 +39,18 @@ class PushNotificationServices : FirebaseMessagingService() {
         remoteMessage.data.let {
             val title = it["title"]
             val body = it["body"]
+            val imageUrl = it["image"]
+
 
             // Optional: Process the click_action (such as opening a specific activity/fragment)
-            Log.d("FirebaseApp", "Notification Title: $title, Body: $body")
+            Log.d("FirebaseApp", "Notification Title: $title, Body: $body , image:$imageUrl")
 
             remoteMessage.data.let { data ->
-                val type = data["noti_type"]
-                val id = data["noti_type_id"]
+                val type = data["type"]
+                val id = data["action_id"]
                 Log.d("FirebaseApp", "Data: Type: $type, ID: $id")
                 // Show notification
-                showNotification(title, body, id, type)
+                showNotification(title, body, 1,imageUrl,id, type)
             }
         }
     }
@@ -52,7 +59,7 @@ class PushNotificationServices : FirebaseMessagingService() {
 
 
     @SuppressLint("MissingPermission")
-    private fun showNotification(title: String?, body: String?, id: String?, type: String?) {
+    private fun showNotification(title: String?, body: String?,  notificationId: Int, imageUrl: String?,id: String?, type: String?) {
         val channelId = "hadramout_channel"
         createNotificationChannel(channelId, "Hadramout Notifications")
 
@@ -75,6 +82,27 @@ class PushNotificationServices : FirebaseMessagingService() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
 
+            if (!imageUrl.isNullOrEmpty()) {
+                Glide.with(this)
+                    .asBitmap()
+                    .load(imageUrl)
+                    .into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            notificationBuilder.setLargeIcon(resource)
+                                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(resource))
+                            NotificationManagerCompat.from(this@PushNotificationServices)
+                                .notify(notificationId, notificationBuilder.build())
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            // Handle cleanup if needed
+                        }
+                    })
+            } else {
+                NotificationManagerCompat.from(this@PushNotificationServices)
+                    .notify(notificationId, notificationBuilder.build())
+            }
+
         val notificationId = (System.currentTimeMillis() and 0xfffffff).toInt()
         NotificationManagerCompat.from(this).notify(notificationId, notificationBuilder.build())
     }
@@ -83,6 +111,7 @@ class PushNotificationServices : FirebaseMessagingService() {
 
 
     private fun handleNotificationType(type: String?, id: String?, intent: Intent) {
+        Log.d("FirebaseApp", "type: $type, id: $id ")
         when (type) {
             "order" -> { // Open order details
 
