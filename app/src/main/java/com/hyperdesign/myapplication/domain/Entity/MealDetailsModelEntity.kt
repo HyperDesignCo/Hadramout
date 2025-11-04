@@ -49,6 +49,7 @@ data class AddOrderRequest(
     @SerializedName("branch_id") val branchId: String,
     @SerializedName("meal_id") val mealId: String,
     @SerializedName("quantity") val quantity: String,
+    @SerializedName("area_id") val areaId :String,
     @SerializedName("size_id") val sizeId: String,
     @SerializedName("choices") val choices: Map<String, List<String>>,
     @SerializedName("pickup_status") val pickupStatus :String

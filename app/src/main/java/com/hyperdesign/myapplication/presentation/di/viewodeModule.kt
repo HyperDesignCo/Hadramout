@@ -72,7 +72,7 @@ val viewModels = module {
 
     viewModel<CheckOutViewModel> { CheckOutViewModel(get(), get(), get()) }
 
-    viewModel<MyOrderViewModel> { MyOrderViewModel(get(), get()) }
+    viewModel<MyOrderViewModel> { MyOrderViewModel(get(), get(),get()) }
 
     viewModel<WhoAreWeViewModel> { WhoAreWeViewModel(get()) }
 

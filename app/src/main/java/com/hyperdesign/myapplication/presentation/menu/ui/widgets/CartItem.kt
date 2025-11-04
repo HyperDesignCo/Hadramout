@@ -1,39 +1,25 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.widgets
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Minimize
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardDefaults.cardColors
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -60,19 +46,15 @@ fun CartItem(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clickable { },
-        colors = cardColors(containerColor = Gray),
+        colors = CardDefaults.cardColors(containerColor = Gray),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
-                modifier = Modifier
-                    .padding(12.dp),
+                modifier = Modifier.padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Image placeholder
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -94,7 +76,9 @@ fun CartItem(
                             .clip(RoundedCornerShape(10.dp))
                     )
                 }
+
                 Spacer(modifier = Modifier.width(12.dp))
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = cartItem.mealTitle,
@@ -107,9 +91,8 @@ fun CartItem(
                         color = Color.Gray
                     )
                     Spacer(modifier = Modifier.height(15.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
                                 .size(20.dp)
@@ -124,14 +107,15 @@ fun CartItem(
                                 modifier = Modifier
                                     .padding(bottom = 5.dp)
                                     .fillMaxSize()
-                                    .align(Alignment.Center)
                             )
                         }
+
                         Text(
                             text = cartItem.quantity.toString(),
                             fontSize = 16.sp,
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
+
                         Box(
                             modifier = Modifier
                                 .size(20.dp)
@@ -143,13 +127,12 @@ fun CartItem(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = "Increase",
                                 tint = Color.White,
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .align(Alignment.Center)
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
                 }
+
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -164,60 +147,66 @@ fun SwipeToDismissCartItem(
     onDecrease: () -> Unit,
     onIncrease: () -> Unit
 ) {
-    // Get layout direction
-    val layoutDirection = LocalLayoutDirection.current
-    val isRtl = layoutDirection == LayoutDirection.Rtl
-
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { dismissValue ->
-            // For LTR: Delete on StartToEnd (left to right)
-            // For RTL: Delete on EndToStart (right to left, which is natural left in RTL)
-            val shouldDelete = if (isRtl) {
-                dismissValue == SwipeToDismissBoxValue.EndToStart
-            } else {
-                dismissValue == SwipeToDismissBoxValue.StartToEnd
-            }
-
-            if (shouldDelete) {
+        positionalThreshold = { 150f },
+        confirmValueChange = { targetValue ->
+            if (targetValue == SwipeToDismissBoxValue.StartToEnd) {
                 onDelete()
                 true
             } else {
                 false
             }
-        },
-        positionalThreshold = { 150F }
+        }
+    )
+
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+
+    val isSwipingToDelete = dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd ||
+            dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+
+    val bgColor by animateColorAsState(
+        targetValue = if (isSwipingToDelete) Color.Red else Color.Transparent,
+        animationSpec = tween(300),
+        label = "bg_color"
+    )
+
+    val iconAlpha by animateFloatAsState(
+        targetValue = if (isSwipingToDelete) 1f else 0f,
+        animationSpec = tween(250),
+        label = "icon_alpha"
+    )
+
+    val iconScale by animateFloatAsState(
+        targetValue = if (isSwipingToDelete) 1f else 0.8f,
+        animationSpec = tween(250),
+        label = "icon_scale"
     )
 
     SwipeToDismissBox(
         state = dismissState,
-        enableDismissFromStartToEnd = !isRtl, // Enable for LTR
-        enableDismissFromEndToStart = isRtl,  // Enable for RTL
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = false,
         backgroundContent = {
-            val color by animateColorAsState(
-                targetValue = when {
-                    // For LTR: Show red when swiping left to right
-                    !isRtl && dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd -> Color.Red
-                    // For RTL: Show red when swiping right to left
-                    isRtl && dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart -> Color.Red
-                    else -> Color.Transparent
-                },
-                label = "background_color"
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color)
+                    .background(bgColor)
                     .padding(16.dp),
-                // Align delete icon to the left (start) for both LTR and RTL
-                contentAlignment = Alignment.CenterStart
+                contentAlignment =  Alignment.CenterStart
             ) {
-                if (color != Color.Transparent) {
+                if (isSwipingToDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier
+                            .size(32.dp)
+                            .graphicsLayer {
+                                alpha = iconAlpha
+                                scaleX = iconScale
+                                scaleY = iconScale
+                            }
                     )
                 }
             }

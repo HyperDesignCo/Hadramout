@@ -3,6 +3,7 @@ package com.hyperdesign.myapplication.presentation.profile.myorders.mvi
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.Entity.ReorderRequest
 import com.hyperdesign.myapplication.domain.usecase.profile.ReOrderUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.ShowMyOrdersUseCase
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class MyOrderViewModel(
     private val reOrderUseCase: ReOrderUseCase,
-    private val showMyOrdersUseCase: ShowMyOrdersUseCase
+    private val showMyOrdersUseCase: ShowMyOrdersUseCase,
+    private val tokenManager: TokenManager
 ): ViewModel() {
     
     private var _myOrdersState = MutableStateFlow(MyOrdersModelState())
@@ -68,7 +70,7 @@ class MyOrderViewModel(
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val reOrderRequest = ReorderRequest(orderId = orderId)
+                val reOrderRequest = ReorderRequest(orderId = orderId, areaId = tokenManager.getAreaId().toString())
                 val response = reOrderUseCase(reOrderRequest)
                 _myOrdersState.value=_myOrdersState.value.copy(
                     isLoading = false,

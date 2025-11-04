@@ -65,8 +65,8 @@
     <string name="view_cart">عرض السلة</string>
     <string name="cart">السلة</string>
     <string name="add">أضف</string>
-    <string name="enter_promo_code">أدخل رمز الترويج</string>
-    <string name="promo_code">رمز الترويج</string>
+    <string name="enter_promo_code">أدخل البرومو كود</string>
+    <string name="promo_code">برومو كود</string>
     <string name="complete_order">اكمل الطلب</string>
     <string name="price">السعر</string>
     <string name="delivery">التوصيل</string>
@@ -167,4 +167,6 @@
     <string name="order_now">اطلب الان</string>
     <string name="branch_opens_at">الرجاء العلم الفرع يفتح الساعة</string>
     <string name="branch_closes_at">و يغلق في الساعة</string>
+    <string name="your_cart_is_empty">السلة فارغة</string>
+    <string name="swipe_to_delete">اسحب للحذف</string>
 </resources>

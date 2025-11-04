@@ -97,6 +97,9 @@ data class CheckCouponRequest(
 
 data class ReorderRequest(
     @SerializedName("order_id")
-    val orderId:String
+    val orderId:String,
+    @SerializedName("area_id")
+    val areaId: String,
+
 
 )

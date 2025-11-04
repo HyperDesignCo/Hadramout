@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.screens
 
+import android.os.Build
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -9,6 +10,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,12 +22,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.request.ImageRequest
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.CartMealEntity
 import com.hyperdesign.myapplication.domain.Entity.SellingMealEntity
@@ -55,25 +64,21 @@ fun CartScreen(
     var cartId by remember { mutableStateOf("") }
     var deliveryStatus by remember { mutableStateOf(false) }
 
-    // State to track if bottom bar is expanded
     var isBottomBarExpanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
     Log.d("deliveryStatus", cartMealState.showCartDate?.cart?.pickUpStatus.toString())
     Log.d("deliveryStatus", deliveryStatus.toString())
 
-    // Detect scroll direction to auto-expand/collapse
     LaunchedEffect(listState) {
         snapshotFlow {
             listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
         }
             .distinctUntilChanged()
             .collect { (index, offset) ->
-                // Auto-expand when scrolling down
                 if (index > 0 || offset > 100) {
                     isBottomBarExpanded = true
                 } else if (index == 0 && offset < 50) {
-                    // Auto-collapse when at top
                     isBottomBarExpanded = false
                 }
             }
@@ -111,7 +116,7 @@ fun CartScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(
-                        text = "Your Cart Is Empty",
+                        text = stringResource(R.string.your_cart_is_empty),
                         color = Secondry,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
@@ -214,6 +219,22 @@ fun CartScreenContent(
     listState: androidx.compose.foundation.lazy.LazyListState,
     isBottomBarExpanded: Boolean
 ) {
+    val context = LocalContext.current
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                if (Build.VERSION.SDK_INT >= 28) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
+            }
+            .build()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -228,7 +249,6 @@ fun CartScreenContent(
             onCartPressed = {}
         )
 
-        // Scrollable content
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -284,17 +304,44 @@ fun CartScreenContent(
             }
 
             item {
-                Spacer(modifier = Modifier.height(240.dp)) // Space for bottom bar
+                Spacer(modifier = Modifier.height(240.dp))
             }
         }
 
-        // Promo Code Section (Always visible above bottom bar)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
+            // Swipe instruction with GIF
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(if (isRtl) R.drawable.drag_left else R.drawable.drag_right)
+                        .build(),
+                    imageLoader = imageLoader,
+                    contentDescription = "Swipe instruction",
+                    modifier = Modifier.size(40.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = stringResource(R.string.swipe_to_delete),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = stringResource(R.string.promo_code),
                 color = Secondry,
@@ -309,7 +356,6 @@ fun CartScreenContent(
             )
         }
 
-        // Animated Price Details Box
         AnimatedVisibility(
             visible = isBottomBarExpanded,
             enter = expandVertically(
@@ -331,7 +377,6 @@ fun CartScreenContent(
                     .background(Color.White)
                     .padding(horizontal = 16.dp)
             ) {
-                // Price row
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 10.dp)
@@ -351,7 +396,6 @@ fun CartScreenContent(
                     )
                 }
 
-                // Delivery row (if pickUpStatus is true)
                 if (pickUpStatus) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
@@ -374,9 +418,8 @@ fun CartScreenContent(
                     }
                 }
 
-                // Delivery/Pickup time row
                 Spacer(modifier = Modifier.height(8.dp))
-                if (pickUpStatus){
+                if (pickUpStatus) {
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 10.dp)
@@ -384,9 +427,7 @@ fun CartScreenContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = stringResource(
-                                 R.string.delivery_time
-                            ),
+                            text = stringResource(R.string.delivery_time),
                             fontSize = 16.sp,
                             color = Color.Gray
                         )
@@ -399,8 +440,6 @@ fun CartScreenContent(
                     }
                 }
 
-
-                // Divider
                 Spacer(modifier = Modifier.height(12.dp))
                 Divider(
                     modifier = Modifier
@@ -412,7 +451,6 @@ fun CartScreenContent(
             }
         }
 
-        // Bottom Bar with Total Price (Always visible)
         CartBottomBar(
             priceItems = totalItems,
             deliveryPrice = deliveryPrice,

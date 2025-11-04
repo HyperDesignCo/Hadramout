@@ -76,7 +76,8 @@ class MealDetailsViewModel(
                     sizeId = intent.sizeId,
                     quantity = intent.quantity,
                     choices = intent.choices,
-                    pickupStatus = intent.pickupStatus
+                    pickupStatus = intent.pickupStatus,
+                    areaId = tokenManager.getAreaId().toString()
 
                 ))
             }
