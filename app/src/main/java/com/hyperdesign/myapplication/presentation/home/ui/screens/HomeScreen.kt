@@ -246,11 +246,8 @@ fun HomeScreen(
                 }
             },
             onCartPressed = {
-                if (homeViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
                     navController.navigate(Screen.CartScreen.route)
-                } else {
-                    homeViewModel.showAuthDialoge.value = true
-                }
+
             },
             saveBranchId = { branchId ->
                 homeViewModel.tokenManager.saveBranchId(branchId)

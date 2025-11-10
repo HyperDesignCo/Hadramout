@@ -1,5 +1,6 @@
 package com.hyperdesign.myapplication.presentation.auth.login.mvi
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
+import android.provider.Settings
 import javax.inject.Inject
 
 
@@ -106,8 +109,8 @@ class LoginViewModel(
                         email = _state.value.phoneNumber,
                         password = _state.value.password,
                         deviceToken = firebaseToken?:"",
-                        deviceType = "android"
-
+                        deviceType = "android",
+                        deviceId = "android-${getAndroidId(context)}"
                     )
                 )
 
@@ -146,6 +149,24 @@ class LoginViewModel(
         Log.d("FirebaseApp", "Firebase Token: $firebaseToken")
     }
 
+    fun getOrCreateDeviceId(): String {
+        var deviceId = tokenManager.getDeviceId()
+
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = UUID.randomUUID().toString()
+            tokenManager.saveDeviceId(deviceId)
+        }
+
+        return deviceId
+    }
+
+    @SuppressLint("HardwareIds")
+    fun getAndroidId(context: Context): String {
+        return Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
+    }
     var firebaseToken: String? = null
         private set
 }

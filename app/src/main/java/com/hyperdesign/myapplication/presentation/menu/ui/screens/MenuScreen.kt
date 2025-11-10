@@ -68,11 +68,7 @@ fun MenuScreen(menuViewModel: MenuViewModel = koinViewModel()) {
             onBackPressed = { navController.popBackStack() },
             menuTabs = menuTabs,
             onCartPressed = {
-                if (menuViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
                     navController.navigate(Screen.CartScreen.route)
-                } else {
-                    menuViewModel.showAuthDialoge.value = true
-                }
 
             }
         )

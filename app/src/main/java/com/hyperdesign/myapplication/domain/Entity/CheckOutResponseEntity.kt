@@ -46,7 +46,8 @@ data class PaymentMethodEntity(
 )
 
 data class CheckOutRequest(
-    val branch_id:String
+    val branch_id:String,
+    val area_id:String
 )
 
 data class FinishOrderRequest(

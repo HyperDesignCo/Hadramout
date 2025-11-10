@@ -61,6 +61,8 @@ data class ShowCartRequest(
     val branchId: String,
     @SerializedName("area_id")
     val areaId: String,
+    @SerializedName("device_id")
+    val deviceId: String
 
 )
 

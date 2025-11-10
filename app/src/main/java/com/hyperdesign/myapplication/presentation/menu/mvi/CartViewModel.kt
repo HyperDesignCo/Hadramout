@@ -1,6 +1,10 @@
 package com.hyperdesign.myapplication.presentation.menu.mvi
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.provider.Settings
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.data.local.TokenManager
@@ -12,6 +16,7 @@ import com.hyperdesign.myapplication.domain.usecase.cart.CheckCouponUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.DeleteCartItemUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.UpdateCartItemQuantityUseCase
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,11 +28,14 @@ class CartViewModel(
     private val deleteCartItemUseCase: DeleteCartItemUseCase,
     private val updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
     private val checkCouponUseCase: CheckCouponUseCase,
-    val tokenManager: TokenManager
+    val tokenManager: TokenManager,
+    private @ApplicationContext val context: Context
 ): ViewModel() {
 
     private var _cartState = MutableStateFlow(MenuStateModel())
     val cartState: StateFlow<MenuStateModel> = _cartState.asStateFlow()
+
+    var showAuthDialoge = mutableStateOf(false)
 
     fun handleIntent(intent: CartIntents){
         when(intent){
@@ -179,7 +187,13 @@ class CartViewModel(
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val showCartRequest = ShowCartRequest(branchId.toString(), areaId = tokenManager.getAreaId().toString())
+                val showCartRequest = ShowCartRequest(branchId.toString(), areaId = tokenManager.getAreaId().toString(),
+                    deviceId = if (tokenManager.getUserData()?.authenticated=="authenticated"){
+                        ""
+                    }else{
+                        "android-${getAndroidId(context =context )}"
+                    }
+                )
                 val response = showCartUseCase.invoke(showCartRequest)
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,
@@ -202,6 +216,14 @@ class CartViewModel(
 
 
 
+    }
+
+    @SuppressLint("HardwareIds")
+    fun getAndroidId(context: Context): String {
+        return Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
     }
 
 

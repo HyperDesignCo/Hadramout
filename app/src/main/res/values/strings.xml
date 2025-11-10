@@ -167,4 +167,5 @@
     <string name="branch_closes_at">و يغلق في الساعة</string>
     <string name="your_cart_is_empty">Your Cart Is Empty</string>
     <string name="swipe_to_delete">Swipe to delete</string>
+    <string name="meal_not_found">Meal Not Found</string>
 </resources>

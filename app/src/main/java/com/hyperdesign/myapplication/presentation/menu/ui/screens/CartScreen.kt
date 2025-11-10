@@ -18,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,6 +40,7 @@ import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.CartMealEntity
 import com.hyperdesign.myapplication.domain.Entity.SellingMealEntity
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
+import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDeataisWithString
@@ -66,6 +68,8 @@ fun CartScreen(
 
     var isBottomBarExpanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+
+    val showAuthDialoge by cartViewModel.showAuthDialoge
 
     Log.d("deliveryStatus", cartMealState.showCartDate?.cart?.pickUpStatus.toString())
     Log.d("deliveryStatus", deliveryStatus.toString())
@@ -166,7 +170,14 @@ fun CartScreen(
                     )
                 },
                 onGoToCheckOutScreen = {
-                    navController.navigate("${Screen.CheckOutScreen.route}?deliveryTime=${cartMealState.showCartDate?.deliveryTime.orEmpty()}")
+                    if(cartViewModel.tokenManager.getUserData()?.authenticated=="authenticated"){
+                        navController.navigate("${Screen.CheckOutScreen.route}?deliveryTime=${cartMealState.showCartDate?.deliveryTime.orEmpty()}")
+
+                    }else{
+                        cartViewModel.showAuthDialoge.value =true
+
+                    }
+
                 },
                 deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
                 totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString() ?: "0",
@@ -181,6 +192,21 @@ fun CartScreen(
                 listState = listState,
                 isBottomBarExpanded = isBottomBarExpanded
             )
+        }
+
+        if(showAuthDialoge){
+            ShowAuthentaionDialge(onNavToLogin = {
+                navController.navigate(Screen.LoginInScreen.route) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
+                cartViewModel.showAuthDialoge.value =false
+
+            }, onCancel = {
+                cartViewModel.showAuthDialoge.value =false
+
+            })
         }
         if (cartMealState.isLoading) {
             Box(

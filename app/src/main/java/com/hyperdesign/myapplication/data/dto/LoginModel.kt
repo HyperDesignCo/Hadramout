@@ -21,5 +21,6 @@ data class User(
     val email : String,
     val image : String,
     val mobile : String,
-    val authenticated:String
+    val authenticated:String,
+    val balance:String
 )

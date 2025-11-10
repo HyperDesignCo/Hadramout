@@ -20,6 +20,7 @@ fun User.toEntity(): UserEntity{
         email = email,
         image = image,
         mobile =mobile,
-        authenticated=authenticated
+        authenticated=authenticated,
+        balance=balance
     )
 }

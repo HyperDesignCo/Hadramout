@@ -58,9 +58,9 @@ val viewModels = module {
 
     viewModel<MenuViewModel> { MenuViewModel(get(), get()) }
 
-    viewModel<MealDetailsViewModel> { MealDetailsViewModel(get(), get(), get()) }
+    viewModel<MealDetailsViewModel> { MealDetailsViewModel(get(), get(), get(),get()) }
 
-    viewModel<CartViewModel> { CartViewModel(get(), get(), get(), get(), get()) }
+    viewModel<CartViewModel> { CartViewModel(get(), get(), get(), get(), get(),get()) }
 
     viewModel<ForgetPasswordViewModel> { ForgetPasswordViewModel(get(), get(), get()) }
 
@@ -70,7 +70,7 @@ val viewModels = module {
 
     viewModel<CreatePasswordViewModel> { CreatePasswordViewModel(get(), get(), get()) }
 
-    viewModel<CheckOutViewModel> { CheckOutViewModel(get(), get(), get()) }
+    viewModel<CheckOutViewModel> { CheckOutViewModel(get(), get(), get(),get()) }
 
     viewModel<MyOrderViewModel> { MyOrderViewModel(get(), get(),get()) }
 

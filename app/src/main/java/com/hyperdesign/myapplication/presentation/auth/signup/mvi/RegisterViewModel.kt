@@ -1,6 +1,8 @@
 package com.hyperdesign.myapplication.presentation.auth.signup.mvi
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.provider.Settings
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class RegisterViewModel(
     private val validateText: ValidateText,
@@ -138,7 +141,8 @@ class RegisterViewModel(
                         name = _state.value.userName,
                         mobile = _state.value.phoneNumber,
                         device_token = firebaseToken?:"",
-//                        device_type = "android"
+                        device_type = "android",
+                        device_id = "android-${getAndroidId(context)}"
                     )
                 )
                 // Update state back on the main thread
@@ -164,5 +168,23 @@ class RegisterViewModel(
                 _validationEvent.send(ValidationEvent.Failure(errorMessage = e.message.toString()))
             }
         }
+    }
+    fun getOrCreateDeviceId(): String {
+        var deviceId = tokenManager.getDeviceId()
+
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = UUID.randomUUID().toString()
+            tokenManager.saveDeviceId(deviceId)
+        }
+
+        return deviceId
+    }
+
+    @SuppressLint("HardwareIds")
+    fun getAndroidId(context: Context): String {
+        return Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
     }
 }

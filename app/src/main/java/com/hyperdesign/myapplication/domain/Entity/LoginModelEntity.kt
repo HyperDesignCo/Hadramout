@@ -16,6 +16,8 @@ data class LoginRequest(
     val deviceToken: String? = null,
     @SerializedName("device_type")
     val deviceType: String? = null,
+    @SerializedName("device_id")
+    val deviceId: String
 )
 
 
@@ -25,5 +27,6 @@ data class UserEntity(
     val email: String,
     val image: String,
     val mobile: String,
+    val balance:String,
     val authenticated:String
 )

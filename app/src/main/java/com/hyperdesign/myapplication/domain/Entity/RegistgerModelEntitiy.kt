@@ -14,5 +14,7 @@ data class RegisterRequst(
     val password: String,
     val name: String,
     val mobile: String,
-    val device_token: String
+    val device_token: String,
+    val device_type: String,
+    val device_id: String
 )

@@ -20,11 +20,19 @@ class NetworkingApiServicesImpl(
 ): NetworkingApiServices {
 
     override suspend fun login(loginRequest: LoginRequest): LoginResponse {
-        return client.post("user/login") {
-            contentType(ContentType.Application.Json)
-            setBody(loginRequest)
+        return try {
+            val response = client.post("user/login"){
+                contentType(ContentType.Application.Json)
+                setBody(loginRequest)
+            }.body<LoginResponse>()
+            Log.d("NetworkingApiServices", "login Response for loginRequest=$loginRequest: $response")
+            response
 
-        }.body()
+        }catch (e:Exception){
+            Log.e("NetworkingApiServices", "login failed for loginRequest=$loginRequest: ${e.message}", e)
+            throw e
+
+        }
     }
 
     override suspend fun register(registerRequest: RegisterRequst): RegisterResponse {

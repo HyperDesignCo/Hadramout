@@ -29,6 +29,8 @@ class TokenManager(private val context: Context) {
         private const val CURRENT_RESTURANT_BRANCH_CLOSE_TIME ="current_resturant_branch_close_time"
 
         private const val STATUS = "status"
+
+        private const val DEVICE_ID = "device_id"
     }
 
     private val masterKey: MasterKey by lazy {
@@ -78,6 +80,14 @@ class TokenManager(private val context: Context) {
             .putString(HOTLINE,phone)
             .apply()
     }
+
+    fun saveDeviceId(deviceId:String){
+        encryptedSharedPreferences.edit()
+            .putString(DEVICE_ID,deviceId)
+            .apply()
+    }
+
+    fun getDeviceId() = encryptedSharedPreferences.getString(DEVICE_ID,"")
 
     fun getHomeHotline() = encryptedSharedPreferences.getString(HOTLINE,"")
 

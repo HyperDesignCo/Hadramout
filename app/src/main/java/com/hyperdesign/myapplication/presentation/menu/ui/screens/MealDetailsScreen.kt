@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +38,7 @@ import com.hyperdesign.myapplication.domain.Entity.ChoiceEntity
 import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.domain.Entity.MealDetailsEntity
 import com.hyperdesign.myapplication.domain.Entity.SubChoiceEntity
+import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
@@ -170,7 +175,6 @@ fun MealDetailsScreen(
                 selectedChoiceId = selectedChoiceId,
                 onAddToCart = {
                     if (mealId != null) {
-                        if(mealDetailsViewModel.tokenManager.getUserData()?.authenticated=="authenticated"){
                             mealDetailsViewModel.handleIntents(
                                 MealDetialsIntents.addMealToCart(
                                     mealId = mealId,
@@ -181,10 +185,7 @@ fun MealDetailsScreen(
                                     pickupStatus = mealDetailsViewModel.tokenManager.getStatus().toString()
                                 )
                             )
-                        }else{
-                            mealDetailsViewModel.showAuthDialoge.value =true
 
-                        }
 
                     } else {
                         Log.e("MealDetailsScreen", "Cannot add to cart: mealId is null")
@@ -254,12 +255,36 @@ fun MealDetailsScreen(
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = mealDetailsState.errorMessage ?: "An error occurred",
-                    color = Color.Red,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
+                AlertDialog(
+                    onDismissRequest = {
+                    },
+                    icon = {
+
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.meal_not_found),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    },
+                    text = {
+
+                    },
+                    confirmButton = {
+                        CustomButton(
+                            onClick = {
+
+                                navController.popBackStack()
+
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(R.string.confirm),
+                        )
+                    },
+                    containerColor = Color.White
                 )
             }
         }

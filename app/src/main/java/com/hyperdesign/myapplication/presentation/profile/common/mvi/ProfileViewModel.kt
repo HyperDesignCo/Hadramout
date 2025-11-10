@@ -95,6 +95,7 @@ class ProfileViewModel(
                     email = response.user.email,
                     mobile = response.user.mobile,
                     image = response.user.image,
+                    balance = response.user.balance,
                     authenticated = "authenticated"
 
                 )

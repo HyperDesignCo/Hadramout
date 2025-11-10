@@ -3,6 +3,7 @@ package com.hyperdesign.myapplication.presentation.menu.mvi
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hyperdesign.myapplication.data.local.TokenManager
 import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.CheckOutRequest
 import com.hyperdesign.myapplication.domain.Entity.FinishOrderRequest
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 class CheckOutViewModel(
     private val getAllAddressUseCase: GetAllAddressUseCase,
     private val checkOutUseCase: CheckOutUseCase,
-    private val finishOrderUseCase: FinishOrderUseCase
+    private val finishOrderUseCase: FinishOrderUseCase,
+    val tokenManager: TokenManager
 ): ViewModel() {
 
     private var _checkOutState = MutableStateFlow(CheckOutStateModel())
@@ -91,7 +93,7 @@ class CheckOutViewModel(
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val checkOutRequest = CheckOutRequest(branch_id = branchId)
+                val checkOutRequest = CheckOutRequest(branch_id = branchId, area_id = tokenManager.getAreaId().toString())
                 val response = checkOutUseCase(checkOutRequest)
                 _checkOutState.value=_checkOutState.value.copy(
                     isLoading = false,
