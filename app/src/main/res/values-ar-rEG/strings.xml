@@ -169,5 +169,5 @@
     <string name="branch_closes_at">و يغلق في الساعة</string>
     <string name="your_cart_is_empty">السلة فارغة</string>
     <string name="swipe_to_delete">اسحب للحذف</string>
-    <string name="meal_not_found">Meal Not Found</string>
+    <string name="meal_not_found">الوجبة غير موجودة</string>
 </resources>

@@ -163,9 +163,9 @@
     <string name="you_can_order_also">You can order also</string>
     <string name="order_later">Order Later</string>
     <string name="order_now">Order Now</string>
-    <string name="branch_opens_at">الرجاء العلم الفرع يفتح الساعة</string>
-    <string name="branch_closes_at">و يغلق في الساعة</string>
+    <string name="branch_opens_at">Please note that the branch opens at</string>
+    <string name="branch_closes_at">and closes at</string>
     <string name="your_cart_is_empty">Your Cart Is Empty</string>
     <string name="swipe_to_delete">Swipe to delete</string>
-    <string name="meal_not_found">Meal Not Found</string>
+    <string name="meal_not_found">Meal Is Not Found</string>
 </resources>
