@@ -102,8 +102,9 @@ fun FeaturedWedgits(
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "${meal.price} ${stringResource(R.string.egy2)}",
-                    fontSize = 14.sp,
-                    color = Secondry
+                    fontSize = 15.sp,
+                    color = Secondry,
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Box(

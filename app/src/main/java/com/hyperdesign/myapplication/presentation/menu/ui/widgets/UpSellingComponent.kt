@@ -51,15 +51,15 @@ fun UpSellingComponent(
     Card(
         modifier = Modifier
             .padding(horizontal = 10.dp)
-            .fillMaxWidth()
-            .height(180.dp) // Fixed height for consistent card size
+            .width(320.dp) // Changed from fillMaxWidth() to fixed width for LazyRow
+            .height(180.dp)
             .clip(RoundedCornerShape(8.dp)),
         colors = cardColors(containerColor = Gray),
         onClick = { onItemClick() }
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize() // Changed to fillMaxSize since we have fixed dimensions
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -102,7 +102,8 @@ fun UpSellingComponent(
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "${upsellingMeal.price} ${stringResource(R.string.egy2)}",
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
                     color = Secondry
                 )
                 Spacer(modifier = Modifier.weight(1f))

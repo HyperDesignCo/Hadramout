@@ -86,7 +86,7 @@
     <string name="new_orders">New Orders</string>
     <string name="previous_orders">Previous Orders</string>
     <string name="reorder">Re Order</string>
-    <string name="egy">%1$sEGY</string>
+    <string name="egy">%1$sEGP</string>
     <string name="who_we_are">Who we are</string>
     <string name="contact_us">Contact us</string>
     <string name="share_app">Share App</string>
@@ -126,7 +126,7 @@
     <string name="no">No</string>
     <string name="pickup_from">Pickup from</string>
     <string name="are_you_sure_you_want_to_change_to">Are you sure you want to change to %1$s?</string>
-    <string name="egy2">EGY</string>
+    <string name="egy2">EGP</string>
     <string name="you_must_choose">(You Must Choose %1$d)</string>
     <string name="you_can_choose">(You Can Choose %1$d)</string>
     <string name="quantity">Quantity: %1$s</string>
@@ -168,4 +168,7 @@
     <string name="your_cart_is_empty">Your Cart Is Empty</string>
     <string name="swipe_to_delete">Swipe to delete</string>
     <string name="meal_not_found">Meal Is Not Found</string>
+    <string name="you_should_add_your_address_first">You Must Add Address Firstly</string>
+    <string name="VAT">Vat</string>
+    <string name="service_charge_cost">Service charge cost</string>
 </resources>

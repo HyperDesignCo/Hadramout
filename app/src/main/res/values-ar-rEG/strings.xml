@@ -170,4 +170,7 @@
     <string name="your_cart_is_empty">السلة فارغة</string>
     <string name="swipe_to_delete">اسحب للحذف</string>
     <string name="meal_not_found">الوجبة غير موجودة</string>
+    <string name="you_should_add_your_address_first">You Must Add Address Firstly</string>
+    <string name="VAT">Vat</string>
+    <string name="service_charge_cost">Service charge cost</string>
 </resources>

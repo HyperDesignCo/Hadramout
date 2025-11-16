@@ -70,6 +70,7 @@ fun CheckOutScreen(
     // Scroll-driven expand/collapse state
     var isBottomBarExpanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    var showEnterAddressDialoge by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -247,7 +248,12 @@ fun CheckOutScreen(
                 selctedOrder = selectedOrder,
                 onNavToTimeDatePickerScreen = { navController.navigate(Screen.DateTimePicker.route) },
                 listState = listState,
-                isBottomBarExpanded = isBottomBarExpanded
+                languge = loginViewModel.tokenManager.getLanguage()?:"en",
+                onShowEnterAddress = { value->
+                    showEnterAddressDialoge = value
+                },
+                vatCost = checkState.checkOutResponse?.cart?.vatCost.toString(),
+                serviceChargeCost = checkState.checkOutResponse?.cart?.serviceChargeCost.toString(),
             )
         }
 
@@ -261,12 +267,44 @@ fun CheckOutScreen(
                 CircularProgressIndicator(color = Secondry)
             }
         }
+
+        if (showEnterAddressDialoge){
+            AlertDialog(
+                onDismissRequest = {
+                    showEnterAddressDialoge = false
+                },
+                icon = {
+
+                },
+                title = {
+                    Text(
+                        text = stringResource(R.string.you_should_add_your_address_first),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                },
+                text = {
+
+                },
+                confirmButton = {
+                    CustomButton(
+                        onClick = {
+
+
+                            showEnterAddressDialoge = false
+
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(R.string.confirm),
+                    )
+                },
+                containerColor = Color.White
+            )
+        }
     }
 }
-
-/* ============================================================= */
-/* ===================  CHECK-OUT SCREEN CONTENT  =============== */
-/* ============================================================= */
 
 @Composable
 fun CheckOutScreenContent(
@@ -294,9 +332,11 @@ fun CheckOutScreenContent(
     dateTimePicker: String,
     onNavToTimeDatePickerScreen: () -> Unit,
     listState: LazyListState,
-    isBottomBarExpanded: Boolean
+    languge:String,
+    onShowEnterAddress: (Boolean) ->Unit,
+    serviceChargeCost:String?,
+    vatCost:String?
 ) {
-    // <<< FIXED >>> Single Column layout (exactly like CartScreen)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -316,11 +356,13 @@ fun CheckOutScreenContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-            contentPadding = PaddingValues(bottom = 240.dp) // Space for bottom sections
         ) {
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                SpecialRequestEditText(state = state, onChangeSpecialRequest = onChangeSpecialRequest)
+                SpecialRequestEditText(
+                    state = state,
+                    onChangeSpecialRequest = onChangeSpecialRequest
+                )
                 Spacer(modifier = Modifier.height(10.dp))
             }
 
@@ -431,7 +473,7 @@ fun CheckOutScreenContent(
 
                         if (state.checkOutResponse.preOrderTextStatus == 1) {
                             OrderOptions(
-                                order = state.checkOutResponse.preOrderText,
+                                order = if (languge == "en") state.checkOutResponse.preOrderText else state.checkOutResponse.preOrderTextAr,
                                 onSelected = { onSelectedOredrNow(it, "2") },
                                 selectedOrder = selctedOrder,
                                 timepicker = ""
@@ -440,130 +482,42 @@ fun CheckOutScreenContent(
                     }
                 }
             }
-        }
 
-        // <<< FIXED >>> Special Request / Address section (always visible, like promo in CartScreen)
-        // (You can move this above LazyColumn if you want it to scroll with content)
 
-        // <<< FIXED >>> Animated Price Details Box (exactly like CartScreen)
-        AnimatedVisibility(
-            visible = isBottomBarExpanded,
-            enter = expandVertically(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
+            item {
+                Spacer(modifier = Modifier.height(30.dp))  // Add more space before CartBottomBar
+
+                CartBottomBar(
+                    priceItems = state.checkOutResponse?.cart?.primaryPrice?.toString() ?: "0.00",
+                    deliveryPrice = state.checkOutResponse?.cart?.deliveryCost?.toString()
+                        ?: "0.00",
+                    totalPrice = state.checkOutResponse?.cart?.totalPrice?.toString() ?: "0.00",
+                    buttonText = stringResource(R.string.checkout),
+                    deliveryTime = deliveryTime,
+                    onPayClick = {
+                        if (pickUpStatus) {
+                            if (addressList.isEmpty()) {
+                                onShowEnterAddress(true)
+                            } else {
+                                finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
+                            }
+                        } else {
+                            finishOrder(state.checkOutResponse?.cart?.id.orEmpty())
+                        }
+                    },
+                    pickUpStatus = pickUpStatus,
+                    vatCost = vatCost,
+                    serviceCharcheCost = serviceChargeCost
                 )
-            ),
-            exit = shrinkVertically(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
-                )
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(horizontal = 16.dp)
-            ) {
-                // Price row
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stringResource(R.string.price),
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = state.checkOutResponse?.cart?.primaryPrice?.toString() ?: "0.00",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondry
-                    )
-                }
 
-                // Delivery row (if pickUpStatus is true)
-                if (pickUpStatus) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.delivery),
-                            fontSize = 16.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = state.checkOutResponse?.cart?.deliveryCost?.toString() ?: "0.00",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Secondry
-                        )
-                    }
-                }
-
-                // Delivery/Pickup time row
-                Spacer(modifier = Modifier.height(8.dp))
-                if(pickUpStatus){
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(
-                                R.string.delivery_time
-                            ),
-                            fontSize = 16.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = stringResource(R.string.minutes, deliveryTime),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Secondry
-                        )
-                    }
-                }
-
-
-                // Divider
-                Spacer(modifier = Modifier.height(12.dp))
-                Divider(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    color = Color.LightGray
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+//                Spacer(modifier = Modifier.height(24.dp))
             }
-        }
 
-        // <<< FIXED >>> Bottom Bar with Total Price (Always visible)
-        CartBottomBar(
-            priceItems = state.checkOutResponse?.cart?.primaryPrice?.toString() ?: "0.00",
-            deliveryPrice = state.checkOutResponse?.cart?.deliveryCost?.toString() ?: "0.00",
-            totalPrice = state.checkOutResponse?.cart?.totalPrice?.toString() ?: "0.00",
-            buttonText = stringResource(R.string.checkout),
-            deliveryTime = deliveryTime,
-            onPayClick = { finishOrder(state.checkOutResponse?.cart?.id.orEmpty()) },
-            pickUpStatus = pickUpStatus
-        )
+
+
+        }
     }
 }
-
-/* ============================================================= */
-/* =====================  DATE-TIME PARSER  =================== */
-/* ============================================================= */
 
 fun parseDateTime(dateTimeString: String): Pair<String, String> {
     if (dateTimeString.isEmpty()) return Pair("", "")

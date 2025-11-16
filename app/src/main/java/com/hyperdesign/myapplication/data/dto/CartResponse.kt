@@ -27,6 +27,7 @@ data class CartDto(
     val id: String,
     @SerializedName("service_charge")
     val serviceCharge: String,
+
     @SerializedName("delivery_cost")
     val deliveryCost: String,
     val vat: String,

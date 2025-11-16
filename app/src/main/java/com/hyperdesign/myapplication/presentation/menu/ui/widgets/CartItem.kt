@@ -34,6 +34,7 @@ import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.CartMealEntity
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Primary
+import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 
 @Composable
 fun CartItem(
@@ -87,8 +88,9 @@ fun CartItem(
                     )
                     Text(
                         text = "${cartItem.price}",
-                        fontSize = 14.sp,
-                        color = Color.Gray
+                        fontSize = 15.sp,
+                        color = Secondry,
+                        fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(15.dp))
 

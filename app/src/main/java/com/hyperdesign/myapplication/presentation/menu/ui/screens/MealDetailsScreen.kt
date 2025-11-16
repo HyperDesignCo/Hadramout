@@ -421,7 +421,7 @@ fun MealDetailsContent(
                         meal.sizes.forEach { size ->
                             SizeOption(
                                 size = size.sizeTitle,
-                                price = String.format("%.2f", size.price),
+                                price =if (size.price>0) String.format("%.2f", size.price) else "",
                                 selectedSize = selectedSize,
                                 onSelected = { selected ->
                                     onSizeSelected(selected)

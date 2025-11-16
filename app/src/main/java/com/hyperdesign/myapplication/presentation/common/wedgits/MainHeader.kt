@@ -163,7 +163,7 @@ fun MainHeader(
                         ) {
                             Image(
 
-                                painter = if(makePickup==true) painterResource(R.drawable.delivery) else  if (!statusState) painterResource(R.drawable.ic_pickup) else painterResource(R.drawable.delivery),
+                                painter = if(makePickup==true) painterResource(R.drawable.ic_pickup) else  if (!statusState) painterResource(R.drawable.delivery) else painterResource(R.drawable.delivery  ),
                                 contentDescription = ""
                             )
                             Spacer(modifier = Modifier.width(5.dp))

@@ -89,7 +89,7 @@ fun SubChoiceOption(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "${subChoice.price} ${stringResource(R.string.egy2)}",
+                text = if (subChoice.price>0) "${subChoice.price} ${stringResource(R.string.egy2)}" else "",
                 fontSize = 14.sp,
                 color = if (isSelected) Color.White else Color.Black
             )

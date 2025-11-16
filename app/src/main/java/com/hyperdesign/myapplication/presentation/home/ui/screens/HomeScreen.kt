@@ -453,15 +453,15 @@ fun HomeScreenContent(
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(
-                    stringResource(R.string.hello),
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    color = Primary,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
                 Spacer(modifier = Modifier.height(10.dp))
+//                Text(
+//                    stringResource(R.string.hello),
+//                    modifier = Modifier.padding(horizontal = 20.dp),
+//                    color = Primary,
+//                    fontSize = 22.sp,
+//                    fontWeight = FontWeight.Bold
+//                )
+//                Spacer(modifier = Modifier.height(10.dp))
 
                 Box(
                     modifier = Modifier
@@ -573,9 +573,10 @@ fun HomeScreenContent(
                                     }
                                 )
                             }
+                            Spacer(modifier = Modifier.width(5.dp))
+
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 

@@ -15,6 +15,8 @@ data class CheckOutResponseDto(
     val dateTimeOrder:Int,//check if orderLater will show or not,
     @SerializedName("pre_order_text")
     val preOrderText:String,//display text from backend,
+    @SerializedName("pre_order_text_ar")
+    val preOrderTextAr:String,
     @SerializedName("pre_order_text_status")
     val preOrderTextStatus:Int // check if display preOrderText or not
 )

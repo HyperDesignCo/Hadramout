@@ -9,6 +9,7 @@ data class CheckOutResponseEntity(
     val preOrder:Int,//check to put cart of orders or not
     val dateTimeOrder:Int,//check if orderLater will show or not,
     val preOrderText:String,//display text from backend,
+    val preOrderTextAr:String,
     val preOrderTextStatus:Int, // check if display preOrderText or not
     val cart: CartEntity,
     val message: String,

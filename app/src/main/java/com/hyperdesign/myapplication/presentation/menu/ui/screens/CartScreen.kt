@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -190,7 +191,8 @@ fun CartScreen(
                     navController.navigate(route)
                 },
                 listState = listState,
-                isBottomBarExpanded = isBottomBarExpanded
+                vatCost = cartMealState.showCartDate?.cart?.vatCost.toString(),
+                serviceChargeCost = cartMealState.showCartDate?.cart?.serviceChargeCost.toString()
             )
         }
 
@@ -243,7 +245,8 @@ fun CartScreenContent(
     deliveryTime: String,
     onNavToMealDetails: (String) -> Unit,
     listState: androidx.compose.foundation.lazy.LazyListState,
-    isBottomBarExpanded: Boolean
+    serviceChargeCost:String?,
+    vatCost:String?
 ) {
     val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
@@ -322,169 +325,84 @@ fun CartScreenContent(
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                 }
-                items(upSellingMeals, key = { meal -> meal.id }) { meal ->
-                    UpSellingComponent(meal) {
-                        onNavToMealDetails(meal.id)
+                item {
+                    LazyRow(modifier = Modifier.fillMaxWidth()) {
+                        items(upSellingMeals, key = { meal -> meal.id }) { meal ->
+                            UpSellingComponent(meal) {
+                                onNavToMealDetails(meal.id)
+                            }
+                        }
                     }
+                }
+
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(if (isRtl) R.drawable.drag_left else R.drawable.drag_right)
+                            .build(),
+                        imageLoader = imageLoader,
+                        contentDescription = "Swipe instruction",
+                        modifier = Modifier.size(40.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.swipe_to_delete),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Gray
+                    )
                 }
             }
 
             item {
-                Spacer(modifier = Modifier.height(240.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
             }
-        }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(horizontal = 8.dp, vertical = 8.dp)
-        ) {
-            // Swipe instruction with GIF
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.Start
-            ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(if (isRtl) R.drawable.drag_left else R.drawable.drag_right)
-                        .build(),
-                    imageLoader = imageLoader,
-                    contentDescription = "Swipe instruction",
-                    modifier = Modifier.size(40.dp)
-                )
+            item {
 
-                Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = stringResource(R.string.swipe_to_delete),
+                    text = stringResource(R.string.promo_code),
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    color = Secondry,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Gray
+                    fontWeight = FontWeight.Bold
+                )
+                PromoCodeInput(
+                    onClickCoponCkeck = onCheckCoponClick,
+                    copoun = copoun,
+                    onCopounChange = onCopounChange,
+                    copounMessage = copounMessage
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = stringResource(R.string.promo_code),
-                color = Secondry,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-            PromoCodeInput(
-                onClickCoponCkeck = onCheckCoponClick,
-                copoun = copoun,
-                onCopounChange = onCopounChange,
-                copounMessage = copounMessage
-            )
-        }
 
-        AnimatedVisibility(
-            visible = isBottomBarExpanded,
-            enter = expandVertically(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
+            item {
+                CartBottomBar(
+                    priceItems = totalItems,
+                    deliveryPrice = deliveryPrice,
+                    totalPrice = totalPrice,
+                    buttonText = stringResource(R.string.complete_order),
+                    onPayClick = { onGoToCheckOutScreen() },
+                    pickUpStatus = pickUpStatus,
+                    deliveryTime = deliveryTime,
+                    vatCost = vatCost,
+                    serviceCharcheCost = serviceChargeCost
                 )
-            ),
-            exit = shrinkVertically(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
-                )
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(horizontal = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stringResource(R.string.price),
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = totalItems,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Secondry
-                    )
-                }
-
-                if (pickUpStatus) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.delivery),
-                            fontSize = 16.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = deliveryPrice,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Secondry
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                if (pickUpStatus) {
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.delivery_time),
-                            fontSize = 16.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = stringResource(R.string.minutes, deliveryTime),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Secondry
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-                Divider(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    color = Color.LightGray
-                )
-                Spacer(modifier = Modifier.height(8.dp))
             }
-        }
 
-        CartBottomBar(
-            priceItems = totalItems,
-            deliveryPrice = deliveryPrice,
-            totalPrice = totalPrice,
-            buttonText = stringResource(R.string.complete_order),
-            onPayClick = { onGoToCheckOutScreen() },
-            pickUpStatus = pickUpStatus,
-            deliveryTime = deliveryTime
-        )
+        }
     }
 }

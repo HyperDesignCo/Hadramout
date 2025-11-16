@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -42,7 +43,7 @@ fun MenuHeader(
     cardCount: String? = "7",
     selectedTab: Int = 0,
     onTabSelected: (Int) -> Unit = {},
-    menuTabs:List<MenuEntity>
+    menuTabs: List<MenuEntity>
 ) {
     val tabs = menuTabs
 
@@ -85,7 +86,9 @@ fun MenuHeader(
                 Image(
                     painter = painterResource(id = R.drawable.hadramout_logo),
                     contentDescription = "logo",
-                    modifier = Modifier.padding(top = 10.dp).size(70.dp),
+                    modifier = Modifier
+                        .padding(top = 10.dp)
+                        .size(70.dp),
                     alignment = Alignment.Center,
                     contentScale = ContentScale.Crop
                 )
@@ -132,30 +135,32 @@ fun MenuHeader(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
-
-
-                TabRow(
+                ScrollableTabRow(
                     selectedTabIndex = selectedTab,
                     modifier = Modifier.fillMaxWidth(),
                     containerColor = Color.Transparent,
                     contentColor = Color.White,
+                    edgePadding = 0.dp,
                     indicator = {
-                       TabRowDefaults.Indicator(
-                           color = Color.Transparent
+                        TabRowDefaults.Indicator(
+                            color = Color.Transparent
                         )
-                    }
+                    },
+                    divider = {}
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = selectedTab == index,
                             onClick = { onTabSelected(index) },
-                            modifier = Modifier.background(
-                                brush = if (selectedTab == index) Brush.linearGradient(
-                                    colors = listOf(Color(0xFFF15A25), Color(0xFFFCB203))
-                                ) else Brush.linearGradient(
-                                    colors = listOf(Color.Transparent, Color.Transparent)
+                            modifier = Modifier
+                                .background(
+                                    brush = if (selectedTab == index) Brush.linearGradient(
+                                        colors = listOf(Color(0xFFF15A25), Color(0xFFFCB203))
+                                    ) else Brush.linearGradient(
+                                        colors = listOf(Color.Transparent, Color.Transparent)
+                                    )
                                 )
-                            ),
+                                .padding(horizontal = 16.dp),
                             text = {
                                 Text(
                                     text = title.title,

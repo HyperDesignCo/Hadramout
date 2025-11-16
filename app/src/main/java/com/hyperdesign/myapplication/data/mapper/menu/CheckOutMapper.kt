@@ -18,7 +18,8 @@ fun CheckOutResponseDto.toDomain(): CheckOutResponseEntity{
         preOrder = preOrder,
         dateTimeOrder = dateTimeOrder,
         preOrderText = preOrderText,
-        preOrderTextStatus = preOrderTextStatus
+        preOrderTextStatus = preOrderTextStatus,
+        preOrderTextAr = preOrderTextAr
 
     )
 }
