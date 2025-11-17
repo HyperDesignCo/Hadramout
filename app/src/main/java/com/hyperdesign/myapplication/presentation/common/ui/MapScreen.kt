@@ -243,7 +243,22 @@ fun MapScreen(
                                                 Log.e("MapScreen", "Navigation failed: ${e.message}", e)
                                                 Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
                                             }
-                                        } else if (navigateFrom == "addAddress") {
+                                        }
+                                        else if(navigateFrom=="checkOutScreen"){
+                                            val route = "${Screen.AllAddressesScreen.route.replace("{screenType}","checkOutScreen")}?lat=${latLng.latitude}&lng=${latLng.longitude}&areaId=${areaId}"
+                                            Log.d("MapScreen", "Navigating to: $route")
+                                            try {
+                                                navController.navigate(route) {
+                                                    popUpTo(Screen.AllAddressesScreen.route) { inclusive = true }
+                                                }
+                                                Log.d("MapScreen", "Navigation successful")
+                                            } catch (e: Exception) {
+                                                Log.e("MapScreen", "Navigation failed: ${e.message}", e)
+                                                Toast.makeText(context, "Navigation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                            }
+                                        }
+
+                                        else if (navigateFrom == "addAddress") {
                                             val route = "all_address_screen/{screenType}?lat=${latLng.latitude}&lng=${latLng.longitude}&areaId=${areaId}"
                                             Log.d("MapScreen", "Navigating to: $route")
                                             try {

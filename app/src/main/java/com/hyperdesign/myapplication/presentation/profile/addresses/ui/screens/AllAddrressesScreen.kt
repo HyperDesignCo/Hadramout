@@ -200,7 +200,15 @@ fun AllAddressesScreen(type:String?,navBackStackEntry: NavBackStackEntry?=null,a
                 onBackClick = {
                     if(type=="checkOutScreen"){
                         navController.previousBackStackEntry?.savedStateHandle?.set("address_added", true)
-                        navController.popBackStack()
+//                        navController.popBackStack()
+
+                        navController.navigate(Screen.CheckOutScreen.route) {
+                            popUpTo(Screen.MapScreen.route) {
+                                inclusive = true
+
+                            }
+                            launchSingleTop = true
+                        }
                     }
                 }
             )

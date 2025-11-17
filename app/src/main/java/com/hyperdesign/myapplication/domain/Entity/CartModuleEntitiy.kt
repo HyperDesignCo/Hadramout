@@ -7,7 +7,8 @@ data class CartResponseEntity(
     val message: String?,
     val crossSellingMeal : List<SellingMealEntity>?=null,
     val upSellingMeal: List<SellingMealEntity>?=null,
-    val deliveryTime: String?=null
+    val deliveryTime: String?=null,
+    val minimumCharge :String
 )
 
 data class SellingMealEntity(

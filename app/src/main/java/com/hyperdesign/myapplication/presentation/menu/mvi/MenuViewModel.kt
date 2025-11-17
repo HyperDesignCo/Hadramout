@@ -39,7 +39,7 @@ class MenuViewModel(
         _menuState.value = _menuState.value.copy(isLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val response = getMenusUseCase(tokenManager.getBranchId()?:0)
+                val response = getMenusUseCase(tokenManager.getBranchId()?:0,tokenManager.getStatus())
                 _menuState.value = _menuState.value.copy(
                     isLoading = false,
                     menuData = response

@@ -49,6 +49,7 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartIntents
 import com.hyperdesign.myapplication.presentation.menu.mvi.CartViewModel
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.CartBottomBar
+import com.hyperdesign.myapplication.presentation.menu.ui.widgets.MinimumChargeDesign
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.PromoCodeInput
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.SwipeToDismissCartItem
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.UpSellingComponent
@@ -69,6 +70,8 @@ fun CartScreen(
 
     var isBottomBarExpanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+
+    var displayMinimumCharge by remember { mutableStateOf(false) }
 
     val showAuthDialoge by cartViewModel.showAuthDialoge
 
@@ -172,7 +175,17 @@ fun CartScreen(
                 },
                 onGoToCheckOutScreen = {
                     if(cartViewModel.tokenManager.getUserData()?.authenticated=="authenticated"){
-                        navController.navigate("${Screen.CheckOutScreen.route}?deliveryTime=${cartMealState.showCartDate?.deliveryTime.orEmpty()}")
+                        cartMealState.showCartDate?.minimumCharge?.toInt()?.let {minumnmCharge->
+                            cartMealState.showCartDate?.cart?.totalPrice?.toInt()?.let { totalPrice ->
+                                if (totalPrice < minumnmCharge){
+
+                                    displayMinimumCharge = true
+                                }else{
+                                    navController.navigate("${Screen.CheckOutScreen.route}?deliveryTime=${cartMealState.showCartDate?.deliveryTime.orEmpty()}")
+
+                                }
+                            }
+                        }
 
                     }else{
                         cartViewModel.showAuthDialoge.value =true
@@ -209,6 +222,27 @@ fun CartScreen(
                 cartViewModel.showAuthDialoge.value =false
 
             })
+        }
+
+        if (displayMinimumCharge){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                MinimumChargeDesign(
+                    onGoToMenu = {
+                        navController.navigate(Screen.MenueScreen.route) {
+                            popUpTo(Screen.MealDetailsScreen.route) { inclusive = true }
+                        }
+                    },
+                    cancel = {
+                        displayMinimumCharge=false
+                    },
+                    minmumCharge = "${cartMealState.showCartDate?.minimumCharge.orEmpty()} ${stringResource(R.string.egy2)}"
+                )
+
+            }
         }
         if (cartMealState.isLoading) {
             Box(
@@ -275,7 +309,8 @@ fun CartScreenContent(
             showBackPressedIcon = true,
             title = stringResource(R.string.cart),
             onBackPressesd = { onBackPressesd() },
-            onCartPressed = {}
+            onCartPressed = {},
+            cardCount = 0
         )
 
         LazyColumn(

@@ -10,7 +10,9 @@ data class CartResponseDto(
     val crossSellingMeal : List<SellingMealDto>?=null,
     @SerializedName("up_selling_meal")
     val upSellingMeal: List<SellingMealDto>?=null,
-    val message: String
+    val message: String,
+    @SerializedName("minimum_charge")
+    val minimumCharge:String
 )
 
 

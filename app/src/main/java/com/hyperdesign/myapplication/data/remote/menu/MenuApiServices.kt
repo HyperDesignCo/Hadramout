@@ -14,7 +14,7 @@ import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
 
 interface MenuApiServices {
-    suspend fun getMenus(branchId: Int): MenuResponseDto
+    suspend fun getMenus(branchId: Int,pikupStatus:Int): MenuResponseDto
 
     suspend fun showMealDetails(branchId: Int, mealId: Int): MealDetailResponseDto
 

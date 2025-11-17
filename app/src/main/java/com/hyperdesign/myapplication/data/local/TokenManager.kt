@@ -31,6 +31,8 @@ class TokenManager(private val context: Context) {
         private const val STATUS = "status"
 
         private const val DEVICE_ID = "device_id"
+
+        private const val CART_Num = "cart_num"
     }
 
     private val masterKey: MasterKey by lazy {
@@ -74,6 +76,14 @@ class TokenManager(private val context: Context) {
             .putString(ACCESS_TOKEN, accessToken)
             .apply()
     }
+
+    fun saveCartNum(cartNum:Int){
+        encryptedSharedPreferences.edit()
+            .putInt(CART_Num,cartNum)
+            .apply()
+    }
+
+    fun getCartNum():Int = encryptedSharedPreferences.getInt(CART_Num,0)
 
     fun saveHomeHotline(phone:String){
         encryptedSharedPreferences.edit()

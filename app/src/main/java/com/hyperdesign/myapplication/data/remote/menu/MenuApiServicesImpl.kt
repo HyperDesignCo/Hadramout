@@ -25,17 +25,18 @@ import io.ktor.http.contentType
 class MenuApiServicesImpl(
     private val client: HttpClient
 ): MenuApiServices {
-    override suspend fun getMenus(branchId: Int): MenuResponseDto {
+    override suspend fun getMenus(branchId: Int,pickupStatus:Int): MenuResponseDto {
        return try {
 
             val response = client.get("menu") {
                 contentType(ContentType.Application.Json)
                 parameter("branch_id", branchId)
+                parameter("pickup_status",pickupStatus)
             }.body<MenuResponseDto>()
-           Log.d("MenuApiServices", "Menu Response for branchId=$branchId: $response")
+           Log.d("MenuApiServices", "Menu Response for branchId=$branchId and pickupStatus=$pickupStatus : $response")
            response
         }catch (e:Exception){
-            Log.e("MenuApiServices", "getMenus failed for branchId=$branchId: ${e.message}", e)
+            Log.e("MenuApiServices", "getMenus failed for branchId=$branchId and pickupStatus=$pickupStatus : ${e.message}", e)
            throw e
 
         }

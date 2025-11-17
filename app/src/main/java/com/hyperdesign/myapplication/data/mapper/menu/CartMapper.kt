@@ -15,7 +15,8 @@ fun CartResponseDto.toEntity(): CartResponseEntity {
         message = message.orEmpty(),
         deliveryTime = deliveryTime ?:"",
         upSellingMeal = upSellingMeal?.map { it.toDomain() },
-        crossSellingMeal = crossSellingMeal?.map { it.toDomain() }
+        crossSellingMeal = crossSellingMeal?.map { it.toDomain() },
+        minimumCharge = minimumCharge
 
     )
 }

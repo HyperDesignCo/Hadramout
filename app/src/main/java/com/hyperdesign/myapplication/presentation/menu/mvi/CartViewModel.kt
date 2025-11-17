@@ -167,6 +167,8 @@ class CartViewModel(
                     showCartDate = response
                 )
 
+                tokenManager.saveCartNum(response.cart?.cartMeals?.size?:0)
+
 
             }.onSuccess {
                 _cartState.value = _cartState.value.copy(
@@ -199,6 +201,7 @@ class CartViewModel(
                     isLoading = false,
                     showCartDate = response
                 )
+                tokenManager.saveCartNum(response.cart?.cartMeals?.size?:0)
 
             }.onSuccess {
                 _cartState.value = _cartState.value.copy(

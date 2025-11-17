@@ -20,8 +20,8 @@ import com.hyperdesign.myapplication.domain.repo.menu.MenuRepo
 class MenuRepoImpl(
     private val menuApiServices: MenuApiServices
 ): MenuRepo {
-    override suspend fun getMenus(branchId: Int): MenueResponse {
-        val response = menuApiServices.getMenus(branchId)
+    override suspend fun getMenus(branchId: Int,pickUpStatus:Int): MenueResponse {
+        val response = menuApiServices.getMenus(branchId,pickUpStatus)
         return response.toDomain()
     }
 

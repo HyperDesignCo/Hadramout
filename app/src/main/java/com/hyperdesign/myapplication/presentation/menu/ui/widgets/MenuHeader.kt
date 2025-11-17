@@ -98,36 +98,36 @@ fun MenuHeader(
                         .padding(top = 4.dp, end = 10.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
-//                    Box(
-//                        modifier = Modifier
-//                            .padding(bottom = 27.dp, end = 3.dp)
-//                            .size(17.dp)
-//                            .background(color = Color.Red, shape = CircleShape),
-//                        contentAlignment = Alignment.Center
+////                    Box(
+////                        modifier = Modifier
+////                            .padding(bottom = 27.dp, end = 3.dp)
+////                            .size(17.dp)
+////                            .background(color = Color.Red, shape = CircleShape),
+////                        contentAlignment = Alignment.Center
+////                    ) {
+////                        Text(
+////                            text = cardCount ?: "",
+////                            modifier = Modifier
+////                                .padding(bottom = 2.dp)
+////                                .fillMaxSize(),
+////                            textAlign = TextAlign.Center,
+////                            color = Color.White,
+////                            fontSize = 9.sp,
+////                            fontWeight = FontWeight.Bold
+////                        )
+////                    }
+//
+//                    IconButton(
+//                        onClick = onCartPressed,
+//                        modifier = Modifier.size(30.dp)
 //                    ) {
-//                        Text(
-//                            text = cardCount ?: "",
-//                            modifier = Modifier
-//                                .padding(bottom = 2.dp)
-//                                .fillMaxSize(),
-//                            textAlign = TextAlign.Center,
-//                            color = Color.White,
-//                            fontSize = 9.sp,
-//                            fontWeight = FontWeight.Bold
+//                        Icon(
+//                            painter = painterResource(R.drawable.cart),
+//                            tint = Color.LightGray,
+//                            contentDescription = "cart",
+//                            modifier = Modifier.size(24.dp)
 //                        )
 //                    }
-
-                    IconButton(
-                        onClick = onCartPressed,
-                        modifier = Modifier.size(30.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.cart),
-                            tint = Color.LightGray,
-                            contentDescription = "cart",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
                 }
             }
 

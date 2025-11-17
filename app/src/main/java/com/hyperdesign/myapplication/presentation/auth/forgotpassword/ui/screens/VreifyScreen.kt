@@ -126,7 +126,8 @@ fun VerifyScreenContent(
         MainHeader(
             showBackPressedIcon = true,
             showLogo = true,
-            onBackPressesd = onBackPressed
+            onBackPressesd = onBackPressed,
+            cardCount = 0
         )
 
         Column(

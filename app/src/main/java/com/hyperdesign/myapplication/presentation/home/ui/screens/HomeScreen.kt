@@ -272,7 +272,8 @@ fun HomeScreen(
             },
             saveCloseBranch = {
                 homeViewModel.tokenManager.saveCloseTimeBranch(it)
-            }
+            },
+            cartNum = homeViewModel.tokenManager.getCartNum()
         )
 
         if (showAuthDialoge) {
@@ -361,7 +362,8 @@ fun HomeScreenContent(
     onShowPickupDialog: () -> Unit,
     makePickup: Boolean = false,
     saveOpenBranch: (String) -> Unit,
-    saveCloseBranch: (String) -> Unit
+    saveCloseBranch: (String) -> Unit,
+    cartNum:Int?
 ) {
     val navController = LocalNavController.current
     val configuration = LocalConfiguration.current
@@ -442,7 +444,7 @@ fun HomeScreenContent(
             title = "",
             onBackPressesd = { onBackPressed() },
             showIcon = true,
-            cardCount = "2",
+            cardCount = cartNum,
             onCartPressed = { onCartPressed() },
             showStatus = true,
             onClickChangStatus = onStatusChanged,

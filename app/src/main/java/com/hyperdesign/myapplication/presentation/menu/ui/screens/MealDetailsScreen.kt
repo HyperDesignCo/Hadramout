@@ -316,7 +316,12 @@ fun MealDetailsContent(
 // Calculate total price with derivedStateOf
     val totalPrice by remember(meal, selectedSize, selectedSubChoices) {
         derivedStateOf {
-            val selectedSizePrice = meal?.sizes?.find { it.sizeTitle == selectedSize }?.price ?: meal?.price ?: 0.0
+            val selectedSizeObj = meal?.sizes?.find { it.sizeTitle == selectedSize }
+            val selectedSizePrice = if (selectedSizeObj?.discountPrice != null && selectedSizeObj.discountPrice > 0) {
+                selectedSizeObj.discountPrice
+            } else {
+                selectedSizeObj?.price ?: meal?.price ?: 0.0
+            }
             val subChoicesPrice = meal?.choices?.flatMap { it.subChoices }
                 ?.filter { subChoice ->
                     selectedSubChoices.any { entry -> entry.value.contains(subChoice.id) }
@@ -351,6 +356,7 @@ fun MealDetailsContent(
                 title = "",
                 showBackPressedIcon = true,
                 onBackPressesd = onBackPressed,
+                cardCount = 0,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
@@ -399,6 +405,15 @@ fun MealDetailsContent(
                 fontSize = 14.sp,
                 color = Color.Gray
             )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "${stringResource(R.string.price)} ${String.format("%.2f", totalPrice)} ${stringResource(R.string.egy2)}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Secondry
+            )
+
+
             Spacer(modifier = Modifier.height(16.dp))
 // Sizes Section
             if (!meal?.sizes.isNullOrEmpty()) {
@@ -421,6 +436,7 @@ fun MealDetailsContent(
                         meal.sizes.forEach { size ->
                             SizeOption(
                                 size = size.sizeTitle,
+                                discountPrice = size.discountPrice.toString(),
                                 price =if (size.price>0) String.format("%.2f", size.price) else "",
                                 selectedSize = selectedSize,
                                 onSelected = { selected ->

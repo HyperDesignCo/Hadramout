@@ -171,4 +171,5 @@
     <string name="you_should_add_your_address_first">You Must Add Address Firstly</string>
     <string name="VAT">Vat</string>
     <string name="service_charge_cost">Service charge cost</string>
+    <string name="please_note_minumm_charge_is">"Please note that the minimum order amount is "</string>
 </resources>

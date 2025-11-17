@@ -30,7 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,11 +50,13 @@ fun FeaturedWedgits(
     meal: Meal,
     onItemClick: (Meal) -> Unit
 ) {
+    val hasDiscount = meal.discountPrice != null && meal.discountPrice > 0
+
     Card(
         modifier = Modifier
             .padding(horizontal = 10.dp)
             .fillMaxWidth()
-            .height(180.dp) // Fixed height for consistent card size
+            .height(180.dp)
             .clip(RoundedCornerShape(8.dp)),
         colors = cardColors(containerColor = Gray),
         onClick = { onItemClick(meal) }
@@ -63,20 +67,48 @@ fun FeaturedWedgits(
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(meal.image)
-                    .crossfade(true)
-                    .error(R.drawable.test_food)
-                    .placeholder(R.drawable.test_food)
-                    .build(),
-                contentDescription = "Meal image ${meal.title}",
+            // Image with optional discount badge
+            Box(
                 modifier = Modifier
                     .width(140.dp)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(meal.image)
+                        .crossfade(true)
+                        .error(R.drawable.test_food)
+                        .placeholder(R.drawable.test_food)
+                        .build(),
+                    contentDescription = "Meal image ${meal.title}",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Discount Badge
+                if (hasDiscount) {
+                    val discountPercentage = (((meal.price - meal.discountPrice!!) / meal.price) * 100).toInt()
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(6.dp)
+                            .background(
+                                color = Color.Red,
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "-$discountPercentage%",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
 
             Column(
                 modifier = Modifier
@@ -99,14 +131,46 @@ fun FeaturedWedgits(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "${meal.price} ${stringResource(R.string.egy2)}",
-                    fontSize = 15.sp,
-                    color = Secondry,
-                    fontWeight = FontWeight.Bold
-                )
+
+                // Price Section with Discount
+                if (hasDiscount) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        // Discount Price (Highlighted)
+                        Text(
+                            text = "${meal.discountPrice} ${stringResource(R.string.egy2)}",
+                            fontSize = 16.sp,
+                            color = Secondry,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Original Price (Strikethrough)
+                        Text(
+                            text = "${meal.price} ${stringResource(R.string.egy2)}",
+                            fontSize = 13.sp,
+                            color = Color.Gray,
+                            style = TextStyle(textDecoration = TextDecoration.LineThrough),
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
+                } else {
+                    // Regular Price (No Discount)
+                    Text(
+                        text = "${meal.price} ${stringResource(R.string.egy2)}",
+                        fontSize = 15.sp,
+                        color = Secondry,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 Spacer(modifier = Modifier.weight(1f))
+
                 Box(
                     modifier = Modifier
                         .size(30.dp)

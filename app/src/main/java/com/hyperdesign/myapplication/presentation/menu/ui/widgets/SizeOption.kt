@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -19,34 +21,82 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.domain.Entity.SubChoiceEntity
 
 @Composable
-fun SizeOption(size: String, price: String, selectedSize: String, onSelected: (String) -> Unit) {
+fun SizeOption(
+    size: String,
+    price: String,
+    discountPrice: String? = null,
+    selectedSize: String,
+    onSelected: (String) -> Unit
+) {
+    val hasDiscount = !discountPrice.isNullOrEmpty() && discountPrice.toDoubleOrNull()?.let { it > 0 } == true
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (selectedSize == size)  Brush.linearGradient(
-                listOf(Color(0xFFF15A25), Color(0xFFFCB203))
-            ) else Brush.linearGradient(
-                listOf(Color(0xFFF8F8F8), Color(0xFFF8F8F8))
-            ) )
+            .background(
+                if (selectedSize == size) Brush.linearGradient(
+                    listOf(Color(0xFFF15A25), Color(0xFFFCB203))
+                ) else Brush.linearGradient(
+                    listOf(Color(0xFFF8F8F8), Color(0xFFF8F8F8))
+                )
+            )
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(size, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = if (selectedSize == size) Color.White else Color.Black)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("$price ${stringResource(R.string.egy2)}", fontSize = 14.sp, color = if (selectedSize == size) Color.White else Color.Black)
-            RadioButton(
-                colors = RadioButtonDefaults.colors(if (selectedSize == size) Color.White else Color.Black),
+        Text(
+            text = size,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (selectedSize == size) Color.White else Color.Black
+        )
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            if (hasDiscount) {
+                // Show discount price first (bold and larger)
+                Text(
+                    text = "$discountPrice ${stringResource(R.string.egy2)}",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (selectedSize == size) Color.White else Color.Black
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                // Show original price with strikethrough
+                Text(
+                    text = "$price ${stringResource(R.string.egy2)}",
+                    fontSize = 12.sp,
+                    color = if (selectedSize == size) Color.White.copy(alpha = 0.7f) else Color.Gray,
+                    style = TextStyle(textDecoration = TextDecoration.LineThrough)
+                )
+            } else if (price.isNotEmpty()) {
+                // Regular price (no discount)
+                Text(
+                    text = "$price ${stringResource(R.string.egy2)}",
+                    fontSize = 14.sp,
+                    color = if (selectedSize == size) Color.White else Color.Black
+                )
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            RadioButton(
+                colors = RadioButtonDefaults.colors(
+                    if (selectedSize == size) Color.White else Color.Black
+                ),
                 selected = selectedSize == size,
                 onClick = { onSelected(size) }
             )

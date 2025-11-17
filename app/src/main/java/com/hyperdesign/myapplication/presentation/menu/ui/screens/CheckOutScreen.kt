@@ -19,11 +19,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.auth.login.mvi.LoginViewModel
@@ -40,9 +43,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
-/* ============================================================= */
-/* =====================  CHECK-OUT SCREEN  ==================== */
-/* ============================================================= */
+
 
 @Composable
 fun CheckOutScreen(
@@ -53,6 +54,7 @@ fun CheckOutScreen(
 ) {
     val navController = LocalNavController.current
     val checkState by checkOutViewModel.checkOutState.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     // ---------- UI state ----------
     var subRegion by remember { mutableStateOf("") }
@@ -74,7 +76,26 @@ fun CheckOutScreen(
 
     val context = LocalContext.current
 
-    /* -------------------- SCROLL DETECTION -------------------- */
+    /* -------------------- REFRESH ON SCREEN RESUME -------------------- */
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                checkOutViewModel.handleIntents(
+                    CheckOutIntents.CheckOutClick(
+                        loginViewModel.tokenManager.getBranchId().toString()
+                    )
+                )
+                checkOutViewModel.handleIntents(CheckOutIntents.GetAddress)
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     LaunchedEffect(listState) {
         snapshotFlow {
             listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
@@ -228,7 +249,10 @@ fun CheckOutScreen(
                 },
                 onClickToAddNewAddress = {
                     val screenType = "checkOutScreen"
-                    navController.navigate(Screen.AllAddressesScreen.route.replace("{screenType}", screenType))
+                    navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}", screenType))
+
+//                    val screenType = "checkOutScreen"
+//                    navController.navigate(Screen.AllAddressesScreen.route.replace("{screenType}", screenType))
                 },
                 pickUpStatus = deliveryStatus,
                 branchName = if (loginViewModel.tokenManager.getLanguage() == "en")
@@ -291,10 +315,7 @@ fun CheckOutScreen(
                 confirmButton = {
                     CustomButton(
                         onClick = {
-
-
                             showEnterAddressDialoge = false
-
                         },
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(R.string.confirm),
@@ -512,9 +533,6 @@ fun CheckOutScreenContent(
 
 //                Spacer(modifier = Modifier.height(24.dp))
             }
-
-
-
         }
     }
 }
