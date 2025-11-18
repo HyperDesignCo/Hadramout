@@ -31,7 +31,7 @@ val RepoModule = module {
     }
 
     single<ProfileRepo> {
-        ProfileRepoImpl(get())
+        ProfileRepoImpl(get(),get())
     }
 
     single<LanguageRepo> {

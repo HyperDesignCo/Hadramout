@@ -24,6 +24,8 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
 class ProfileApiServicesImpl(
@@ -179,27 +181,39 @@ class ProfileApiServicesImpl(
     override suspend fun editProfile(editProfileRequest: EditProfileRequest): EditProfileResponse {
         return try {
             val response = client.post("edit_profile") {
-                contentType(ContentType.MultiPart.FormData)
                 setBody(
                     MultiPartFormDataContent(
                         formData {
                             append("name", editProfileRequest.name)
                             append("email", editProfileRequest.email)
                             append("mobile", editProfileRequest.mobile)
-                            editProfileRequest.image?.let { image ->
+
+                            // Properly handle image bytes
+                            editProfileRequest.imageBytes?.let { bytes ->
                                 append(
                                     "image",
-                                    image
-                                ) // Assuming image is a URL or file path as a string
+                                    bytes,
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "image/jpeg")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"profile.jpg\"")
+                                    }
+                                )
                             }
                         }
                     )
                 )
             }.body<EditProfileResponse>()
-            Log.d("ProfileApiServices", "editProfileSuccess, request: $editProfileRequest, Response: $response")
+
+            Log.d("ProfileApiServices", "editProfile Response: $response")
+
+            // Validate response message
+            if (response.message.contains("failed", ignoreCase = true)) {
+                throw Exception("Failed to update profile: ${response.message}")
+            }
+
             response
         } catch (e: Exception) {
-            Log.e("ProfileApiServices", "editProfileFailed, request: $editProfileRequest, ${e.message}")
+            Log.e("ProfileApiServices", "editProfileFailed: ${e.message}")
             throw e
         }
     }
