@@ -12,7 +12,7 @@ data class CartResponseDto(
     val upSellingMeal: List<SellingMealDto>?=null,
     val message: String,
     @SerializedName("minimum_charge")
-    val minimumCharge:String
+    val minimumCharge:String?=null
 )
 
 
