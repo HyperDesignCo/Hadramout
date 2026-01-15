@@ -53,8 +53,8 @@ fun FoodCardDesign(imageUrl: String,onGoToCart:()->Unit,onGoToMenu:()->Unit) {
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(imageUrl)
                             .crossfade(true)
-                            .error(com.hyperdesign.myapplication.R.drawable.test_food)
-                            .placeholder(R.drawable.test_food)
+                            .error(com.hyperdesign.myapplication.R.drawable.hadramout_logo)
+                            .placeholder(R.drawable.hadramout_logo)
                             .build(),
                         contentDescription = "Food image",
                         alignment = Alignment.Center,

@@ -54,7 +54,7 @@ fun FeaturedWedgits(
 
     Card(
         modifier = Modifier
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = 4.dp)
             .fillMaxWidth()
             .height(180.dp)
             .clip(RoundedCornerShape(8.dp)),
@@ -77,8 +77,8 @@ fun FeaturedWedgits(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(meal.image)
                         .crossfade(true)
-                        .error(R.drawable.test_food)
-                        .placeholder(R.drawable.test_food)
+                        .error(R.drawable.hadramout_logo)
+                        .placeholder(R.drawable.hadramout_logo)
                         .build(),
                     contentDescription = "Meal image ${meal.title}",
                     modifier = Modifier
@@ -220,8 +220,8 @@ fun AdsWdegit(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(meal.image)
                     .crossfade(true)
-                    .error(R.drawable.test_food)
-                    .placeholder(R.drawable.test_food)
+                    .error(R.drawable.hadramout_logo)
+                    .placeholder(R.drawable.hadramout_logo)
                     .build(),
                 contentDescription = "Meal image ${meal.image}",
                 modifier = Modifier

@@ -88,8 +88,8 @@ fun CheckOutHeader(userName:String,phoneNumber:String,image:String?=null,onBackP
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(image)
                         .crossfade(true)
-                        .error(R.drawable.test_food)
-                        .placeholder(R.drawable.test_food)
+                        .error(R.drawable.hadramout_logo)
+                        .placeholder(R.drawable.hadramout_logo)
                         .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                         .diskCachePolicy(coil.request.CachePolicy.ENABLED)
                         .build(),

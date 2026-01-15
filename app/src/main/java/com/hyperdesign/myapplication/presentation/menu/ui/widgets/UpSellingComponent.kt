@@ -67,8 +67,8 @@ fun UpSellingComponent(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(upsellingMeal.image)
                     .crossfade(true)
-                    .error(R.drawable.test_food)
-                    .placeholder(R.drawable.test_food)
+                    .error(R.drawable.hadramout_logo)
+                    .placeholder(R.drawable.hadramout_logo)
                     .build(),
                 contentDescription = "Meal image ${upsellingMeal.title}",
                 modifier = Modifier

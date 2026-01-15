@@ -3,19 +3,36 @@ package com.hyperdesign.myapplication.presentation.home.ui.screens
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
-import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +41,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -43,15 +59,16 @@ import com.hyperdesign.myapplication.domain.Entity.Branch
 import com.hyperdesign.myapplication.domain.Entity.HomeMenu
 import com.hyperdesign.myapplication.domain.Entity.Meal
 import com.hyperdesign.myapplication.domain.Entity.SlideShowEntity
-import com.hyperdesign.myapplication.presentation.common.wedgits.CustomButton
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
+import com.hyperdesign.myapplication.presentation.home.HomeObject
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeIntents
 import com.hyperdesign.myapplication.presentation.home.mvi.HomeViewModel
-import com.hyperdesign.myapplication.presentation.home.HomeObject
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.AdsWdegit
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.FeaturedWedgits
+import com.hyperdesign.myapplication.presentation.home.ui.wedgit.NoDeliveryDialogHome
 import com.hyperdesign.myapplication.presentation.home.ui.wedgit.OffersList
+import com.hyperdesign.myapplication.presentation.home.ui.wedgit.PickupBranchDialog
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
 import com.hyperdesign.myapplication.presentation.main.navcontroller.goToScreenMealDeataisWithString
@@ -67,8 +84,7 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = koinViewModel(),
-    navBackStackEntry: NavBackStackEntry? = null
+    homeViewModel: HomeViewModel = koinViewModel(), navBackStackEntry: NavBackStackEntry? = null
 ) {
     val navController = LocalNavController.current
     val homeState by homeViewModel.homeState.collectAsStateWithLifecycle()
@@ -77,16 +93,13 @@ fun HomeScreen(
     var status by remember { mutableStateOf(homeViewModel.tokenManager.getStatus() == 1) }
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
     val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(context)
     }
 
-    Log.d("HomeScreen", "open branch=${homeViewModel.tokenManager.getOpenTimeBranch()}")
-    Log.d("HomeScreen", "close branch=${homeViewModel.tokenManager.getCloseTimeBranch()}")
 
     var userLocation by remember { mutableStateOf(LatLng(30.0444, 31.2357)) } // Default to Cairo
     var isFetchingLocation by remember { mutableStateOf(false) }
@@ -103,18 +116,18 @@ fun HomeScreen(
         }
     }
 
-    // Track navigation arguments to trigger recomposition
     val navArgsKey by rememberUpdatedState(
-        "${navBackStackEntry?.arguments?.getString("lat")}:${navBackStackEntry?.arguments?.getString("lng")}:${navBackStackEntry?.arguments?.getString("pickup")}"
+        "${navBackStackEntry?.arguments?.getString("lat")}:${
+            navBackStackEntry?.arguments?.getString(
+                "lng"
+            )
+        }:${navBackStackEntry?.arguments?.getString("pickup")}"
     )
 
-    Log.d("HomeScreen", "Composing HomeScreen with navArgsKey=$navArgsKey")
-    Log.d("makeupd", makePichUp.toString())
 
     var hasShownNoDeliveryDialog by remember { mutableStateOf(false) }
     var showPickupBranchDialog by remember { mutableStateOf(false) }
 
-    // === NOTIFICATION PERMISSION (Android 13+) ===
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(
             permission = Manifest.permission.POST_NOTIFICATIONS
@@ -123,22 +136,19 @@ fun HomeScreen(
         var hasRequestedNotificationPermission by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
-            if (!hasRequestedNotificationPermission &&
-                !notificationPermissionState.status.isGranted
-            ) {
+            if (!hasRequestedNotificationPermission && !notificationPermissionState.status.isGranted) {
                 hasRequestedNotificationPermission = true
                 notificationPermissionState.launchPermissionRequest()
             }
         }
     }
 
-    // === LOCATION PERMISSION & FETCHING ===
+
     LaunchedEffect(Unit) {
         if (!permissionState.allPermissionsGranted) {
             permissionState.launchMultiplePermissionRequest()
         } else {
             if (navArgsKey == "noDialoge" || navArgsKey == "noDialoge::") {
-                Log.d("nodDialoge", "nodDialoge")
             } else {
                 isFetchingLocation = true
                 if (navArgsKey.isEmpty() || navArgsKey == "::") {
@@ -147,18 +157,16 @@ fun HomeScreen(
                             val lastLocation = fusedLocationClient.lastLocation.await()
                             if (lastLocation != null) {
                                 userLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
-                                Log.d("HomeScreen", "Location fetched (last): $userLocation")
                             } else {
                                 val currentLocation = fusedLocationClient.getCurrentLocation(
                                     Priority.PRIORITY_HIGH_ACCURACY, null
                                 ).await()
                                 if (currentLocation != null) {
-                                    userLocation = LatLng(currentLocation.latitude, currentLocation.longitude)
-                                    Log.d("HomeScreen", "Location fetched (current): $userLocation")
+                                    userLocation =
+                                        LatLng(currentLocation.latitude, currentLocation.longitude)
                                 }
                             }
                         } catch (e: Exception) {
-                            Log.e("HomeScreen", "Failed to get location", e)
                         } finally {
                             isFetchingLocation = false
                         }
@@ -166,20 +174,18 @@ fun HomeScreen(
                         homeViewModel.handleIntents(HomeIntents.ChangeLat(userLocation.latitude.toString()))
                         homeViewModel.handleIntents(HomeIntents.ChangeLng(userLocation.longitude.toString()))
                         homeViewModel.handleIntents(HomeIntents.CheckLocation)
-                        Log.d("HomeScreen", "Initial CheckLocation called with lat=${userLocation.latitude}, lng=${userLocation.longitude}")
                     }
                 }
             }
         }
     }
 
-    // === HANDLE RETURN FROM MAPSCREEN ===
+
     LaunchedEffect(navArgsKey) {
         navBackStackEntry?.arguments?.let { args ->
             val lat = args.getString("lat")
             val lng = args.getString("lng")
             val pickup = args.getString("pickup")
-            Log.d("HomeScreen", "Received args from MapScreen: lat=$lat, lng=$lng, pickup=$pickup")
 
             if (lat != null && lng != null && lat.isNotEmpty() && lng.isNotEmpty()) {
                 try {
@@ -187,9 +193,7 @@ fun HomeScreen(
                     homeViewModel.handleIntents(HomeIntents.ChangeLat(lat))
                     homeViewModel.handleIntents(HomeIntents.ChangeLng(lng))
                     homeViewModel.handleIntents(HomeIntents.CheckLocation)
-                    Log.d("HomeScreen", "Processed location from MapScreen: $userLocation")
                 } catch (e: NumberFormatException) {
-                    Log.e("HomeScreen", "Invalid lat/lng format: lat=$lat, lng=$lng", e)
                 } finally {
                     isFetchingLocation = false
                 }
@@ -199,27 +203,24 @@ fun HomeScreen(
                 status = true
                 homeViewModel.tokenManager.saveStatus(1)
                 showPickupBranchDialog = true
-                Log.d("HomeScreen", "Switched to pickup mode via navigation")
             }
         }
     }
 
     if (!permissionState.allPermissionsGranted) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Location permission is required")
-        }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {}
         return
     }
 
     val deliveryStatus = homeState.checkLocationResponseEntity?.data?.deliveryStatus
-    Log.d("HomeScreen", "Delivery status: $deliveryStatus")
 
     LaunchedEffect(deliveryStatus) {
         if (deliveryStatus == "0" && HomeObject.status == 0 && !hasShownNoDeliveryDialog && navArgsKey != "noDialoge" && navArgsKey != "noDialoge::") {
             hasShownNoDeliveryDialog = true
-            Log.d("HomeScreen", "Delivery status is 0 → showing No Delivery dialog")
         } else {
-            homeViewModel.tokenManager.saveCurrentResturentBranch(homeState.checkLocationResponseEntity?.data?.currentResturantBranch ?: "")
+            homeViewModel.tokenManager.saveCurrentResturentBranch(
+                homeState.checkLocationResponseEntity?.data?.currentResturantBranch ?: ""
+            )
         }
     }
 
@@ -230,7 +231,6 @@ fun HomeScreen(
             homeMenus = homeState.homeMenues?.homeMenus.orEmpty(),
             onBranchSelected = { branchId ->
                 newBranchId = branchId
-                Log.d("ourBranch", branchId.toString())
                 if (checkValueEqualZoroOrNot != 0) {
                     homeViewModel.tokenManager.saveBranchId(branchId)
                 }
@@ -246,13 +246,14 @@ fun HomeScreen(
                 }
             },
             onCartPressed = {
-                    navController.navigate(Screen.CartScreen.route)
+                navController.navigate(Screen.CartScreen.route)
 
             },
             saveBranchId = { branchId ->
                 homeViewModel.tokenManager.saveBranchId(branchId)
             },
-            getBranchId = homeViewModel.tokenManager.getBranchId() ?: homeState.branches?.branches?.get(0)?.id ?: 0,
+            getBranchId = homeViewModel.tokenManager.getBranchId()
+                ?: homeState.branches?.branches?.get(0)?.id ?: 0,
             myStatus = homeViewModel.tokenManager.getStatus(),
             bestSelling = homeState.homeMenues?.bestSalesMeals.orEmpty(),
             ads = homeState.homeMenues?.ads.orEmpty(),
@@ -260,7 +261,6 @@ fun HomeScreen(
                 checkValueEqualZoroOrNot = valueEquealZoro
             },
             navToMap = {
-                Log.d("HomeScreen", "Navigating to MapScreen with navigateFrom=Home")
                 navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}", "Home"))
             },
             currentResturentBranch = homeState.checkLocationResponseEntity?.data?.currentResturantBranch.orEmpty(),
@@ -277,42 +277,35 @@ fun HomeScreen(
         )
 
         if (showAuthDialoge) {
-            ShowAuthentaionDialge(
-                onNavToLogin = {
-                    navController.navigate(Screen.LoginInScreen.route) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
-                    homeViewModel.showAuthDialoge.value = false
-                },
-                onCancel = {
-                    homeViewModel.showAuthDialoge.value = false
+            ShowAuthentaionDialge(onNavToLogin = {
+                navController.navigate(Screen.LoginInScreen.route) {
+                    popUpTo(navController.graph.id) { inclusive = true }
                 }
-            )
+                homeViewModel.showAuthDialoge.value = false
+            }, onCancel = {
+                homeViewModel.showAuthDialoge.value = false
+            })
         }
 
         if (deliveryStatus == "0" && hasShownNoDeliveryDialog) {
-            NoDeliveryDialogHome(
-                onPickUp = {
-                    status = true
-                    homeViewModel.tokenManager.saveStatus(1)
-                    hasShownNoDeliveryDialog = false
-                    showPickupBranchDialog = true
-                    Log.d("HomeScreen", "User selected Pickup → dialog dismissed")
-                },
-                onChangeLocation = {
-                    status = false
-                    homeViewModel.tokenManager.saveStatus(0)
-                    hasShownNoDeliveryDialog = false
-                    navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}", "Home"))
-                    Log.d("HomeScreen", "User selected Change Location → navigating to Map")
-                }
-            )
+            NoDeliveryDialogHome(onPickUp = {
+                status = true
+                homeViewModel.tokenManager.saveStatus(1)
+                hasShownNoDeliveryDialog = false
+                showPickupBranchDialog = true
+            }, onChangeLocation = {
+                status = false
+                homeViewModel.tokenManager.saveStatus(0)
+                hasShownNoDeliveryDialog = false
+                navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}", "Home"))
+            })
         }
 
         if (showPickupBranchDialog) {
             PickupBranchDialog(
                 branches = homeState.branches?.branches.orEmpty(),
-                currentBranchId = homeViewModel.tokenManager.getBranchId() ?: homeState.branches?.branches?.firstOrNull()?.id ?: 0,
+                currentBranchId = homeViewModel.tokenManager.getBranchId()
+                    ?: homeState.branches?.branches?.firstOrNull()?.id ?: 0,
                 onBranchSelected = { branch ->
                     makePichUp = true
                     homeViewModel.tokenManager.saveBranchId(branch.id)
@@ -323,8 +316,7 @@ fun HomeScreen(
                 onDismiss = {
                     showPickupBranchDialog = false
                     HomeObject.updateStatus(1)
-                }
-            )
+                })
         }
 
         if (homeState.isLoading) {
@@ -363,11 +355,12 @@ fun HomeScreenContent(
     makePickup: Boolean = false,
     saveOpenBranch: (String) -> Unit,
     saveCloseBranch: (String) -> Unit,
-    cartNum:Int?
+    cartNum: Int?
 ) {
     val navController = LocalNavController.current
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
+    val itemWidth = (screenWidth * 0.90f)
 
     LaunchedEffect(currentResturentBranch) {
         if (myStatus == 0 && currentResturentBranch.isNotEmpty()) {
@@ -377,7 +370,6 @@ fun HomeScreenContent(
                 onBranchSelected(selected.id)
                 saveOpenBranch(selected.openTime)
                 saveCloseBranch(selected.closeTime)
-                Log.d("HomeScreen", "Updated selectedBranch to ${selected.title} based on currentResturentBranch=$currentResturentBranch")
             }
         }
     }
@@ -391,16 +383,13 @@ fun HomeScreenContent(
                     saveCloseBranch(branches[0].closeTime)
                     checkOnZeroOrNot(0)
                     onBranchSelected(branches[0].id)
-                    Log.d("getBranchId", "getBranchId inside getBranchId")
                 } else if (currentResturentBranch.isEmpty()) {
-                    Log.d("getBranchId", "getBranchId inside mystatuselseif")
                     selectedBranchState.value = branches[0].title
                     onBranchSelected(branches[0].id)
                     saveOpenBranch(branches[0].openTime)
                     saveCloseBranch(branches[0].closeTime)
                 }
             } else {
-                Log.d("getBranchId", "getBranchId inside else")
                 if (getBranchId != 0) {
                     val selected = branches.find { it.id == getBranchId }
                     if (selected != null) {
@@ -408,7 +397,6 @@ fun HomeScreenContent(
                         onBranchSelected(selected.id)
                         saveOpenBranch(selected.openTime)
                         saveCloseBranch(selected.closeTime)
-                        Log.d("HomeScreen", "Set selectedBranch to ${selected.title} from getBranchId=$getBranchId")
                     } else {
                         saveBranchId(0)
                         selectedBranchState.value = branches[0].title
@@ -416,7 +404,6 @@ fun HomeScreenContent(
                         saveBranchId(branches[0].id)
                         saveOpenBranch(branches[0].openTime)
                         saveCloseBranch(branches[0].closeTime)
-                        Log.d("HomeScreen", "Fallback to first branch: ${branches[0].title}")
                     }
                 } else {
                     if (currentResturentBranch.isEmpty()) {
@@ -425,14 +412,12 @@ fun HomeScreenContent(
                         saveBranchId(branches[0].id)
                         saveOpenBranch(branches[0].openTime)
                         saveCloseBranch(branches[0].closeTime)
-                        Log.d("HomeScreen", "Default to first branch: ${branches[0].title}")
                     }
                 }
             }
         }
     }
 
-    Log.d("HomeScreen", "Rendering HomeScreenContent: Branches=$branches, Offers=$offers, HomeMenus=$homeMenus, selectedBranch=${selectedBranchState.value}")
 
     Column(
         modifier = Modifier
@@ -456,14 +441,6 @@ fun HomeScreenContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
                 Spacer(modifier = Modifier.height(10.dp))
-//                Text(
-//                    stringResource(R.string.hello),
-//                    modifier = Modifier.padding(horizontal = 20.dp),
-//                    color = Primary,
-//                    fontSize = 22.sp,
-//                    fontWeight = FontWeight.Bold
-//                )
-//                Spacer(modifier = Modifier.height(10.dp))
 
                 Box(
                     modifier = Modifier
@@ -485,7 +462,9 @@ fun HomeScreenContent(
                                 tint = Primary
                             )
                             Text(
-                                text = if (!status) stringResource(R.string.delevery_to) else stringResource(R.string.pickup_from),
+                                text = if (!status) stringResource(R.string.delevery_to) else stringResource(
+                                    R.string.pickup_from
+                                ),
                                 modifier = Modifier.padding(horizontal = 10.dp),
                                 color = Secondry,
                                 fontSize = 15.sp,
@@ -508,8 +487,7 @@ fun HomeScreenContent(
                                     } else {
                                         navToMap()
                                     }
-                                }
-                            )
+                                })
                             IconButton(
                                 onClick = {
                                     if (myStatus == 1) {
@@ -517,8 +495,7 @@ fun HomeScreenContent(
                                     } else {
                                         navToMap()
                                     }
-                                },
-                                modifier = Modifier.size(20.dp)
+                                }, modifier = Modifier.size(20.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ArrowDropDown,
@@ -533,91 +510,92 @@ fun HomeScreenContent(
 
             item {
                 Spacer(modifier = Modifier.height(15.dp))
-                OffersList(
-                    offers = offers,
-                    navToMealDetais = { mealId ->
-                        val route = goToScreenMealDeataisWithString(mealId)
-                        navController.navigate(route)
-                    },
-                    navToMenu = {
-                        navController.navigate(Screen.MenueScreen.route)
-                    }
-                )
+                OffersList(offers = offers, navToMealDetais = { mealId ->
+                    val route = goToScreenMealDeataisWithString(mealId)
+                    navController.navigate(route)
+                }, navToMenu = {
+                    navController.navigate(Screen.MenueScreen.route)
+                })
             }
 
-            item {
-                Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        stringResource(R.string.meals),
-                        color = Secondry,
-                        fontSize = 17.sp,
-                        modifier = Modifier.padding(top = 10.dp),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+
 
             homeMenus.forEach { homeMenu ->
+
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Text(
+                            homeMenu.title,
+                            color = Secondry,
+                            fontSize = 17.sp,
+                            modifier = Modifier.padding(top = 10.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 item {
                     LazyRow(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(homeMenu.meals, key = { meal -> meal.id }) { meal ->
+
                             Box(
-                                modifier = Modifier.width(screenWidth)
+                                modifier = Modifier.width(itemWidth)
                             ) {
                                 FeaturedWedgits(
-                                    meal = meal,
-                                    onItemClick = {
+                                    meal = meal, onItemClick = {
                                         val route = goToScreenMealDetails(meal)
                                         navController.navigate(route)
-                                    }
-                                )
+                                    })
                             }
-                            Spacer(modifier = Modifier.width(5.dp))
+
 
                         }
                     }
+                    Spacer(modifier = Modifier.height(9.dp))
                 }
             }
 
-            item {
-                Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        stringResource(R.string.best_selling),
-                        color = Secondry,
-                        fontSize = 17.sp,
-                        modifier = Modifier.padding(top = 10.dp),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+            if (bestSelling.isNotEmpty()) {
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.best_selling),
+                            color = Secondry,
+                            fontSize = 17.sp,
+                            modifier = Modifier.padding(top = 10.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
                 }
             }
 
             items(bestSelling, key = { meal -> meal.id }) { meal ->
                 FeaturedWedgits(
-                    meal = meal,
-                    onItemClick = {
+                    meal = meal, onItemClick = {
                         val route = goToScreenMealDetails(meal)
                         navController.navigate(route)
-                    }
-                )
+                    })
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            item {
-                Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        stringResource(R.string.offers),
-                        color = Secondry,
-                        fontSize = 17.sp,
-                        modifier = Modifier.padding(top = 10.dp),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+            if (ads.isNotEmpty()) {
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.offers),
+                            color = Secondry,
+                            fontSize = 17.sp,
+                            modifier = Modifier.padding(top = 10.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
                 }
             }
 
@@ -627,12 +605,10 @@ fun HomeScreenContent(
                 ) {
                     items(ads, key = { meal -> meal.id }) { meal ->
                         AdsWdegit(
-                            meal = meal,
-                            onItemClick = {
+                            meal = meal, onItemClick = {
                                 val route = goToScreenMealDeataisWithString(meal.mealId ?: "")
                                 navController.navigate(route)
-                            }
-                        )
+                            })
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -641,149 +617,3 @@ fun HomeScreenContent(
     }
 }
 
-@Composable
-fun NoDeliveryDialogHome(
-    onPickUp: () -> Unit,
-    onChangeLocation: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = { },
-        title = {
-            Text(
-                stringResource(R.string.no_delivery_available),
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        },
-        confirmButton = {
-            TextButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    onChangeLocation()
-                    HomeObject.updateStatus(1)
-                }
-            ) {
-                Text(
-                    stringResource(R.string.change_Location),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color(0xFFFCB203)
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = {
-                onPickUp()
-                HomeObject.updateStatus(1)
-            }) {
-                Text(
-                    stringResource(R.string.pick_up),
-                    color = Color(0xFFF15A25),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-            }
-        },
-        containerColor = Color.White
-    )
-}
-
-@Composable
-fun PickupBranchDialog(
-    branches: List<Branch>,
-    currentBranchId: Int,
-    onBranchSelected: (Branch) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedBranch by remember { mutableStateOf<Branch?>(null) }
-
-    LaunchedEffect(currentBranchId, branches) {
-        if (branches.isNotEmpty()) {
-            selectedBranch = branches.find { it.id == currentBranchId } ?: branches[0]
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_pickup),
-                contentDescription = "Pickup Icon",
-                tint = Color.Black,
-                modifier = Modifier.size(48.dp)
-            )
-        },
-        title = {
-            Text(
-                text = "استلام من الفرع",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        },
-        text = {
-            Column {
-                Divider(color = Color.LightGray, thickness = 1.dp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { expanded = true }
-                        .background(Color.White)
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = selectedBranch?.title ?: "",
-                        color = if (selectedBranch == null) Color.Gray else Color.Black,
-                        fontSize = 16.sp
-                    )
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                        contentDescription = "Dropdown",
-                        tint = Color(0xFFF15A25)
-                    )
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    if (branches.isEmpty()) {
-                        DropdownMenuItem(
-                            text = { Text("No branches available") },
-                            onClick = { expanded = false }
-                        )
-                    } else {
-                        branches.forEach { branch ->
-                            DropdownMenuItem(
-                                text = { Text(branch.title) },
-                                onClick = {
-                                    selectedBranch = branch
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            CustomButton(
-                onClick = {
-                    selectedBranch?.let { onBranchSelected(it) }
-                    onDismiss()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.complete_order),
-            )
-        },
-        containerColor = Color.White
-    )
-}

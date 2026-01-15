@@ -150,10 +150,10 @@ fun ClickableProfileImage(
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
-                .data(imageUri ?: R.drawable.test_food)
+                .data(imageUri ?: R.drawable.hadramout_logo)
                 .crossfade(true)
-                .error(R.drawable.test_food)
-                .placeholder(R.drawable.test_food)
+                .error(R.drawable.hadramout_logo)
+                .placeholder(R.drawable.hadramout_logo)
                 .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil.request.CachePolicy.ENABLED)
                 .build(),

@@ -155,8 +155,8 @@ fun OrderItem(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(meal.mealImage)
                     .crossfade(true)
-                    .error(R.drawable.test_food)
-                    .placeholder(R.drawable.test_food)
+                    .error(R.drawable.hadramout_logo)
+                    .placeholder(R.drawable.hadramout_logo)
                     .build(),
                 contentDescription = "Meal image ",
                 modifier = Modifier
