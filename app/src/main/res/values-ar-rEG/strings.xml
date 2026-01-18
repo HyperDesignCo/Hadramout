@@ -174,4 +174,5 @@
     <string name="VAT">Vat</string>
     <string name="service_charge_cost">Service charge cost</string>
     <string name="please_note_minumm_charge_is">"الرجاء العلم ان الحد الادني للطلب هو "</string>
+    <string name="categories">الاقسام</string>
 </resources>

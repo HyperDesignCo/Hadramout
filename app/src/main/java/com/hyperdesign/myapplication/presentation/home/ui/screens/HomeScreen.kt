@@ -519,6 +519,21 @@ fun HomeScreenContent(
             }
 
 
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                        Spacer(modifier = Modifier.height(15.dp))
+                        Text(
+                            stringResource(R.string.categories),
+                            color = Secondry,
+                            fontSize = 17.sp,
+                            modifier = Modifier.padding(top = 10.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+
+
 
             homeMenus.forEach { homeMenu ->
 
