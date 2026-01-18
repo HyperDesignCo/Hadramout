@@ -56,6 +56,17 @@ class MapViewModel(
         sessionToken = AutocompleteSessionToken.newInstance()
     }
 
+    fun isFirstLaunch(): Boolean {
+        return sharedPreferences.getBoolean("isFirstLaunch", true)
+    }
+
+    fun setFirstLaunchComplete() {
+        sharedPreferences.edit {
+            putBoolean("isFirstLaunch", false)
+        }
+    }
+
+
     fun searchPlaces(query: String) {
         if (query.length < 2) {
             _uiState.update { it.copy(predictions = emptyList()) }
@@ -199,6 +210,7 @@ class MapViewModel(
         sharedPreferences.edit {
             putFloat("latitude", latLng.latitude.toFloat())
             putFloat("longitude", latLng.longitude.toFloat())
+            putBoolean("isFirstLaunch", false)
         }
         Log.d("MapViewModel", "Saved location: lat=${latLng.latitude}, lng=${latLng.longitude}")
     }
@@ -206,17 +218,16 @@ class MapViewModel(
     fun getSavedLocation(): LatLng? {
         val lat = sharedPreferences.getFloat("latitude", Float.MIN_VALUE).toDouble()
         val lng = sharedPreferences.getFloat("longitude", Float.MIN_VALUE).toDouble()
-        return try {
-            if (lat != Float.MIN_VALUE.toDouble() && lng != Float.MIN_VALUE.toDouble() &&
-                lat in -90.0..90.0 && lng in -180.0..180.0) {
-                LatLng(lat, lng)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Log.e("MapViewModel", "Invalid saved location format: lat=$lat, lng=$lng", e)
-            null
+
+        if (lat == Float.MIN_VALUE.toDouble() || lng == Float.MIN_VALUE.toDouble()) {
+            return null
         }
+
+        if (lat !in -90.0..90.0 || lng !in -180.0..180.0) {
+            return null
+        }
+
+        return LatLng(lat, lng)
     }
 
     fun updateErrorState(error: String) {
