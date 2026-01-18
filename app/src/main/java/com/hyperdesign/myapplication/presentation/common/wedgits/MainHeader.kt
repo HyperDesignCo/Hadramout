@@ -36,12 +36,12 @@ fun MainHeader(
     height: Int = 140,
     showTitle: Boolean = false,
     showStatus: Boolean = false,
-    onClickChangStatus: (Boolean) -> Unit = {},
-    myStatus: Int? = null,
-    makePickup: Boolean = false,
-    goToMap: () -> Unit = {}
+    onClickChangStatus: (Boolean) -> Unit = {}, // Updated to pass the new status
+    myStatus:Int?=null,
+    makePickup: Boolean =false,
+    goToMap:()->Unit={}
 ) {
-    var statusState by remember { mutableStateOf(myStatus != 0) }
+    var statusState by remember { mutableStateOf(if(myStatus==0)false else true) }
     var showDialog by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.height(height.dp)) {
@@ -125,112 +125,115 @@ fun MainHeader(
                             }
                         }
                     }
-                }
+                    if (showStatus) {
+                        Row(
+                            modifier = Modifier
+                                .padding(end = 5.dp, top = 15.dp)
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .clickable {
+                                    showDialog = true // Show dialog on click
+                                },
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
 
-                // Pickup / Delivery Status
-                if (showStatus) {
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 8.dp, end = 16.dp)
-                            .clickable { showDialog = true },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = painterResource(
-                                if (makePickup || !statusState) R.drawable.ic_pickup
-                                else R.drawable.delivery
-                            ),
-                            contentDescription = null,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = if (makePickup || !statusState)
-                                stringResource(R.string.pick_up)
-                            else
-                                stringResource(R.string.delivery),
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                                painter = if(makePickup==true) painterResource(R.drawable.delivery) else  if (!statusState) painterResource(R.drawable.ic_pickup) else painterResource(R.drawable.delivery),
+                                contentDescription = ""
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(if(makePickup==true) stringResource(R.string.delivery) else if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery), color = Color.White)
+                        }
                     }
                 }
             }
         }
 
-        // Logo at Bottom Center
         if (showLogo) {
             Image(
                 painter = painterResource(R.drawable.hadramout_logo),
-                contentDescription = "Logo",
+                contentDescription = "Hadramout Logo",
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-                    .size(90.dp),
+                    .size(100.dp),
                 contentScale = ContentScale.Fit
             )
         }
 
-        // Confirmation Dialog
+        // Custom-designed Dialog
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                containerColor = Color.White,
-                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .background(Color.White, RoundedCornerShape(16.dp))
+                    .padding(16.dp),
                 title = {
-                    Image(painter = painterResource(R.drawable.warning), contentDescription = null)
+                    Image(
+                        painter = painterResource(R.drawable.warning),
+                        contentDescription = ""
+
+                    )
                 },
                 text = {
                     Text(
                         text = stringResource(
                             R.string.are_you_sure_you_want_to_change_to,
-                            if (makePickup || !statusState) stringResource(R.string.pick_up)
-                            else stringResource(R.string.delivery)
+                            if(makePickup==true)stringResource(R.string.delivery) else if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery)
                         ),
-                        textAlign = TextAlign.Center,
-                        color = Color.Gray,
                         fontSize = 16.sp,
-                        modifier = Modifier.fillMaxWidth()
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
                     )
                 },
                 confirmButton = {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Row(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(), horizontalArrangement =Arrangement.SpaceBetween ) {
                         Text(
-                            text = if (makePickup || !statusState)
-                                stringResource(R.string.pick_up)
-                            else
-                                stringResource(R.string.delivery),
-                            color = Secondry,
+                            text = if(makePickup==true)stringResource(R.string.delivery) else if (!statusState) stringResource(R.string.pick_up) else stringResource(R.string.delivery),
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
+                            color = Secondry,
                             modifier = Modifier
                                 .clickable {
-                                    if (makePickup) {
-                                        statusState = false
+                                    if(makePickup==true){
+                                        statusState=false
                                         onClickChangStatus(false)
                                         goToMap()
-                                    } else {
+                                        showDialog = false
+                                    }else{
                                         statusState = !statusState
-                                        onClickChangStatus(statusState)
-                                        if (!statusState) goToMap()
+                                        onClickChangStatus(statusState) // Pass the new status
+                                        if (!statusState){
+                                            goToMap()
+                                        }
+                                        showDialog = false
                                     }
-                                    showDialog = false
+
                                 }
-                                .padding(12.dp)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
+
                         Text(
                             text = stringResource(R.string.no),
-                            color = Secondry,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
+                            color = Secondry,
                             modifier = Modifier
                                 .clickable { showDialog = false }
-                                .padding(12.dp)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
+
                 },
-                dismissButton = {}
+                dismissButton = {
+
+                },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(16.dp),
+                tonalElevation = 8.dp
             )
         }
     }
