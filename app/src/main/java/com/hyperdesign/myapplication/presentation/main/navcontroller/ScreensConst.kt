@@ -39,4 +39,6 @@ object ScreensConst {
     const val MAP_SCREEN = "map_screen"
 
     const val DATE_TIME_PICKER ="date_time_picker"
+
+    const val POINTS_SCREEN ="points_screen"
 }

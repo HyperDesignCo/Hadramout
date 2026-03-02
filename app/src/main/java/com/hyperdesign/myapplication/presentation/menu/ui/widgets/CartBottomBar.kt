@@ -23,18 +23,19 @@ import java.util.Locale
 
 @Composable
 fun CartBottomBar(
-    priceItems: String,          // primary price (items only)
-    deliveryPrice: String,       // delivery cost
-    totalPrice: String,          // final total
+    priceItems: String,
+    deliveryPrice: String,
+    totalPrice: String,
     buttonText: String,
     vatCost:String?,
     serviceCharcheCost:String?,
     deliveryTime: String,
-    pickUpStatus: Boolean,       // true → show delivery rows
+    pickUpStatus: Boolean,
+    walletDiscount: Double = 0.0,
+    couponDiscount: Double = 0.0,
     onPayClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // RTL detection (layout direction + locale fallback)
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl ||
             Locale.getDefault().language == "ar"
 
@@ -52,27 +53,22 @@ fun CartBottomBar(
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ── Price (items) ───────────────────────
             PriceRow(
                 label = stringResource(R.string.price),
                 value = priceItems
             )
 
-            // ── Delivery (only when pickUpStatus == true) ─────
             if (pickUpStatus) {
-//                Spacer(modifier = Modifier.height(8.dp))
                 PriceRow(
                     label = stringResource(R.string.delivery),
                     value = deliveryPrice
                 )
             }
 
-            // ── Delivery time (only when pickUpStatus == true) ─
             if (pickUpStatus) {
-//                Spacer(modifier = Modifier.height(8.dp))
                 PriceRow(
                     label = stringResource(R.string.delivery_time),
-                    value = stringResource(R.string.minutes, deliveryTime)
+                    value = deliveryTime
                 )
             }
 
@@ -90,9 +86,22 @@ fun CartBottomBar(
                 )
             }
 
+            if (walletDiscount > 0.0) {
+                PriceRow(
+                    label = stringResource(R.string.wallet_discount),
+                    value = "-$walletDiscount",
+                    valueColor = Color(0xFF4CAF50)
+                )
+            }
 
+            if (couponDiscount > 0.0) {
+                PriceRow(
+                    label = stringResource(R.string.coupon_discount),
+                    value = "-$couponDiscount",
+                    valueColor = Color(0xFF4CAF50)
+                )
+            }
 
-            // ── Divider & final total ───────────────────────
             Spacer(modifier = Modifier.height(8.dp))
             Divider(
                 modifier = Modifier
@@ -123,7 +132,6 @@ fun CartBottomBar(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // ── Pay button ───────────────────────────────────
             CustomButton(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -135,9 +143,8 @@ fun CartBottomBar(
     }
 }
 
-/** Small reusable row for a label-value pair */
 @Composable
-private fun PriceRow(label: String, value: String) {
+private fun PriceRow(label: String, value: String, valueColor: Color = Secondry) {
     Row(
         modifier = Modifier
             .padding(horizontal = 10.dp)
@@ -153,7 +160,7 @@ private fun PriceRow(label: String, value: String) {
             text = value,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
-            color = Secondry
+            color = valueColor
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.hyperdesign.myapplication.domain.repo.profile
 
 import com.hyperdesign.myapplication.domain.Entity.AboutUsResponseEntity
+import com.hyperdesign.myapplication.domain.Entity.GetProfileEntity
 import com.hyperdesign.myapplication.domain.Entity.AddToCartResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.AddressEntity
 import com.hyperdesign.myapplication.domain.Entity.AreaResponseEntity
@@ -37,5 +38,7 @@ interface ProfileRepo {
     suspend fun updateAddress(updateAddressRequest: updateAddressRequest):AddToCartResponseEntity
 
     suspend fun editProfile(editProfileRequest: EditProfileRequest): EditProfileResponseEntity
+
+    suspend fun getProfile(): GetProfileEntity
 
 }

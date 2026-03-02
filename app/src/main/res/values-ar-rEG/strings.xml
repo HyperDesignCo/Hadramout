@@ -83,7 +83,7 @@
     <string name="payment_type">نوع الدفع</string>
     <string name="pay_with_card_or_cash">يمكنك الدفع نقداً أو باستخدام بطاقة ائتمان/خصم</string>
     <string name="enter_your_request_here">أدخل طلبك هنا</string>
-    <string name="your_order_has_been_sent_successfully">تم إرسال طلبك بنجاح</string>
+    <string name="your_order_has_been_sent_successfully">لقد تم إرسال طلبك بنجاح</string>
     <string name="new_orders">الطلبات الجديدة</string>
     <string name="previous_orders">الطلبات السابقة</string>
     <string name="reorder">إعادة الطلب</string>
@@ -175,4 +175,16 @@
     <string name="service_charge_cost">Service charge cost</string>
     <string name="please_note_minumm_charge_is">"الرجاء العلم ان الحد الادني للطلب هو "</string>
     <string name="categories">الاقسام</string>
+    <string name="points">نقاطي</string>
+    <string name="used_points">النقاط المستخدمة</string>
+    <string name="eraned_pointes">النقاط المكتسبة</string>
+    <string name="transactions_points">معاملات النقاط</string>
+    <string name="get_points_every_day">احصل علي المزيد من النقاط يوميا .</string>
+    <string name="point">%1$s نقطة</string>
+    <string name="points_count">رصيد النقاط</string>
+    <string name="points_value">Point value</string>
+    <string name="wallet_discount">خصم النقاط</string>
+    <string name="use_points_free_meal">استخدم نقاطك للحصول علي وجبة مجانية</string>
+    <string name="use_points_for_discount">استخدم نقاطك (%1$s) للحصول علي خصم (%2$s جنية)</string>
+    <string name="coupon_discount">خصم كوبون</string>
 </resources>

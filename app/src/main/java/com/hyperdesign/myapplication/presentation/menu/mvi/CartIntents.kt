@@ -14,4 +14,5 @@ sealed class CartIntents {
 
     data class OnCkeckCopounClick(val cartId:String,val promoCode:String):CartIntents()
     data class DecreaseCartItemQuantity(val cartId:String,val itemId :String,val newQuantity:String):CartIntents()
+    data class AddWalletDiscount(val cartId: String): CartIntents()
 }

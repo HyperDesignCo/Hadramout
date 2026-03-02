@@ -5,6 +5,7 @@ import com.hyperdesign.myapplication.data.dto.AboutUsResponseDTO
 import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
 import com.hyperdesign.myapplication.data.dto.AddressDto
 import com.hyperdesign.myapplication.data.dto.AreaResponseDto
+import com.hyperdesign.myapplication.data.dto.GetProfileResponseDTO
 import com.hyperdesign.myapplication.data.dto.EditProfileResponse
 import com.hyperdesign.myapplication.data.dto.OrdersResponseDTO
 import com.hyperdesign.myapplication.data.dto.PagesResponseDto
@@ -218,5 +219,18 @@ class ProfileApiServicesImpl(
         }
     }
 
+
+    override suspend fun getProfile(): GetProfileResponseDTO {
+        return try {
+            val response = client.get("get_profile") {
+                contentType(ContentType.Application.Json)
+            }.body<GetProfileResponseDTO>()
+            Log.d("ProfileApiServices", "getProfile Response: $response")
+            response
+        } catch (e: Exception) {
+            Log.e("ProfileApiServices", "getProfileFailed: ${e.message}")
+            throw e
+        }
+    }
 
 }

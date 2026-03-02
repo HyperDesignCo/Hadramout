@@ -48,6 +48,7 @@ data class SubChoiceDto(
 
 
 data class AddToCartResponseDto(
-    val message: String
+    val message: String,
+    val cart: CartDto? = null
 )
 

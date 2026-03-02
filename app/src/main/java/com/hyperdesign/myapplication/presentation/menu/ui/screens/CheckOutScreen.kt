@@ -56,7 +56,6 @@ fun CheckOutScreen(
     val checkState by checkOutViewModel.checkOutState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // ---------- UI state ----------
     var subRegion by remember { mutableStateOf("") }
     var allAddress by remember { mutableStateOf("") }
     var selectedPayment by remember { mutableStateOf("") }
@@ -69,14 +68,12 @@ fun CheckOutScreen(
     var justAdded by remember { mutableStateOf(false) }
     var deliveryStatus by remember { mutableStateOf(false) }
 
-    // Scroll-driven expand/collapse state
     var isBottomBarExpanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     var showEnterAddressDialoge by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
-    /* -------------------- REFRESH ON SCREEN RESUME -------------------- */
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -110,7 +107,7 @@ fun CheckOutScreen(
             }
     }
 
-    /* -------------------- TIME PICKER RETURN -------------------- */
+
     val returnedDeliveryTime by navController.currentBackStackEntry
         ?.savedStateHandle
         ?.getStateFlow<String?>("selected_delivery_time", null)
@@ -122,7 +119,6 @@ fun CheckOutScreen(
         }
     }
 
-    /* -------------------- ADDRESS ADDED FLAG -------------------- */
     val addressAdded by navController.currentBackStackEntry
         ?.savedStateHandle
         ?.getStateFlow<Boolean>("address_added", false)
@@ -138,12 +134,10 @@ fun CheckOutScreen(
         }
     }
 
-    /* -------------------- INITIAL DATA -------------------- */
     LaunchedEffect(Unit) {
         checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick(loginViewModel.tokenManager.getBranchId().toString()))
     }
 
-    /* -------------------- STATE UPDATE -------------------- */
     LaunchedEffect(checkState) {
         val address = checkState.address?.addresses?.firstOrNull()
         subRegion = listOfNotNull(
@@ -199,10 +193,9 @@ fun CheckOutScreen(
         deliveryStatus = checkState.checkOutResponse?.cart?.pickUpStatus == "0"
     }
 
-    /* -------------------- FINISH ORDER MESSAGE -------------------- */
     LaunchedEffect(finishOrderMsg) {
         if (finishOrderMsg.isNotEmpty()) {
-            if (finishOrderMsg == "Your order has been sent successfully") {
+            if (finishOrderMsg == context.getString(R.string.your_order_has_been_sent_successfully)) {
                 Toast.makeText(context, context.getString(R.string.your_order_has_been_sent_successfully), Toast.LENGTH_SHORT).show()
                 navController.navigate(Screen.MyOrders.route) {
                     popUpTo(Screen.CartScreen.route) { inclusive = true }
@@ -213,7 +206,6 @@ fun CheckOutScreen(
         }
     }
 
-    /* -------------------- UI -------------------- */
     Box(modifier = Modifier.fillMaxSize()) {
         addressList?.let { addresses ->
             CheckOutScreenContent(
@@ -251,8 +243,6 @@ fun CheckOutScreen(
                     val screenType = "checkOutScreen"
                     navController.navigate(Screen.MapScreen.route.replace("{navigateFrom}", screenType))
 
-//                    val screenType = "checkOutScreen"
-//                    navController.navigate(Screen.AllAddressesScreen.route.replace("{screenType}", screenType))
                 },
                 pickUpStatus = deliveryStatus,
                 branchName = if (loginViewModel.tokenManager.getLanguage() == "en")
@@ -363,7 +353,6 @@ fun CheckOutScreenContent(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Header
         CheckOutHeader(
             userName = name,
             phoneNumber = phoneNumber,
@@ -371,7 +360,6 @@ fun CheckOutScreenContent(
             onBackPressed = onBackedBresed
         )
 
-        // Scrollable content
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -506,13 +494,13 @@ fun CheckOutScreenContent(
 
 
             item {
-                Spacer(modifier = Modifier.height(30.dp))  // Add more space before CartBottomBar
+                Spacer(modifier = Modifier.height(30.dp))
 
                 CartBottomBar(
                     priceItems = state.checkOutResponse?.cart?.primaryPrice?.toString() ?: "0.00",
                     deliveryPrice = state.checkOutResponse?.cart?.deliveryCost?.toString()
                         ?: "0.00",
-                    totalPrice = state.checkOutResponse?.cart?.totalPrice?.toString() ?: "0.00",
+                    totalPrice = state.checkOutResponse?.cart?.netPrice?.toString() ?: "0.00",
                     buttonText = stringResource(R.string.checkout),
                     deliveryTime = deliveryTime,
                     onPayClick = {
@@ -531,7 +519,6 @@ fun CheckOutScreenContent(
                     serviceCharcheCost = serviceChargeCost
                 )
 
-//                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

@@ -68,6 +68,7 @@ fun SubChoiceDto.toDomain(): SubChoiceEntity {
 
 fun AddToCartResponseDto.toDomain(): AddToCartResponseEntity {
     return AddToCartResponseEntity(
-        message = message
+        message = message,
+        cart = cart?.toEntity()
     )
 }

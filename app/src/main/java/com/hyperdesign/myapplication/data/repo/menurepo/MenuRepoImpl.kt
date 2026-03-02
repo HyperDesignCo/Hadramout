@@ -15,6 +15,7 @@ import com.hyperdesign.myapplication.domain.Entity.MealDetailsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.MenueResponse
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
+import com.hyperdesign.myapplication.domain.Entity.AddWalletDiscountRequest
 import com.hyperdesign.myapplication.domain.repo.menu.MenuRepo
 
 class MenuRepoImpl(
@@ -65,6 +66,11 @@ class MenuRepoImpl(
 
     override suspend fun finishOrder(finishOrderRequest: FinishOrderRequest): AddToCartResponseEntity {
         val response = menuApiServices.finishOrder(finishOrderRequest)
+        return response.toDomain()
+    }
+
+    override suspend fun addWalletDiscount(addWalletDiscountRequest: AddWalletDiscountRequest): AddToCartResponseEntity {
+        val response = menuApiServices.addWalletDiscount(addWalletDiscountRequest)
         return response.toDomain()
     }
 }

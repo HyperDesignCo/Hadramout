@@ -13,6 +13,7 @@ import com.hyperdesign.myapplication.domain.Entity.MealDetailsResponseEntity
 import com.hyperdesign.myapplication.domain.Entity.MenueResponse
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
+import com.hyperdesign.myapplication.domain.Entity.AddWalletDiscountRequest
 
 interface MenuRepo {
     suspend fun getMenus(branchId: Int,pickUpStatus:Int): MenueResponse
@@ -31,4 +32,6 @@ interface MenuRepo {
     suspend fun checkout(checkOutRequest: CheckOutRequest): CheckOutResponseEntity
 
     suspend fun finishOrder(finishOrderRequest: FinishOrderRequest):AddToCartResponseEntity
+    
+    suspend fun addWalletDiscount(addWalletDiscountRequest: AddWalletDiscountRequest): AddToCartResponseEntity
 }

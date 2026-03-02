@@ -13,6 +13,7 @@ import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.FinishOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
+import com.hyperdesign.myapplication.domain.Entity.AddWalletDiscountRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -174,5 +175,19 @@ class MenuApiServicesImpl(
         }
     }
 
+    override suspend fun addWalletDiscount(addWalletDiscountRequest: AddWalletDiscountRequest): AddToCartResponseDto {
+        return try {
+            val response = client.post("addwalletdiscount") {
+                contentType(ContentType.Application.Json)
+                setBody(addWalletDiscountRequest)
+            }.body<AddToCartResponseDto>()
+            Log.d("MenuApiServices", "addWalletDiscount Response for cartId=${addWalletDiscountRequest.cartId}: $response")
+
+            response
+        }catch (e: Exception){
+            Log.e("MenuApiServices", "addWalletDiscount failed for cartId=${addWalletDiscountRequest.cartId}: ${e.message}")
+            throw e
+        }
+    }
 
 }

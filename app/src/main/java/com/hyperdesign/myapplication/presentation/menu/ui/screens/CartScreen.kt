@@ -15,8 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -93,7 +97,11 @@ fun CartScreen(
     }
 
     LaunchedEffect(Unit) {
-        cartViewModel.handleIntent(CartIntents.GetCart(cartViewModel.tokenManager.getBranchId() ?: 0))
+        cartViewModel.handleIntent(
+            CartIntents.GetCart(
+                cartViewModel.tokenManager.getBranchId() ?: 0
+            )
+        )
     }
 
     LaunchedEffect(cartMealState) {
@@ -137,6 +145,7 @@ fun CartScreen(
                 cartMeals = cartMeals,
                 cartId = cartId,
                 copoun = cartMealState.copoun,
+                couponLoading = cartMealState.isLoading,
                 onCheckCoponClick = {
                     cartViewModel.handleIntent(
                         CartIntents.OnCkeckCopounClick(
@@ -145,8 +154,15 @@ fun CartScreen(
                         )
                     )
                 },
+                copounCost = cartMealState.showCartDate?.cart?.couponCost ?: 0.0,
                 onCopounChange = { cartViewModel.handleIntent(CartIntents.OnChangeCopounText(it)) },
                 copounMessage = cartMealState.copounMessage,
+                totalPoints = cartMealState.showCartDate?.totalPoints ?: 0.0,
+                totalBalance = cartMealState.showCartDate?.totalBalance ?: 0.0,
+                walletDiscount = cartMealState.showCartDate?.cart?.walletDiscount ?: 0.0,
+                onAddWalletDiscount = {
+                    cartViewModel.handleIntent(CartIntents.AddWalletDiscount(cartId))
+                },
                 onChangeQuantity = { quantity ->
                     cartViewModel.handleIntent(CartIntents.OnChangeQuantity(quantity))
                 },
@@ -174,28 +190,30 @@ fun CartScreen(
                     )
                 },
                 onGoToCheckOutScreen = {
-                    if(cartViewModel.tokenManager.getUserData()?.authenticated=="authenticated"){
-                        cartMealState.showCartDate?.minimumCharge?.toInt()?.let {minumnmCharge->
-                            cartMealState.showCartDate?.cart?.totalPrice?.toInt()?.let { totalPrice ->
-                                if (totalPrice < minumnmCharge){
+                    if (cartViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
+                        cartMealState.showCartDate?.minimumCharge?.toInt()?.let { minumnmCharge ->
+                            cartMealState.showCartDate?.cart?.totalPrice?.toInt()
+                                ?.let { totalPrice ->
+                                    if (totalPrice < minumnmCharge) {
 
-                                    displayMinimumCharge = true
-                                }else{
-                                    navController.navigate("${Screen.CheckOutScreen.route}?deliveryTime=${cartMealState.showCartDate?.deliveryTime.orEmpty()}")
+                                        displayMinimumCharge = true
+                                    } else {
+                                        navController.navigate("${Screen.CheckOutScreen.route}?deliveryTime=${cartMealState.showCartDate?.deliveryTime.orEmpty()}")
 
+                                    }
                                 }
-                            }
                         }
 
-                    }else{
-                        cartViewModel.showAuthDialoge.value =true
+                    } else {
+                        cartViewModel.showAuthDialoge.value = true
 
                     }
 
                 },
-                deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString() ?: "0.00",
+                deliveryPrice = cartMealState.showCartDate?.cart?.deliveryCost?.toString()
+                    ?: "0.00",
                 totalItems = cartMealState.showCartDate?.cart?.primaryPrice?.toString() ?: "0",
-                totalPrice = cartMealState.showCartDate?.cart?.totalPrice?.toString() ?: "0.00",
+                totalPrice = cartMealState.showCartDate?.cart?.netPrice?.toString() ?: "0.00",
                 pickUpStatus = deliveryStatus,
                 deliveryTime = cartMealState.showCartDate?.deliveryTime.orEmpty(),
                 upSellingMeals = cartMealState.showCartDate?.upSellingMeal.orEmpty(),
@@ -209,22 +227,22 @@ fun CartScreen(
             )
         }
 
-        if(showAuthDialoge){
+        if (showAuthDialoge) {
             ShowAuthentaionDialge(onNavToLogin = {
                 navController.navigate(Screen.LoginInScreen.route) {
                     popUpTo(navController.graph.id) {
                         inclusive = true
                     }
                 }
-                cartViewModel.showAuthDialoge.value =false
+                cartViewModel.showAuthDialoge.value = false
 
             }, onCancel = {
-                cartViewModel.showAuthDialoge.value =false
+                cartViewModel.showAuthDialoge.value = false
 
             })
         }
 
-        if (displayMinimumCharge){
+        if (displayMinimumCharge) {
             Box(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -237,9 +255,13 @@ fun CartScreen(
                         }
                     },
                     cancel = {
-                        displayMinimumCharge=false
+                        displayMinimumCharge = false
                     },
-                    minmumCharge = "${cartMealState.showCartDate?.minimumCharge.orEmpty()} ${stringResource(R.string.egy2)}"
+                    minmumCharge = "${cartMealState.showCartDate?.minimumCharge.orEmpty()} ${
+                        stringResource(
+                            R.string.egy2
+                        )
+                    }"
                 )
 
             }
@@ -266,6 +288,11 @@ fun CartScreenContent(
     totalPrice: String,
     copoun: String,
     copounMessage: String? = null,
+    couponLoading: Boolean = false,
+    totalPoints: Double,
+    totalBalance: Double,
+    walletDiscount: Double,
+    onAddWalletDiscount: () -> Unit,
     onCopounChange: (String) -> Unit,
     onChangeQuantity: (String) -> Unit,
     onDeleteItem: (String, String) -> Unit,
@@ -279,8 +306,9 @@ fun CartScreenContent(
     deliveryTime: String,
     onNavToMealDetails: (String) -> Unit,
     listState: androidx.compose.foundation.lazy.LazyListState,
-    serviceChargeCost:String?,
-    vatCost:String?
+    serviceChargeCost: String?,
+    copounCost:Double,
+    vatCost: String?
 ) {
     val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
@@ -401,7 +429,61 @@ fun CartScreenContent(
 
             item {
                 Spacer(modifier = Modifier.height(8.dp))
+            }
 
+            if (totalPoints > 0.0) {
+                item {
+                    val walletDiscountActive = walletDiscount > 0.0
+                    val isFreeMealEligible = totalBalance > (totalPrice.toDoubleOrNull() ?: 0.0)
+
+                    val textToDisplay = if (isFreeMealEligible) {
+                        stringResource(R.string.use_points_free_meal)
+                    } else {
+                        stringResource(R.string.use_points_for_discount, totalPoints, totalBalance)
+                    }
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5EFEF)), // matching previous light backgrounds
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = textToDisplay,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.Black,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                           Switch(
+                                checked = walletDiscountActive,
+                                onCheckedChange = { checked ->
+                                    if (checked && !walletDiscountActive) {
+                                        onAddWalletDiscount()
+                                    }
+                                },
+                                enabled = !walletDiscountActive,
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Secondry,
+                                    uncheckedThumbColor = Color.White,
+                                    checkedTrackColor = Color.Yellow
+                                )
+                            )
+                        }
+                    }
+                }
             }
 
             item {
@@ -418,7 +500,8 @@ fun CartScreenContent(
                     onClickCoponCkeck = onCheckCoponClick,
                     copoun = copoun,
                     onCopounChange = onCopounChange,
-                    copounMessage = copounMessage
+                    copounMessage = copounMessage,
+                    isLoading = couponLoading
                 )
             }
 
@@ -434,7 +517,9 @@ fun CartScreenContent(
                     pickUpStatus = pickUpStatus,
                     deliveryTime = deliveryTime,
                     vatCost = vatCost,
-                    serviceCharcheCost = serviceChargeCost
+                    serviceCharcheCost = serviceChargeCost,
+                    walletDiscount = walletDiscount,
+                    couponDiscount =copounCost
                 )
             }
 

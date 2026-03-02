@@ -42,7 +42,8 @@ data class SubChoiceEntity(
 )
 
 data class AddToCartResponseEntity(
-    val message: String
+    val message: String,
+    val cart: CartEntity? = null
 )
 
 data class AddOrderRequest(
@@ -53,5 +54,5 @@ data class AddOrderRequest(
     @SerializedName("size_id") val sizeId: String,
     @SerializedName("choices") val choices: Map<String, List<String>>,
     @SerializedName("device_id") val deviceId :String,
-    @SerializedName("pickup_status") val pickupStatus :String
+    @SerializedName("order_type") val orderType :String
 )

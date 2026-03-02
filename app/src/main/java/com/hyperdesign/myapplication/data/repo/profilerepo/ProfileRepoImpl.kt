@@ -101,4 +101,9 @@ class ProfileRepoImpl(
 
         return response.toEntity()
     }
+
+    override suspend fun getProfile():GetProfileEntity {
+        val response = profileApiServices.getProfile()
+        return response.toEntity()
+    }
 }

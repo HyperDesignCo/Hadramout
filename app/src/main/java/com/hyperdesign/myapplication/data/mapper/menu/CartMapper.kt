@@ -16,8 +16,9 @@ fun CartResponseDto.toEntity(): CartResponseEntity {
         deliveryTime = deliveryTime ?:"",
         upSellingMeal = upSellingMeal?.map { it.toDomain() },
         crossSellingMeal = crossSellingMeal?.map { it.toDomain() },
-        minimumCharge = minimumCharge
-
+        minimumCharge = minimumCharge,
+        totalPoints = totalPoints?.toDoubleOrNull() ?: 0.0,
+        totalBalance = totalBalance?.toDoubleOrNull() ?: 0.0
     )
 }
 
@@ -49,7 +50,8 @@ fun CartDto.toEntity(): CartEntity {
         specialRequests = specialRequests.orEmpty(),
         freeDelivery = freeDelivery == "1",
         cartMeals = cartMeals?.map { it.toEntity() } ?: emptyList(),
-        pickUpStatus = pickupStatus
+        pickUpStatus = pickupStatus,
+        walletDiscount = walletDiscount?.toDoubleOrNull() ?: 0.0
     )
 }
 

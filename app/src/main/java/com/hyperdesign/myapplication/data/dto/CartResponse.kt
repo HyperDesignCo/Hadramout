@@ -12,7 +12,11 @@ data class CartResponseDto(
     val upSellingMeal: List<SellingMealDto>?=null,
     val message: String,
     @SerializedName("minimum_charge")
-    val minimumCharge:String?=null
+    val minimumCharge:String?=null,
+    @SerializedName("total_points")
+    val totalPoints:String?=null,
+    @SerializedName("total_balance")
+    val totalBalance:String?=null
 )
 
 
@@ -58,6 +62,8 @@ data class CartDto(
     val cartMeals: List<CartMealDto>?,
     @SerializedName("pickup_status")
     val pickupStatus:String,
+    @SerializedName("wallet_discount")
+    val walletDiscount:String?
 )
 
 data class CartMealDto(

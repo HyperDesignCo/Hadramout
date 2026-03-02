@@ -22,6 +22,7 @@ import com.hyperdesign.myapplication.presentation.menu.mvi.MenuViewModel
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.AddressesViewModel
 import com.hyperdesign.myapplication.presentation.profile.addresses.mvi.UpdateAddressViewModel
 import com.hyperdesign.myapplication.presentation.profile.common.mvi.ProfileViewModel
+import com.hyperdesign.myapplication.presentation.profile.points.ui.viewmodel.PointsViewModel
 import com.hyperdesign.myapplication.presentation.profile.myorders.mvi.MyOrderViewModel
 import com.hyperdesign.myapplication.presentation.profile.settings.common.mvi.SettingViewModel
 import com.hyperdesign.myapplication.presentation.profile.settings.common.mvi.StaticPagesViewModel
@@ -60,7 +61,7 @@ val viewModels = module {
 
     viewModel<MealDetailsViewModel> { MealDetailsViewModel(get(), get(), get(),get()) }
 
-    viewModel<CartViewModel> { CartViewModel(get(), get(), get(), get(), get(),get()) }
+    viewModel<CartViewModel> { CartViewModel(get(), get(), get(), get(), get(), get(),get()) }
 
     viewModel<ForgetPasswordViewModel> { ForgetPasswordViewModel(get(), get(), get()) }
 
@@ -89,4 +90,6 @@ val viewModels = module {
     viewModel<MapViewModel> {
         MapViewModel(get(), get(), get(),get(),get(),androidContext())
     }
+
+    viewModel<PointsViewModel> { PointsViewModel(get()) }
 }

@@ -22,19 +22,21 @@ class CheckOutViewModel(
     private val checkOutUseCase: CheckOutUseCase,
     private val finishOrderUseCase: FinishOrderUseCase,
     val tokenManager: TokenManager
-): ViewModel() {
+) : ViewModel() {
 
     private var _checkOutState = MutableStateFlow(CheckOutStateModel())
-    val checkOutState : StateFlow<CheckOutStateModel> =_checkOutState.asStateFlow()
+    val checkOutState: StateFlow<CheckOutStateModel> = _checkOutState.asStateFlow()
 
     init {
         getAllAddress()
     }
-    fun handleIntents(intent: CheckOutIntents){
-        when(intent){
+
+    fun handleIntents(intent: CheckOutIntents) {
+        when (intent) {
             is CheckOutIntents.GetAddress -> {
                 getAllAddress()
             }
+
             is CheckOutIntents.OnChangeSpecialRequest -> {
                 _checkOutState.value = _checkOutState.value.copy(
                     specialRequest = intent.text
@@ -47,102 +49,133 @@ class CheckOutViewModel(
             }
 
             is CheckOutIntents.ChangePaymentMethodId -> {
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     paymentMethodId = intent.paymentMethodId
                 )
             }
-            is CheckOutIntents.FinishOrder ->{
-                finishOrder(intent.paymentMethodId,intent.cartId,intent.userId,intent.is_preorder,intent.order_time,intent.order_date)
+
+            is CheckOutIntents.FinishOrder -> {
+                finishOrder(
+                    intent.paymentMethodId,
+                    intent.cartId,
+                    intent.userId,
+                    intent.is_preorder,
+                    intent.order_time,
+                    intent.order_date
+                )
             }
         }
     }
 
-    private fun finishOrder(paymentMethodId: String,cartId: String, userId: String,is_preorder: String,order_time: String,order_date: String) {
-        _checkOutState.value=_checkOutState.value.copy(
+    private fun finishOrder(
+        paymentMethodId: String,
+        cartId: String,
+        userId: String,
+        is_preorder: String,
+        order_time: String,
+        order_date: String
+    ) {
+        _checkOutState.value = _checkOutState.value.copy(
             isLoading = true
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val finishOrderRequest = FinishOrderRequest(cartId = cartId, paymentMethodId=paymentMethodId, specialRequest = _checkOutState.value.specialRequest, userAddressId = userId, isPreOrder = is_preorder, orderTime = order_time, orderDate = order_date)
+                val finishOrderRequest = FinishOrderRequest(
+                    cartId = cartId,
+                    sendFrom = "android",
+                    paymentMethodId = paymentMethodId,
+                    specialRequest = _checkOutState.value.specialRequest,
+                    userAddressId = userId,
+                    isPreOrder = is_preorder,
+                    orderTime = order_time,
+                    orderDate = order_date
+                )
                 val response = finishOrderUseCase(finishOrderRequest)
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
                     finishOrderResponse = response
                 )
 
 
             }.onSuccess {
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
 
                     )
 
             }.onFailure {
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
                     errorMsg = it.message
                 )
-                Log.e("faild finishOrder",it.message.toString())
+                Log.e("faild finishOrder", it.message.toString())
             }
         }
     }
 
     private fun checkOut(branchId: String) {
-        _checkOutState.value=_checkOutState.value.copy(
+        _checkOutState.value = _checkOutState.value.copy(
             isLoading = true
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val checkOutRequest = CheckOutRequest(branch_id = branchId, area_id = tokenManager.getAreaId().toString())
+                val checkOutRequest = CheckOutRequest(
+                    branch_id = branchId,
+                    order_type = if (tokenManager.getStatus().toString() == "1") {
+                        "pickup"
+                    } else {
+                        "delivery"
+                    }
+                )
                 val response = checkOutUseCase(checkOutRequest)
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
-                    checkOutResponse =response
+                    checkOutResponse = response
                 )
 
 
             }.onSuccess {
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
 
                     )
 
             }.onFailure {
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
                     errorMsg = it.message
                 )
-                Log.e("faild checkOut",it.message.toString())
+                Log.e("faild checkOut", it.message.toString())
             }
         }
 
     }
 
     private fun getAllAddress() {
-        _checkOutState.value=_checkOutState.value.copy(
+        _checkOutState.value = _checkOutState.value.copy(
             isLoading = false
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val response = getAllAddressUseCase()
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
                     address = response
                 )
 
 
             }.onSuccess {
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
 
-                )
+                    )
 
             }.onFailure {
-                _checkOutState.value=_checkOutState.value.copy(
+                _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
                     errorMsg = it.message
                 )
-                Log.e("faild to get address",it.message.toString())
+                Log.e("faild to get address", it.message.toString())
             }
         }
 

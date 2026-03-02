@@ -12,6 +12,7 @@ import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.FinishOrderRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
+import com.hyperdesign.myapplication.domain.Entity.AddWalletDiscountRequest
 
 interface MenuApiServices {
     suspend fun getMenus(branchId: Int,pikupStatus:Int): MenuResponseDto
@@ -32,4 +33,5 @@ interface MenuApiServices {
 
     suspend fun finishOrder(finishOrderRequest: FinishOrderRequest):AddToCartResponseDto
 
+    suspend fun addWalletDiscount(addWalletDiscountRequest: AddWalletDiscountRequest): AddToCartResponseDto
 }

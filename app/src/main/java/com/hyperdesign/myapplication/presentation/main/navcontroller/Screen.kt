@@ -19,49 +19,49 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
     object SignUpScreen : Screen(ScreensConst.Sign_Up_Screen)
     object CartScreen : Screen(ScreensConst.Cart_Screen)
 
-    object MyOrders :Screen(ScreensConst.MY_ORDERS)
-    object CheckOutScreen :  Screen(ScreensConst.CHECK_OUT_SCREEN)
+    object MyOrders : Screen(ScreensConst.MY_ORDERS)
+    object CheckOutScreen : Screen(ScreensConst.CHECK_OUT_SCREEN)
     object MealDetailsScreen : Screen("${ScreensConst.MEAL_DETAILS_SCREEN}/{mealJson}")
     object ResetPasswordScreen : Screen("${ScreensConst.RESET_PASSWORD_SCREEN}/{email}")
     object HomeScreen : Screen(ScreensConst.HOME_SCREEN, R.string.home, R.drawable.home)
     object ProfileScreen : Screen(ScreensConst.PROFILE_SCREEN, R.string.profile, R.drawable.profile)
     object MenueScreen : Screen(ScreensConst.MENUE_SCREEN, R.string.menu, R.drawable.menu)
 
-    object SettingsScreen:Screen(ScreensConst.SETTINGS_SCREEN)
+    object SettingsScreen : Screen(ScreensConst.SETTINGS_SCREEN)
 
-    object WhoAreWeScreen:Screen(ScreensConst.WHO_ARE_WE_SCREEN)
+    object WhoAreWeScreen : Screen(ScreensConst.WHO_ARE_WE_SCREEN)
 
-    object ContactUsScreen:Screen(ScreensConst.CONTACT_US_SCREEN)
+    object ContactUsScreen : Screen(ScreensConst.CONTACT_US_SCREEN)
 
-    object ReturnPolicyScreen:Screen(ScreensConst.RETURN_POLICY_SCREEN)
+    object ReturnPolicyScreen : Screen(ScreensConst.RETURN_POLICY_SCREEN)
 
-    object TermesAndConditionsScreen:Screen(ScreensConst.TERMS_AND_CONDITIONS_SCREEN)
+    object TermesAndConditionsScreen : Screen(ScreensConst.TERMS_AND_CONDITIONS_SCREEN)
 
-    object PrivacyPolicyScreen:Screen(ScreensConst.PRIVACY_POLICY_SCREEN)
+    object PrivacyPolicyScreen : Screen(ScreensConst.PRIVACY_POLICY_SCREEN)
 
-    object AllAddressesScreen: Screen("${ScreensConst.ALL_ADDRESSES_SCREEN}/{screenType}")
+    object AllAddressesScreen : Screen("${ScreensConst.ALL_ADDRESSES_SCREEN}/{screenType}")
 
-    object UpdateAddressScreen:Screen("${ScreensConst.UPDATE_ADDRESS_SCREEN}/{addressId}")
+    object UpdateAddressScreen : Screen("${ScreensConst.UPDATE_ADDRESS_SCREEN}/{addressId}")
 
-    object UserProfileScreen: Screen(ScreensConst.USER_PROFILE_SCREEN)
+    object UserProfileScreen : Screen(ScreensConst.USER_PROFILE_SCREEN)
 
     object MapScreen : Screen("${ScreensConst.MAP_SCREEN}/{navigateFrom}")
-    object DateTimePicker :Screen(ScreensConst.DATE_TIME_PICKER)
+    object DateTimePicker : Screen(ScreensConst.DATE_TIME_PICKER)
+    object PointsScreen : Screen(ScreensConst.POINTS_SCREEN)
 }
-
-
 
 
 fun goToScreenMealDetails(meal: Meal): String {
     val json = Uri.encode(Gson().toJson(meal))
     return "${ScreensConst.MEAL_DETAILS_SCREEN}/$json"
 }
-fun goToScreenMealDeataisWithString(mealId:String): String{
+
+fun goToScreenMealDeataisWithString(mealId: String): String {
     val json = Uri.encode(Gson().toJson(mealId))
     return "${ScreensConst.MEAL_DETAILS_SCREEN}/$json"
 }
 
-fun goToVerifyScreen(verify: ForgetPasswordModeEntity,email:String):String{
+fun goToVerifyScreen(verify: ForgetPasswordModeEntity, email: String): String {
     val json = Uri.encode(Gson().toJson(verify))
     val email = email
     return "${ScreensConst.Verify_Screen}/$json/$email"

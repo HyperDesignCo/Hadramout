@@ -83,7 +83,11 @@ class MealDetailsViewModel(
                     sizeId = intent.sizeId,
                     quantity = intent.quantity,
                     choices = intent.choices,
-                    pickupStatus = intent.pickupStatus,
+                    orderType = if (intent.pickupStatus=="1"){
+                        "pickup"
+                    }else{
+                        "delivery"
+                    },
                     areaId = tokenManager.getAreaId().toString(),
                     deviceId = if (tokenManager.getUserData()?.authenticated=="authenticated"){
                         ""

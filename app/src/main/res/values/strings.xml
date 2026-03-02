@@ -173,4 +173,16 @@
     <string name="service_charge_cost">Service charge cost</string>
     <string name="please_note_minumm_charge_is">"Please note that the minimum order amount is "</string>
     <string name="categories">Categories</string>
+    <string name="points">Points</string>
+    <string name="used_points">النقاط المستخدمة</string>
+    <string name="eraned_pointes">النقاط المكتسبة</string>
+    <string name="transactions_points">معاملات النقاط</string>
+    <string name="get_points_every_day">احصل علي المزيد من النقاط يوميا .</string>
+    <string name="point">%1$s نقطة</string>
+    <string name="points_count">رصيد النقاط</string>
+    <string name="points_value">Points value</string>
+    <string name="wallet_discount">Points discount</string>
+    <string name="use_points_free_meal">Use your points to get a free meal</string>
+    <string name="use_points_for_discount">Use your points (%1$s) to get a discount of (%2$s EGP)</string>
+    <string name="coupon_discount">Coupon discount</string>
 </resources>

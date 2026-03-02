@@ -5,6 +5,7 @@ import com.hyperdesign.myapplication.data.dto.AddToCartResponseDto
 import com.hyperdesign.myapplication.data.dto.AddressDto
 import com.hyperdesign.myapplication.data.dto.AreaResponseDto
 import com.hyperdesign.myapplication.data.dto.EditProfileResponse
+import com.hyperdesign.myapplication.data.dto.GetProfileResponseDTO
 import com.hyperdesign.myapplication.data.dto.OrdersResponseDTO
 import com.hyperdesign.myapplication.data.dto.PagesResponseDto
 import com.hyperdesign.myapplication.data.dto.RegionResponseDto
@@ -39,5 +40,6 @@ interface ProfileApiServices {
 
     suspend fun editProfile(editProfileRequest: EditProfileRequest): EditProfileResponse
 
+    suspend fun getProfile(): GetProfileResponseDTO
 
 }

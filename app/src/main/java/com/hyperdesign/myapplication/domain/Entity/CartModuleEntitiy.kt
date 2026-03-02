@@ -5,20 +5,23 @@ import com.google.gson.annotations.SerializedName
 data class CartResponseEntity(
     val cart: CartEntity?, // Made nullable to handle cart=null
     val message: String?,
-    val crossSellingMeal : List<SellingMealEntity>?=null,
-    val upSellingMeal: List<SellingMealEntity>?=null,
-    val deliveryTime: String?=null,
-    val minimumCharge :String?=null
+    val crossSellingMeal: List<SellingMealEntity>? = null,
+    val upSellingMeal: List<SellingMealEntity>? = null,
+    val deliveryTime: String? = null,
+    val minimumCharge: String? = null,
+    val totalPoints: Double = 0.0,
+    val totalBalance: Double = 0.0
 )
 
 data class SellingMealEntity(
-    val id :String,
-    val title:String,
-    val description:String,
-    val image:String,
-    val price:String,
-    val discountPrice:String?=null
+    val id: String,
+    val title: String,
+    val description: String,
+    val image: String,
+    val price: String,
+    val discountPrice: String? = null
 )
+
 data class CartEntity(
     val id: String,
     val serviceCharge: Double,
@@ -36,7 +39,8 @@ data class CartEntity(
     val specialRequests: String,
     val freeDelivery: Boolean,
     val cartMeals: List<CartMealEntity>,
-    val pickUpStatus:String
+    val pickUpStatus: String,
+    val walletDiscount: Double
 )
 
 data class CartMealEntity(
@@ -62,6 +66,9 @@ data class ShowCartRequest(
     val branchId: String,
     @SerializedName("area_id")
     val areaId: String,
+
+    @SerializedName("order_type")
+    val orderType: String,
     @SerializedName("device_id")
     val deviceId: String
 
@@ -75,7 +82,7 @@ data class DeleteCartRequest(
     @SerializedName("area_id")
     val areaId: String,
     @SerializedName("branch_id")
-    val branchId:String
+    val branchId: String
 )
 
 data class UpdateCartItemQuantityRequest(
@@ -88,7 +95,7 @@ data class UpdateCartItemQuantityRequest(
     @SerializedName("area_id")
     val areaId: String,
     @SerializedName("branch_id")
-    val branchId:String
+    val branchId: String
 )
 
 data class CheckCouponRequest(
@@ -100,9 +107,12 @@ data class CheckCouponRequest(
 
 data class ReorderRequest(
     @SerializedName("order_id")
-    val orderId:String,
+    val orderId: String,
     @SerializedName("area_id")
     val areaId: String,
+)
 
-
+data class AddWalletDiscountRequest(
+    @SerializedName("cart_id")
+    val cartId: String
 )

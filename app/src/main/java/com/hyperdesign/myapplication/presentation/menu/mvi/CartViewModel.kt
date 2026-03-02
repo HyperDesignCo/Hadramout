@@ -8,14 +8,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyperdesign.myapplication.data.local.TokenManager
+import com.hyperdesign.myapplication.domain.Entity.AddWalletDiscountRequest
 import com.hyperdesign.myapplication.domain.Entity.CheckCouponRequest
 import com.hyperdesign.myapplication.domain.Entity.DeleteCartRequest
 import com.hyperdesign.myapplication.domain.Entity.ShowCartRequest
 import com.hyperdesign.myapplication.domain.Entity.UpdateCartItemQuantityRequest
 import com.hyperdesign.myapplication.domain.usecase.cart.CheckCouponUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.DeleteCartItemUseCase
-import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.UpdateCartItemQuantityUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.AddWalletDiscountUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,28 +30,39 @@ class CartViewModel(
     private val deleteCartItemUseCase: DeleteCartItemUseCase,
     private val updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
     private val checkCouponUseCase: CheckCouponUseCase,
+    private val addWalletDiscountUseCase: AddWalletDiscountUseCase,
     val tokenManager: TokenManager,
     private @ApplicationContext val context: Context
-): ViewModel() {
+) : ViewModel() {
 
     private var _cartState = MutableStateFlow(MenuStateModel())
     val cartState: StateFlow<MenuStateModel> = _cartState.asStateFlow()
 
     var showAuthDialoge = mutableStateOf(false)
 
-    fun handleIntent(intent: CartIntents){
-        when(intent){
+    fun handleIntent(intent: CartIntents) {
+        when (intent) {
             is CartIntents.GetCart -> {
                 showCart(intent.branchId)
             }
-            is CartIntents.deleteCartItem ->{
+
+            is CartIntents.deleteCartItem -> {
                 deleteCartItem(
                     intent.cartId,
                     intent.itemId
                 )
             }
-            is CartIntents.DecreaseCartItemQuantity -> decreaseCartIntemQuantity(intent.cartId, intent.itemId)
-            is CartIntents.IncreaseCartItemQuantity -> increaseCartIntemQuantity(intent.cartId, intent.itemId)
+
+            is CartIntents.DecreaseCartItemQuantity -> decreaseCartIntemQuantity(
+                intent.cartId,
+                intent.itemId
+            )
+
+            is CartIntents.IncreaseCartItemQuantity -> increaseCartIntemQuantity(
+                intent.cartId,
+                intent.itemId
+            )
+
             is CartIntents.OnChangeQuantity -> {
                 _cartState.value = _cartState.value.copy(
                     quantity = intent.newQuantity
@@ -62,7 +75,34 @@ class CartViewModel(
                     copoun = intent.text
                 )
             }
+
             is CartIntents.OnCkeckCopounClick -> ckeckCopounCode(intent.cartId)
+            is CartIntents.AddWalletDiscount -> addWalletDiscount(intent.cartId)
+        }
+    }
+
+    private fun addWalletDiscount(cartId: String) {
+        _cartState.value = _cartState.value.copy(
+            isLoading = true
+        )
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val request = AddWalletDiscountRequest(cartId = cartId)
+                addWalletDiscountUseCase(request)
+            }.onSuccess { response ->
+                _cartState.value = _cartState.value.copy(
+                    isLoading = false,
+                    showCartDate = response.cart?.let { _cartState.value.showCartDate?.copy(cart = it) }
+                        ?: _cartState.value.showCartDate
+                )
+                showCart(tokenManager.getBranchId() ?: 0)
+            }.onFailure {
+                _cartState.value = _cartState.value.copy(
+                    isLoading = false,
+                    errorMessage = it.message
+                )
+                Log.e("CartViewModel", "Error fetching addWalletDiscount: ${it.message}")
+            }
         }
     }
 
@@ -73,27 +113,28 @@ class CartViewModel(
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val checkCopoanRequest = CheckCouponRequest(cartId = cartId, promoCode = _cartState.value.copoun)
-                val response = checkCouponUseCase.invoke(checkCopoanRequest)
+                val checkCopoanRequest =
+                    CheckCouponRequest(cartId = cartId, promoCode = _cartState.value.copoun)
+                checkCouponUseCase.invoke(checkCopoanRequest)
+
+
+            }.onSuccess { response ->
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,
                     AddToCartData = response,
-                    copounMessage = response.message
-                )
-
-            }.onSuccess {
-                _cartState.value = _cartState.value.copy(
-                    isLoading = false,
+                    copounMessage = response.message,
+                    showCartDate = response.cart?.let { _cartState.value.showCartDate?.copy(cart = it) }
+                        ?: _cartState.value.showCartDate
                 )
 
             }.onFailure {
-                _cartState.value = _cartState.value.copy(
-                    isLoading = false,
-                    errorMessage = it.message
-                )
-                Log.e("CartViewModel", "Error fetching cart: ${it.message}")
+                    _cartState.value = _cartState.value.copy(
+                        isLoading = false,
+                        errorMessage = it.message
+                    )
+                    Log.e("CartViewModel", "Error fetching cart: ${it.message}")
 
-            }
+                }
         }
 
 
@@ -102,8 +143,14 @@ class CartViewModel(
     private fun increaseCartIntemQuantity(cartId: String, itemId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val quantity = _cartState.value.quantity.toInt()+1
-                val updateRequest = UpdateCartItemQuantityRequest(branchId = tokenManager.getBranchId().toString(),cartId = cartId, itemId = itemId, newQuantity = quantity.toString(), areaId = tokenManager.getAreaId().toString())
+                val quantity = _cartState.value.quantity.toInt() + 1
+                val updateRequest = UpdateCartItemQuantityRequest(
+                    branchId = tokenManager.getBranchId().toString(),
+                    cartId = cartId,
+                    itemId = itemId,
+                    newQuantity = quantity.toString(),
+                    areaId = tokenManager.getAreaId().toString()
+                )
                 val response = updateCartItemQuantityUseCase.invoke(updateRequest)
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,
@@ -128,11 +175,17 @@ class CartViewModel(
     private fun decreaseCartIntemQuantity(cartId: String, itemId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val quantity = _cartState.value.quantity.toInt()-1
-                if (quantity<1){
-                    deleteCartItem(cartId,itemId)
+                val quantity = _cartState.value.quantity.toInt() - 1
+                if (quantity < 1) {
+                    deleteCartItem(cartId, itemId)
                 }
-                val updateRequest = UpdateCartItemQuantityRequest(branchId= tokenManager.getBranchId().toString(),cartId = cartId, itemId = itemId, newQuantity = quantity.toString(), areaId = tokenManager.getAreaId().toString())
+                val updateRequest = UpdateCartItemQuantityRequest(
+                    branchId = tokenManager.getBranchId().toString(),
+                    cartId = cartId,
+                    itemId = itemId,
+                    newQuantity = quantity.toString(),
+                    areaId = tokenManager.getAreaId().toString()
+                )
                 val response = updateCartItemQuantityUseCase.invoke(updateRequest)
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,
@@ -154,20 +207,25 @@ class CartViewModel(
         }
     }
 
-    private fun deleteCartItem(cartId:String,itemId:String){
+    private fun deleteCartItem(cartId: String, itemId: String) {
         _cartState.value = _cartState.value.copy(
             isLoading = true
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val deleteRequest = DeleteCartRequest(cartId = cartId, itemId = itemId, branchId = tokenManager.getBranchId().toString(), areaId =tokenManager.getAreaId().toString() )
+                val deleteRequest = DeleteCartRequest(
+                    cartId = cartId,
+                    itemId = itemId,
+                    branchId = tokenManager.getBranchId().toString(),
+                    areaId = tokenManager.getAreaId().toString()
+                )
                 val response = deleteCartItemUseCase.invoke(deleteRequest)
                 _cartState.value = _cartState.value.copy(
                     isLoading = false,
                     showCartDate = response
                 )
 
-                tokenManager.saveCartNum(response.cart?.cartMeals?.size?:0)
+                tokenManager.saveCartNum(response.cart?.cartMeals?.size ?: 0)
 
 
             }.onSuccess {
@@ -183,17 +241,24 @@ class CartViewModel(
             }
         }
     }
+
     private fun showCart(branchId: Int) {
         _cartState.value = _cartState.value.copy(
             isLoading = true
         )
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val showCartRequest = ShowCartRequest(branchId.toString(), areaId = tokenManager.getAreaId().toString(),
-                    deviceId = if (tokenManager.getUserData()?.authenticated=="authenticated"){
+                val showCartRequest = ShowCartRequest(
+                    branchId = branchId.toString(), areaId = tokenManager.getAreaId().toString(),
+                    deviceId = if (tokenManager.getUserData()?.authenticated == "authenticated") {
                         ""
-                    }else{
-                        "android-${getAndroidId(context =context )}"
+                    } else {
+                        "android-${getAndroidId(context = context)}"
+                    },
+                    orderType = if (tokenManager.getStatus().toString() == "1") {
+                        "pickup"
+                    } else {
+                        "delivery"
                     }
                 )
                 val response = showCartUseCase.invoke(showCartRequest)
@@ -201,7 +266,7 @@ class CartViewModel(
                     isLoading = false,
                     showCartDate = response
                 )
-                tokenManager.saveCartNum(response.cart?.cartMeals?.size?:0)
+                tokenManager.saveCartNum(response.cart?.cartMeals?.size ?: 0)
 
             }.onSuccess {
                 _cartState.value = _cartState.value.copy(
@@ -215,8 +280,6 @@ class CartViewModel(
                 Log.e("CartViewModel", "Error fetching cart: ${it.message}")
             }
         }
-
-
 
 
     }

@@ -48,7 +48,8 @@ data class PaymentMethodEntity(
 
 data class CheckOutRequest(
     val branch_id:String,
-    val area_id:String
+    val order_type:String,
+
 )
 
 data class FinishOrderRequest(
@@ -65,5 +66,7 @@ data class FinishOrderRequest(
     @SerializedName("order_time")
     val orderTime:String,
     @SerializedName("order_date")
-    val orderDate:String
+    val orderDate:String,
+    @SerializedName("send_from")
+    val sendFrom:String
 )

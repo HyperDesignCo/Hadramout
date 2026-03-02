@@ -11,6 +11,7 @@ import com.hyperdesign.myapplication.domain.usecase.cart.DeleteCartItemUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.FinishOrderUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.ShowCartUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.UpdateCartItemQuantityUseCase
+import com.hyperdesign.myapplication.domain.usecase.cart.AddWalletDiscountUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.CheckLocationUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetAllAddressUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetBranchesUseCase
@@ -31,6 +32,7 @@ import com.hyperdesign.myapplication.domain.usecase.profile.ShowAddressUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.ShowMyOrdersUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.ShowStaticPageUseCase
 import com.hyperdesign.myapplication.domain.usecase.profile.UpdateAddressUseCase
+import com.hyperdesign.myapplication.domain.usecase.profile.GetProfileUseCase
 import io.ktor.http.auth.HttpAuthHeader
 import org.koin.dsl.module
 
@@ -158,6 +160,14 @@ val useCasesModule = module {
     }
     single<CheckLocationUseCase> {
         CheckLocationUseCase(get())
+    }
+
+    single<GetProfileUseCase> {
+        GetProfileUseCase(get())
+    }
+
+    single<AddWalletDiscountUseCase> {
+        AddWalletDiscountUseCase(get())
     }
 
     }

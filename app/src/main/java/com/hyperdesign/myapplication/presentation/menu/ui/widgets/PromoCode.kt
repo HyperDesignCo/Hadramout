@@ -38,7 +38,13 @@ import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PromoCodeInput(onClickCoponCkeck:()->Unit,copoun:String, copounMessage:String?=null, onCopounChange:(String)->Unit,) {
+fun PromoCodeInput(
+    onClickCoponCkeck: () -> Unit,
+    copoun: String,
+    copounMessage: String? = null,
+    onCopounChange: (String) -> Unit,
+    isLoading: Boolean = false
+) {
 
     Column() {
         Row(
@@ -69,13 +75,14 @@ fun PromoCodeInput(onClickCoponCkeck:()->Unit,copoun:String, copounMessage:Strin
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
                     cursorColor = Color.Black
-                )
+                ),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Button(
-                onClick = { onClickCoponCkeck() },
+                onClick = { if (!isLoading) onClickCoponCkeck() },
                 modifier = Modifier
                     .size(100.dp, 48.dp)
                     .background(
@@ -87,7 +94,8 @@ fun PromoCodeInput(onClickCoponCkeck:()->Unit,copoun:String, copounMessage:Strin
                         ), shape = RoundedCornerShape(24.dp)
                     ),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(24.dp),
+                enabled = !isLoading
             ) {
                 Text(
                     text = stringResource(R.string.add),

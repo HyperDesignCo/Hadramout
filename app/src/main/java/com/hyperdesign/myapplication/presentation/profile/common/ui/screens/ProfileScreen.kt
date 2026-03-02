@@ -68,6 +68,12 @@ fun ProfileScreen() {
             } else {
                 userProfileViewModel.showAuthDialoge.value = true
             }
+        }, onGoToPointsScreen = {
+            if (userProfileViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
+                navController.navigate(Screen.PointsScreen.route)
+            } else {
+                userProfileViewModel.showAuthDialoge.value = true
+            }
         }
     )
 
@@ -96,7 +102,8 @@ fun ProfileScreenContent(
     onBackPressed: () -> Unit,
     onGoToAllAddressesScreen: () -> Unit,
     onGoToMyOrdersScreen: () -> Unit,
-    onGotToSettingsScreen: () -> Unit
+    onGotToSettingsScreen: () -> Unit,
+    onGoToPointsScreen: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -164,6 +171,12 @@ fun ProfileScreenContent(
                 title = stringResource(R.string.update_your_profile),
                 icon = R.drawable.user_profile_edit,
                 onClick = { onGotUserProfileScren() }
+            )
+
+            SettingItem(
+                title = stringResource(R.string.points),
+                icon = R.drawable.img_points,
+                onClick = { onGoToPointsScreen() }
             )
 
             SettingItem(
