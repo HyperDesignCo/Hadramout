@@ -98,6 +98,7 @@ class CheckOutViewModel(
 
 
             }.onSuccess {
+                tokenManager.saveCartNum(0)
                 _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
 

@@ -48,12 +48,7 @@ class RegisterViewModel(
 
     fun onIntentEvent(intent: RegisterIntents) {
         when (intent) {
-            is RegisterIntents.EmailChanged -> {
-                _state.value = _state.value.copy(
-                    email = intent.email,
-                    emailError = null
-                )
-            }
+
             is RegisterIntents.PasswordChanged -> {
                 _state.value = _state.value.copy(
                     password = intent.password,
@@ -89,13 +84,12 @@ class RegisterViewModel(
     }
 
     private fun submitData() {
-        val emailResult = validateText.execute(_state.value.email)
         val passwordResult = validateText.execute(_state.value.password)
         val nameResult = validateText.execute(_state.value.userName)
         val mobileResult = validatePhoneNumber.execute(_state.value.phoneNumber)
         val confirmPasswordResult = validateText.execute(_state.value.confirmPassword)
 
-        val hasError = listOf(emailResult, passwordResult, nameResult, mobileResult, confirmPasswordResult).any { !it.successful }
+        val hasError = listOf(passwordResult, nameResult, mobileResult, confirmPasswordResult).any { !it.successful }
 
         val passwordMatchError = if (_state.value.password != _state.value.confirmPassword && _state.value.confirmPassword.isNotEmpty()) {
             context.getString(R.string.confirm_password_is_should_be_same_as_password)
@@ -103,7 +97,6 @@ class RegisterViewModel(
             null
         }
 
-        val emailError = if (emailResult.successful) null else context.getString(R.string.enter_email_address)
         val passwordError = if (passwordResult.successful) null else context.getString(R.string.enter_your_password)
         val userNameError = if (nameResult.successful) null else context.getString(R.string.enter_your_name)
         val phoneNumberError = if (mobileResult.successful) null else context.getString(R.string.invalid_phone_number_format)
@@ -111,7 +104,6 @@ class RegisterViewModel(
 
         if (hasError || passwordMatchError != null) {
             _state.value = _state.value.copy(
-                emailError = emailError,
                 passwordError = passwordError,
                 userNameError = userNameError,
                 phoneNumberError = phoneNumberError,
@@ -124,7 +116,6 @@ class RegisterViewModel(
         // Set loading state on the main thread
         _state.value = _state.value.copy(
             isLoading = true,
-            emailError = null,
             passwordError = null,
             userNameError = null,
             phoneNumberError = null,
@@ -136,7 +127,6 @@ class RegisterViewModel(
             try {
                 val response = registerUseCase.invoke(
                     RegisterRequst(
-                        email = _state.value.email,
                         password = _state.value.password,
                         name = _state.value.userName,
                         mobile = _state.value.phoneNumber,

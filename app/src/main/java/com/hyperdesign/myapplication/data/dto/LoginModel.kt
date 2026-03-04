@@ -6,21 +6,21 @@ import com.google.gson.annotations.SerializedName
 
 data class LoginResponse(
     @SerializedName("access_token")
-    val accessToken: String,
+    val accessToken: String?=null,
     @SerializedName("token_type")
-    val tokenType: String,
-    val user : User,
-    val message : String,
+    val tokenType: String?=null,
+    val user : User?=null,
+    val message : String?=null,
 
 
 )
 
 data class User(
-    val id: Int,
-    val name : String,
-    val email : String,
-    val image : String,
-    val mobile : String,
-    val authenticated:String,
-    val balance:String
+    val id: Int?=null,
+    val name : String?=null,
+    val email : String?=null,
+    val image : String?=null,
+    val mobile : String?=null,
+    val authenticated:String?=null,
+    val balance:String?=null
 )

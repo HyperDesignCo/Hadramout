@@ -8,21 +8,21 @@ import com.hyperdesign.myapplication.domain.Entity.UserEntity
 
 fun LoginResponse.toLoginDomain(): LoginEntity {
     return LoginEntity(
-        accessToken = accessToken,
-        tokenType = tokenType,
-        user = user.toDomain(),
-        message = message
+        accessToken = accessToken.orEmpty(),
+        tokenType = tokenType.orEmpty(),
+        user = user?.toDomain() ?: UserEntity(id = 0, name = "", mobile = "", image = "", balance = "", email = "",authenticated = ""),
+        message = message.orEmpty()
     )
 }
 
 fun User.toDomain(): UserEntity {
     return UserEntity(
-        id = id,
-        name = name,
-        email = email,
-        image = image,
-        mobile = mobile,
-        authenticated=authenticated,
-        balance=balance
+        id = id?:0,
+        name = name.orEmpty(),
+        image = image.orEmpty(),
+        mobile = mobile.orEmpty(),
+        authenticated=authenticated.orEmpty(),
+        email = email.orEmpty(),
+        balance=balance.orEmpty()
     )
 }

@@ -10,7 +10,6 @@ data class RegisterModelEntity(
 )
 
 data class RegisterRequst(
-    val email: String,
     val password: String,
     val name: String,
     val mobile: String,

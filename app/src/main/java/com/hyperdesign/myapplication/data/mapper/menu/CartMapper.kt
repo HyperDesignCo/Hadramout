@@ -51,7 +51,8 @@ fun CartDto.toEntity(): CartEntity {
         freeDelivery = freeDelivery == "1",
         cartMeals = cartMeals?.map { it.toEntity() } ?: emptyList(),
         pickUpStatus = pickupStatus,
-        walletDiscount = walletDiscount?.toDoubleOrNull() ?: 0.0
+        walletDiscount = walletDiscount?.toDoubleOrNull() ?: 0.0,
+        orderType = orderType.orEmpty()
     )
 }
 

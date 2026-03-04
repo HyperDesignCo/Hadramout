@@ -6,8 +6,6 @@ data class RegisterModelState(
     val isLoading: Boolean = false,
     val userName: String = "",
     val userNameError: String? = null,
-    val email: String = "",
-    val emailError: String? = null,
     val phoneNumber: String = "",
     val phoneNumberError: String? = null,
     val password: String = "",

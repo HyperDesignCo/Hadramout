@@ -43,6 +43,7 @@ import java.net.URLDecoder
 
 val bottomNavScreens = listOf(
     Screen.HomeScreen,
+    Screen.CartScreen,
     Screen.MenueScreen,
     Screen.ProfileScreen
 )

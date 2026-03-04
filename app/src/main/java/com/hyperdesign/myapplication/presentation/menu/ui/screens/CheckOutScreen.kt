@@ -190,7 +190,7 @@ fun CheckOutScreen(
             justAdded = false
         }
 
-        deliveryStatus = checkState.checkOutResponse?.cart?.pickUpStatus == "0"
+        deliveryStatus = checkState.checkOutResponse?.cart?.orderType == "delivery"
     }
 
     LaunchedEffect(finishOrderMsg) {
@@ -377,30 +377,13 @@ fun CheckOutScreenContent(
 
             item {
                 if (pickUpStatus) {
-                    if (allAddress.isNotEmpty() && subRegion.isNotEmpty()) {
-                        ShowAddress(
-                            district = subRegion,
-                            addressDetails = allAddress,
-                            addressList = addressList,
-                            onAddressSelected = onAddressSelected
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        CustomButton(
-                            modifier = Modifier
-                                .padding(horizontal = 15.dp)
-                                .fillMaxWidth(),
-                            text = stringResource(R.string.add_new_address),
-                            onClick = onClickToAddNewAddress
-                        )
-                    } else {
-                        CustomButton(
-                            modifier = Modifier
-                                .padding(horizontal = 15.dp)
-                                .fillMaxWidth(),
-                            text = stringResource(R.string.add_new_address),
-                            onClick = onClickToAddNewAddress
-                        )
-                    }
+                    AddressSection(
+                        district = subRegion,
+                        addressDetails = allAddress,
+                        addressList = addressList,
+                        onAddressSelected = onAddressSelected,
+                        onClickToAddNewAddress = onClickToAddNewAddress
+                    )
                 } else {
                     showBranchDetails(
                         branchName = branchName,

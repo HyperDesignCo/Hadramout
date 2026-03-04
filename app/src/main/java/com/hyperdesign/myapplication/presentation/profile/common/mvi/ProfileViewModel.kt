@@ -64,7 +64,6 @@ class ProfileViewModel(
         _profileState.value = _profileState.value.copy(
             loading = false,
             nameState = tokenManager.getUserData()?.name ?: "",
-            emailState = tokenManager.getUserData()?.email ?: "",
             phoneNumber = tokenManager.getUserData()?.mobile ?: "",
             image = tokenManager.getUserData()?.image ?: ""
         )

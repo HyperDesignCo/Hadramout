@@ -12,5 +12,6 @@ data class HomeStateModel(
     val checkLocationResponseEntity: CheckLocationResponseEntity?=null,
     val lat:String="0",
     val lng:String="0",
-    val branchId : Int = 0
+    val branchId : Int = 0,
+    val cartNum: Int = 0
 )
