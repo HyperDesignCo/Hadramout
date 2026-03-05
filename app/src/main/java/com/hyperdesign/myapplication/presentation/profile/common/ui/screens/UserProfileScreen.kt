@@ -69,7 +69,7 @@ fun UserProfileScreen(profileViewModel: ProfileViewModel = koinViewModel()) {
     UserProfileScreenContent(
         profileState = profileState,
         onChangeName = { name -> profileViewModel.handleIntents(ProfileIntents.OnChangeName(name)) },
-        onChangeEmail = { email -> profileViewModel.handleIntents(ProfileIntents.OnChangeEmail(email)) },
+//        onChangeEmail = { email -> profileViewModel.handleIntents(ProfileIntents.OnChangeEmail(email)) },
         onChangePhone = { phone -> profileViewModel.handleIntents(ProfileIntents.OnChangePhone(phone)) },
         onImageSelected = { imageUri -> profileViewModel.handleIntents(ProfileIntents.OnChangeImage(imageUri)) },
         onUpdateData = { profileViewModel.handleIntents(ProfileIntents.UpdateDataClick) },
@@ -81,7 +81,7 @@ fun UserProfileScreen(profileViewModel: ProfileViewModel = koinViewModel()) {
 fun UserProfileScreenContent(
     profileState: ProfileState,
     onChangeName: (String) -> Unit,
-    onChangeEmail: (String) -> Unit,
+//    onChangeEmail: (String) -> Unit,
     onChangePhone: (String) -> Unit,
     onImageSelected: (String) -> Unit,
     onUpdateData: () -> Unit,
@@ -133,24 +133,24 @@ fun UserProfileScreenContent(
 
             Spacer(modifier = Modifier.height(25.dp))
 
-            Text(
-                text = stringResource(id = R.string.email_address),
-                color = Secondry,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-            CustomTextField(
-                value = profileState.emailState,
-                onValueChange = onChangeEmail,
-                textColor = Color.Black,
-                borderWidth = 2f,
-                placeholder = stringResource(R.string.enter_email_address),
-                modifier = Modifier.fillMaxWidth(),
-                keyboardType = androidx.compose.ui.text.input.KeyboardType.Email,
-//                enabled = !profileState.isUpdating
-            )
+//            Text(
+//                text = stringResource(id = R.string.email_address),
+//                color = Secondry,
+//                fontSize = 14.sp,
+//                fontWeight = FontWeight.Bold
+//            )
+//            CustomTextField(
+//                value = profileState.emailState,
+//                onValueChange = onChangeEmail,
+//                textColor = Color.Black,
+//                borderWidth = 2f,
+//                placeholder = stringResource(R.string.enter_email_address),
+//                modifier = Modifier.fillMaxWidth(),
+//                keyboardType = androidx.compose.ui.text.input.KeyboardType.Email,
+////                enabled = !profileState.isUpdating
+//            )
 
-            Spacer(modifier = Modifier.height(25.dp))
+//            Spacer(modifier = Modifier.height(25.dp))
 
             Text(
                 text = stringResource(id = R.string.phone_number),

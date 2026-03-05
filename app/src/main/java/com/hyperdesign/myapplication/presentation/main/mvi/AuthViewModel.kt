@@ -50,7 +50,7 @@ class AuthViewModel(
 //                    loading.value=true
 
                     val refreshTokenRequest = ForgetPasswordRequest(
-                        email = userData.mobile
+                        mobile = userData.mobile
                     )
                     val result = refreshTokenUseCase.invoke(refreshTokenRequest)
                     _authState.value = _authState.value.copy(

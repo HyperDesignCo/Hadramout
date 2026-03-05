@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
+import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutStateModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -294,7 +295,7 @@ private fun EmptyAddressCard(onClickToAddNewAddress: () -> Unit) {
             .fillMaxWidth()
             .border(
                 width = 1.5.dp,
-                color = Color(0xFFFF3D3D),
+                color = Secondry,
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable { onClickToAddNewAddress() },
@@ -309,9 +310,9 @@ private fun EmptyAddressCard(onClickToAddNewAddress: () -> Unit) {
         ) {
             // Pulsing location icon
             Icon(
-                imageVector = Icons.Default.AddLocation,
+                imageVector = Icons.Default.LocationOn,
                 contentDescription = null,
-                tint = Color(0xFFFF3D3D),
+                tint = Secondry,
                 modifier = Modifier
                     .size(48.dp)
                     .scale(scale)
@@ -323,7 +324,7 @@ private fun EmptyAddressCard(onClickToAddNewAddress: () -> Unit) {
                 text = stringResource(R.string.you_should_add_your_address_first),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFCC0000),
+                color = Secondry,
                 textAlign = TextAlign.Center
             )
 
@@ -333,7 +334,7 @@ private fun EmptyAddressCard(onClickToAddNewAddress: () -> Unit) {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFFF3D3D))
+                    .background(Secondry)
                     .clickable { onClickToAddNewAddress() }
                     .padding(horizontal = 24.dp, vertical = 10.dp)
             ) {

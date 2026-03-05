@@ -106,7 +106,7 @@ class LoginViewModel(
             try {
                 val response = loginUseCase.invoke(
                     LoginRequest(
-                        email = _state.value.phoneNumber,
+                        mobile = _state.value.phoneNumber,
                         password = _state.value.password,
                         deviceToken = firebaseToken?:"",
                         deviceType = "android",
@@ -127,9 +127,9 @@ class LoginViewModel(
                     }
                     else -> {
                         _state.value = _state.value.copy(
-                            errorMessage = "Request failed: ${response.message}"
+                            errorMessage = response.message
                         )
-                        _validationEventChannel.send(ValidationEvent.Failure("Request failed: ${response.message}"))
+                        _validationEventChannel.send(ValidationEvent.Failure(response.message))
                     }
                 }
             } catch (e: Exception) {

@@ -3,6 +3,7 @@ package com.hyperdesign.myapplication.presentation.auth.signup.mvi
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.Settings
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -146,7 +147,7 @@ class RegisterViewModel(
                         tokenManager.saveAccessToken(response.accessToken)
                         tokenManager.saveUserData(response.user)
                     }
-                    "email is used" -> _validationEvent.send(ValidationEvent.Failure(errorMessage = context.getString(R.string.email_is_already_used)))
+                    "mobile is used" -> _validationEvent.send(ValidationEvent.Failure(errorMessage = context.getString(R.string.email_is_already_used)))
                     else -> _validationEvent.send(ValidationEvent.Failure(errorMessage = context.getString(R.string.email_is_already_used)))
                 }
             } catch (e: Exception) {
@@ -155,6 +156,7 @@ class RegisterViewModel(
                     isLoading = false,
                     errorMessage = e.message
                 )
+                Log.d("register error",e.message.toString())
                 _validationEvent.send(ValidationEvent.Failure(errorMessage = e.message.toString()))
             }
         }

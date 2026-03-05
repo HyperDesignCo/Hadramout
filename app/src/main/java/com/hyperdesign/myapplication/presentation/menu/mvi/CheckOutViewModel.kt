@@ -11,6 +11,7 @@ import com.hyperdesign.myapplication.domain.usecase.cart.CheckOutUseCase
 import com.hyperdesign.myapplication.domain.usecase.cart.FinishOrderUseCase
 import com.hyperdesign.myapplication.domain.usecase.home.GetAllAddressUseCase
 import com.hyperdesign.myapplication.presentation.di.viewModels
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,10 @@ class CheckOutViewModel(
 
     private var _checkOutState = MutableStateFlow(CheckOutStateModel())
     val checkOutState: StateFlow<CheckOutStateModel> = _checkOutState.asStateFlow()
+
+    private var isCheckingOut = false
+    private var isFetchingAddress = false
+    private var isFinishingOrder = false
 
     init {
         getAllAddress()
@@ -75,6 +80,8 @@ class CheckOutViewModel(
         order_time: String,
         order_date: String
     ) {
+        if (isFinishingOrder) return
+        isFinishingOrder = true
         _checkOutState.value = _checkOutState.value.copy(
             isLoading = true
         )
@@ -95,26 +102,25 @@ class CheckOutViewModel(
                     isLoading = false,
                     finishOrderResponse = response
                 )
-
-
             }.onSuccess {
                 tokenManager.saveCartNum(0)
                 _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
-
-                    )
-
-            }.onFailure {
+                )
+            }.onFailure { error ->
+                if (error is CancellationException) return@onFailure
                 _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
-                    errorMsg = it.message
+                    errorMsg = error.message
                 )
-                Log.e("faild finishOrder", it.message.toString())
+                Log.e("faild finishOrder", error.message.toString())
             }
-        }
+        }.invokeOnCompletion { isFinishingOrder = false }
     }
 
     private fun checkOut(branchId: String) {
+        if (isCheckingOut) return
+        isCheckingOut = true
         _checkOutState.value = _checkOutState.value.copy(
             isLoading = true
         )
@@ -133,52 +139,39 @@ class CheckOutViewModel(
                     isLoading = false,
                     checkOutResponse = response
                 )
-
-
             }.onSuccess {
                 _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
-
-                    )
-
-            }.onFailure {
+                )
+            }.onFailure { error ->
+                if (error is CancellationException) return@onFailure
                 _checkOutState.value = _checkOutState.value.copy(
                     isLoading = false,
-                    errorMsg = it.message
+                    errorMsg = error.message
                 )
-                Log.e("faild checkOut", it.message.toString())
+                Log.e("faild checkOut", error.message.toString())
             }
-        }
-
+        }.invokeOnCompletion { isCheckingOut = false }
     }
 
     private fun getAllAddress() {
-        _checkOutState.value = _checkOutState.value.copy(
-            isLoading = false
-        )
+        if (isFetchingAddress) return
+        isFetchingAddress = true
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val response = getAllAddressUseCase()
                 _checkOutState.value = _checkOutState.value.copy(
-                    isLoading = false,
                     address = response
                 )
-
-
             }.onSuccess {
+                // address already set above
+            }.onFailure { error ->
+                if (error is CancellationException) return@onFailure
                 _checkOutState.value = _checkOutState.value.copy(
-                    isLoading = false,
-
-                    )
-
-            }.onFailure {
-                _checkOutState.value = _checkOutState.value.copy(
-                    isLoading = false,
-                    errorMsg = it.message
+                    errorMsg = error.message
                 )
-                Log.e("faild to get address", it.message.toString())
+                Log.e("faild to get address", error.message.toString())
             }
-        }
-
+        }.invokeOnCompletion { isFetchingAddress = false }
     }
 }

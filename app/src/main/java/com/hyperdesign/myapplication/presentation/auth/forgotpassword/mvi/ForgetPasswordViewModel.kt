@@ -68,7 +68,7 @@ class ForgetPasswordViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 val forgetPasswordRequest =
-                    ForgetPasswordRequest(email = _forgetPasswordState.value.email)
+                    ForgetPasswordRequest(mobile = _forgetPasswordState.value.email)
                 val response = forgetPasswordUseCase.invoke(forgetPasswordRequest)
 
                 _forgetPasswordState.value = _forgetPasswordState.value.copy(

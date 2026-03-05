@@ -186,7 +186,7 @@ class ProfileApiServicesImpl(
                     MultiPartFormDataContent(
                         formData {
                             append("name", editProfileRequest.name)
-                            append("email", editProfileRequest.email)
+//                            append("email", editProfileRequest.email)
                             append("mobile", editProfileRequest.mobile)
 
                             // Properly handle image bytes

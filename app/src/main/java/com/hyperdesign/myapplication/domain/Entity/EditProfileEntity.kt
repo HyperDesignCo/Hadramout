@@ -10,7 +10,6 @@ data class EditProfileResponseEntity(
 
 data class EditProfileRequest(
     val name: String,
-    val email: String,
     val mobile: String,
     val image: String?,
     val imageBytes: ByteArray? = null // Actual image data

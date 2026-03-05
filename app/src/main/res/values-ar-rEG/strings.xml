@@ -57,7 +57,7 @@
     <string name="password_is_required">كلمة المرور مطلوبة</string>
     <string name="user_name_is_required">اسم المستخدم مطلوب</string>
     <string name="confirm_password_is_should_be_same_as_password">يجب أن يكون تأكيد كلمة المرور متطابقاً مع كلمة المرور</string>
-    <string name="email_is_already_used">البريد الإلكتروني مستخدم بالفعل</string>
+    <string name="email_is_already_used">رقم الهاتف مستخدم بالفعل</string>
     <string name="add_to_cart">أضف إلى السلة</string>
     <string name="meals">الوجبات</string>
     <string name="select_size">اختر الحجم</string>
