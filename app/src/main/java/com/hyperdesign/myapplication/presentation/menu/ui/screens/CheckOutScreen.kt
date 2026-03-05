@@ -39,7 +39,6 @@ import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutIntents
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutStateModel
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutViewModel
 import com.hyperdesign.myapplication.presentation.menu.ui.widgets.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
@@ -126,16 +125,12 @@ fun CheckOutScreen(
 
     LaunchedEffect(addressAdded) {
         if (addressAdded) {
-            checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick(loginViewModel.tokenManager.getBranchId().toString()))
-            checkOutViewModel.handleIntents(CheckOutIntents.GetAddress)
-            delay(1000)
+            // Set justAdded FIRST so that when LaunchedEffect(checkState) fires
+            // after the fresh address fetch, it selects the newest address.
             justAdded = true
+            checkOutViewModel.handleIntents(CheckOutIntents.GetAddress)
             navController.currentBackStackEntry?.savedStateHandle?.set("address_added", false)
         }
-    }
-
-    LaunchedEffect(Unit) {
-        checkOutViewModel.handleIntents(CheckOutIntents.CheckOutClick(loginViewModel.tokenManager.getBranchId().toString()))
     }
 
     LaunchedEffect(checkState) {
@@ -190,7 +185,7 @@ fun CheckOutScreen(
             justAdded = false
         }
 
-        deliveryStatus = checkState.checkOutResponse?.cart?.pickUpStatus == "0"
+        deliveryStatus = checkState.checkOutResponse?.cart?.orderType == "delivery"
     }
 
     LaunchedEffect(finishOrderMsg) {
@@ -377,30 +372,13 @@ fun CheckOutScreenContent(
 
             item {
                 if (pickUpStatus) {
-                    if (allAddress.isNotEmpty() && subRegion.isNotEmpty()) {
-                        ShowAddress(
-                            district = subRegion,
-                            addressDetails = allAddress,
-                            addressList = addressList,
-                            onAddressSelected = onAddressSelected
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        CustomButton(
-                            modifier = Modifier
-                                .padding(horizontal = 15.dp)
-                                .fillMaxWidth(),
-                            text = stringResource(R.string.add_new_address),
-                            onClick = onClickToAddNewAddress
-                        )
-                    } else {
-                        CustomButton(
-                            modifier = Modifier
-                                .padding(horizontal = 15.dp)
-                                .fillMaxWidth(),
-                            text = stringResource(R.string.add_new_address),
-                            onClick = onClickToAddNewAddress
-                        )
-                    }
+                    AddressSection(
+                        district = subRegion,
+                        addressDetails = allAddress,
+                        addressList = addressList,
+                        onAddressSelected = onAddressSelected,
+                        onClickToAddNewAddress = onClickToAddNewAddress
+                    )
                 } else {
                     showBranchDetails(
                         branchName = branchName,

@@ -273,7 +273,7 @@ fun HomeScreen(
             saveCloseBranch = {
                 homeViewModel.tokenManager.saveCloseTimeBranch(it)
             },
-            cartNum = homeViewModel.tokenManager.getCartNum()
+            cartNum = homeState.cartNum
         )
 
         if (showAuthDialoge) {

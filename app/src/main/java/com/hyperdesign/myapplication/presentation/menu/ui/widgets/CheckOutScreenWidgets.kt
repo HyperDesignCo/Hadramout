@@ -1,18 +1,29 @@
 package com.hyperdesign.myapplication.presentation.menu.ui.widgets
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddLocation
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -24,7 +35,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,16 +43,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.main.theme.ui.Gray
+import com.hyperdesign.myapplication.presentation.main.theme.ui.Secondry
 import com.hyperdesign.myapplication.presentation.menu.mvi.CheckOutStateModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -104,14 +119,43 @@ fun SpecialRequestEditText(state: CheckOutStateModel,onChangeSpecialRequest:(Str
     }
 }
 
+/**
+ * Smart address section:
+ * - When addresses exist: shows the current address card with a subtle "+ Add new address" text link at the bottom.
+ * - When no addresses exist: shows a prominent empty-state card with a pulsing icon and bold red CTA.
+ */
 @Composable
-fun ShowAddress(
+fun AddressSection(
     district: String,
     addressDetails: String,
-    addressList: List<Pair<String, String>>, // List of (district, addressDetails) pairs
-    onAddressSelected: (String, String) -> Unit // Callback for selected address
+    addressList: List<Pair<String, String>>,
+    onAddressSelected: (String, String) -> Unit,
+    onClickToAddNewAddress: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) } // State to control dropdown visibility
+    if (addressList.isNotEmpty()) {
+        // ── Has addresses: show selector + subtle add link ──────────────────────
+        AddressWithSelectorCard(
+            district = district,
+            addressDetails = addressDetails,
+            addressList = addressList,
+            onAddressSelected = onAddressSelected,
+            onClickToAddNewAddress = onClickToAddNewAddress
+        )
+    } else {
+        // ── No addresses: prominent empty-state CTA ─────────────────────────────
+        EmptyAddressCard(onClickToAddNewAddress = onClickToAddNewAddress)
+    }
+}
+
+@Composable
+private fun AddressWithSelectorCard(
+    district: String,
+    addressDetails: String,
+    addressList: List<Pair<String, String>>,
+    onAddressSelected: (String, String) -> Unit,
+    onClickToAddNewAddress: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -120,53 +164,60 @@ fun ShowAddress(
         colors = CardDefaults.cardColors(Gray),
         shape = RoundedCornerShape(10.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.delevery_to),
-                color = Color.Black,
-                modifier = Modifier
-                    .padding(horizontal = 10.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Start,
-                fontSize = 14.sp,
-            )
-            Spacer(modifier = Modifier.height(5.dp))
+        Column(modifier = Modifier.padding(16.dp)) {
+
+            // Section label
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = Color(0xFFFCB203),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(R.string.delevery_to),
+                    color = Color.Gray,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Address selector row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = true }, // Open dropdown on click
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.White)
+                    .clickable { expanded = true }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 10.dp)
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = district,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Start,
+                        fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Text(
-                        text = addressDetails,
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                        textAlign = TextAlign.Start,
-                    )
+                    if (addressDetails.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = addressDetails,
+                            fontSize = 13.sp,
+                            color = Color.Gray
+                        )
+                    }
                 }
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Select Address",
-                    tint = Color.Black,
-                    modifier = Modifier.padding(end = 10.dp)
+                    contentDescription = "Change address",
+                    tint = Color(0xFFFCB203)
                 )
             }
+
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
@@ -181,13 +232,15 @@ fun ShowAddress(
                                 Text(
                                     text = districtItem,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
+                                    fontSize = 15.sp
                                 )
-                                Text(
-                                    text = addressDetailsItem,
-                                    fontSize = 14.sp,
-                                    color = Color.Gray
-                                )
+                                if (addressDetailsItem.isNotEmpty()) {
+                                    Text(
+                                        text = addressDetailsItem,
+                                        fontSize = 13.sp,
+                                        color = Color.Gray
+                                    )
+                                }
                             }
                         },
                         onClick = {
@@ -196,6 +249,101 @@ fun ShowAddress(
                         }
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Subtle "+ Add new address" text link
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            color = Color(0xFF888888),
+                            fontSize = 13.sp,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
+                        append("+ ")
+                        append(stringResource(R.string.add_new_address))
+                    }
+                },
+                modifier = Modifier
+                    .clickable { onClickToAddNewAddress() }
+                    .padding(start = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyAddressCard(onClickToAddNewAddress: () -> Unit) {
+    // Pulsing scale animation for the icon
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "icon_scale"
+    )
+
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth()
+            .border(
+                width = 1.5.dp,
+                color = Secondry,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable { onClickToAddNewAddress() },
+        colors = CardDefaults.cardColors(Color(0xFFFFF5F5)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp, horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Pulsing location icon
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = null,
+                tint = Secondry,
+                modifier = Modifier
+                    .size(48.dp)
+                    .scale(scale)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = stringResource(R.string.you_should_add_your_address_first),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = Secondry,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Tap-to-add CTA
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Secondry)
+                    .clickable { onClickToAddNewAddress() }
+                    .padding(horizontal = 24.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = "+ ${stringResource(R.string.add_new_address)}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
         }
     }

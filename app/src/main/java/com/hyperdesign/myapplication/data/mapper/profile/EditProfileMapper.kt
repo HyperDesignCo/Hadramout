@@ -15,12 +15,12 @@ fun EditProfileResponse.toEntity(): EditProfileResponseEntity {
 
 fun User.toEntity(): UserEntity{
     return UserEntity(
-        id = id,
-        name = name,
-        email = email,
-        image = image,
-        mobile =mobile,
-        authenticated=authenticated,
-        balance=balance
+        id = id?:0,
+        name = name.orEmpty(),
+        image = image.orEmpty(),
+        mobile =mobile.orEmpty(),
+        authenticated=authenticated.orEmpty(),
+        balance=balance.orEmpty(),
+        email = email.orEmpty()
     )
 }

@@ -125,7 +125,18 @@ fun AllAddressesScreen(type:String?,navBackStackEntry: NavBackStackEntry?=null,a
                 }
                 ValidationEvent.Success -> {
                     Log.d("AllAddressesScreen", "Success event triggered, calling GetAddress")
-                    addressViewModel.handleIntents(AddressesIntents.GetAddress)
+                    if (type == "checkOutScreen") {
+                        try {
+                            navController.getBackStackEntry(Screen.CheckOutScreen.route)
+                                .savedStateHandle.set("address_added", true)
+                        } catch (e: Exception) {
+                            Log.e("AllAddressesScreen", "Could not find CheckOutScreen in back stack")
+                        }
+                        navController.popBackStack(Screen.CheckOutScreen.route, inclusive = false)
+                    } else {
+                        showBottomSheet = false
+                        addressViewModel.handleIntents(AddressesIntents.GetAddress)
+                    }
                 }
             }
         }
@@ -198,18 +209,7 @@ fun AllAddressesScreen(type:String?,navBackStackEntry: NavBackStackEntry?=null,a
                 lat = addressState.lat,
                 long = addressState.long,
                 onBackClick = {
-                    if(type=="checkOutScreen"){
-                        navController.previousBackStackEntry?.savedStateHandle?.set("address_added", true)
-//                        navController.popBackStack()
-
-                        navController.navigate(Screen.CheckOutScreen.route) {
-                            popUpTo(Screen.MapScreen.route) {
-                                inclusive = true
-
-                            }
-                            launchSingleTop = true
-                        }
-                    }
+                    showBottomSheet = false
                 }
             )
         }

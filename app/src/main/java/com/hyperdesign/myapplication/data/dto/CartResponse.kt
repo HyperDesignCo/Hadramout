@@ -63,7 +63,9 @@ data class CartDto(
     @SerializedName("pickup_status")
     val pickupStatus:String,
     @SerializedName("wallet_discount")
-    val walletDiscount:String?
+    val walletDiscount:String?,
+    @SerializedName("order_type")
+    val orderType:String?
 )
 
 data class CartMealDto(

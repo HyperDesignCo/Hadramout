@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -126,6 +127,15 @@ class HomeViewModel(
 
     init {
         getBranches() // Only fetch branches initially
+        observeCartNum()
+    }
+
+    private fun observeCartNum() {
+        viewModelScope.launch {
+            tokenManager.cartNumFlow.collectLatest { cartNum ->
+                _homeState.update { it.copy(cartNum = cartNum) }
+            }
+        }
     }
 
     private fun getHomeMenuById(branchId:Int) {

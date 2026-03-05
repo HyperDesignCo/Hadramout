@@ -6,6 +6,9 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.hyperdesign.myapplication.domain.Entity.UserEntity
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class TokenManager(private val context: Context) {
@@ -71,16 +74,20 @@ class TokenManager(private val context: Context) {
         }
     }
 
+    private val _cartNumFlow = MutableStateFlow(getCartNum())
+    val cartNumFlow: StateFlow<Int> = _cartNumFlow.asStateFlow()
+
     fun saveAccessToken(accessToken: String) {
         encryptedSharedPreferences.edit()
             .putString(ACCESS_TOKEN, accessToken)
             .apply()
     }
 
-    fun saveCartNum(cartNum:Int){
+    fun saveCartNum(cartNum: Int) {
         encryptedSharedPreferences.edit()
-            .putInt(CART_Num,cartNum)
+            .putInt(CART_Num, cartNum)
             .apply()
+        _cartNumFlow.value = cartNum
     }
 
     fun getCartNum():Int = encryptedSharedPreferences.getInt(CART_Num,0)

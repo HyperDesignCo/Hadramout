@@ -152,7 +152,7 @@ fun LoginScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 borderColor = Color(0xFFFCB203),
                 errorBorderColor = Color.Red,
-                keyboardType = KeyboardType.Text,
+                keyboardType = KeyboardType.Number,
                 isError = phoneNumberError != null,
                 errorMessage = phoneNumberError,
                 focusRequester = phoneFocusRequester,

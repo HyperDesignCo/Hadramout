@@ -10,7 +10,7 @@ data class LoginEntity(
 )
 
 data class LoginRequest(
-    val email: String,
+    val mobile: String,
     val password: String,
     @SerializedName("device_token")
     val deviceToken: String? = null,

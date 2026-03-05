@@ -17,7 +17,7 @@ sealed class Screen(val route: String, val title: Int? = null, val icon: Int? = 
     object VerifyScreen : Screen("${ScreensConst.Verify_Screen}/{verifyJson}/{email}")
 
     object SignUpScreen : Screen(ScreensConst.Sign_Up_Screen)
-    object CartScreen : Screen(ScreensConst.Cart_Screen)
+    object CartScreen : Screen(ScreensConst.Cart_Screen, R.string.cart, R.drawable.cart)
 
     object MyOrders : Screen(ScreensConst.MY_ORDERS)
     object CheckOutScreen : Screen(ScreensConst.CHECK_OUT_SCREEN)

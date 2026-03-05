@@ -40,6 +40,7 @@ data class CartEntity(
     val freeDelivery: Boolean,
     val cartMeals: List<CartMealEntity>,
     val pickUpStatus: String,
+    val orderType:String,
     val walletDiscount: Double
 )
 

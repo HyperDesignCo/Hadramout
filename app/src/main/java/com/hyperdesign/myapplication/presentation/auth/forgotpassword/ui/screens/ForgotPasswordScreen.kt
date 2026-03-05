@@ -128,7 +128,7 @@ fun ForGotPasswordScreenContent(password: String,passwordError: String?=null,onP
                 textColor = Color.Black,
                 borderWidth = 2f,
                 placeholder =stringResource(id = R.string.email_address),
-                keyboardType = KeyboardType.Text,
+                keyboardType = KeyboardType.Phone,
                 isError = passwordError!=null,
                 errorMessage = passwordError,
                 modifier = Modifier.fillMaxWidth()

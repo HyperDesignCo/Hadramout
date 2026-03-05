@@ -7,5 +7,5 @@ data class ForgetPasswordModeEntity(
 )
 
 data class ForgetPasswordRequest(
-    val email: String
+    val mobile: String
 )

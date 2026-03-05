@@ -257,8 +257,8 @@ fun AddNewAddressBottomSheet(
                                     )
                                 )
                                 if (state.phone.isNotEmpty()&&state.street.isNotEmpty()&&state.secondPhoneNum.isNotEmpty()&&state.secondPhoneNumError==null&&state.phoneError==null&&state.streetError==null){
-                                    onDismissRequest()
-                                    onBackClick()
+//                                     onDismissRequest()
+//                                     onBackClick()
                                 }
 
                             }

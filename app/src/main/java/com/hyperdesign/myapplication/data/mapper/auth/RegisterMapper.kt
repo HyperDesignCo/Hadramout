@@ -6,9 +6,9 @@ import com.hyperdesign.myapplication.domain.Entity.RegisterModelEntity
 
 fun RegisterResponse.toRegisterDomain(): RegisterModelEntity {
     return RegisterModelEntity(
-        accessToken = accessToken,
-        tokenType = tokenType,
+        accessToken = accessToken.orEmpty(),
+        tokenType = tokenType.orEmpty(),
         user = user.toDomain(),
-        message = message
+        message = message.orEmpty()
     )
 }

@@ -64,7 +64,6 @@ class ProfileViewModel(
         _profileState.value = _profileState.value.copy(
             loading = false,
             nameState = tokenManager.getUserData()?.name ?: "",
-            emailState = tokenManager.getUserData()?.email ?: "",
             phoneNumber = tokenManager.getUserData()?.mobile ?: "",
             image = tokenManager.getUserData()?.image ?: ""
         )
@@ -81,9 +80,9 @@ class ProfileViewModel(
             try {
                 val request = EditProfileRequest(
                     name = _profileState.value.nameState,
-                    email = _profileState.value.emailState,
+//                    email = _profileState.value.emailState,
                     mobile = _profileState.value.phoneNumber,
-                    image = _profileState.value.image // This will be the image URI or null
+                    image = _profileState.value.image
                 )
 
                 val response = editProfileUseCase.invoke(request)

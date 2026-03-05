@@ -69,18 +69,15 @@ fun SignUpScreen(registerViewModel: RegisterViewModel = koinViewModel()) {
 
     SignUpScreenContent(
         name = state.userName,
-        email = state.email,
         phone = state.phoneNumber,
         password = state.password,
         confirmPassword = state.confirmPassword,
         onNameChange = { registerViewModel.onIntentEvent(RegisterIntents.NameChanged(it)) },
-        onEmailChange = { registerViewModel.onIntentEvent(RegisterIntents.EmailChanged(it)) },
         onPhoneChange = { registerViewModel.onIntentEvent(RegisterIntents.MobileChanged(it)) },
         onPasswordChange = { registerViewModel.onIntentEvent(RegisterIntents.PasswordChanged(it)) },
         onConfirmPasswordChange = { registerViewModel.onIntentEvent(RegisterIntents.ConfirmPasswordChanged(it)) },
-        onSignUpClick = { registerViewModel.onIntentEvent(RegisterIntents.RegisterClicked(name = state.userName, email = state.email, mobile = state.phoneNumber, password = state.password)) },
+        onSignUpClick = { registerViewModel.onIntentEvent(RegisterIntents.RegisterClicked(name = state.userName, mobile = state.phoneNumber, password = state.password)) },
         nameError = state.userNameError,
-        emailError = state.emailError,
         isLoading = state.isLoading,
         phoneError = state.phoneNumberError,
         passwordError = state.passwordError,
@@ -92,19 +89,16 @@ fun SignUpScreen(registerViewModel: RegisterViewModel = koinViewModel()) {
 @Composable
 fun SignUpScreenContent(
     name: String = "",
-    email: String = "",
     phone: String = "",
     password: String = "",
     isLoading: Boolean = false,
     confirmPassword: String = "",
     onNameChange: (String) -> Unit = {},
-    onEmailChange: (String) -> Unit = {},
     onPhoneChange: (String) -> Unit = {},
     onPasswordChange: (String) -> Unit = {},
     onConfirmPasswordChange: (String) -> Unit = {},
     onSignUpClick: () -> Unit = {},
     nameError: String? = null,
-    emailError: String? = null,
     phoneError: String? = null,
     passwordError: String? = null,
     confirmPasswordError: String? = null,
@@ -152,27 +146,6 @@ fun SignUpScreenContent(
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            Text(
-                text = stringResource(id = R.string.email_address),
-                color = Secondry,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-            CustomTextField(
-                value = email,
-                onValueChange = onEmailChange,
-                textColor = Color.Black,
-                borderWidth = 2f,
-                placeholder = stringResource(R.string.enter_email_address),
-                modifier = Modifier.fillMaxWidth(),
-                keyboardType = KeyboardType.Text,
-                isError = emailError != null,
-                errorMessage = emailError,
-                focusRequester = emailFocusRequester,
-                nextFocusRequester = phoneFocusRequester
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
 
             Text(
                 text = stringResource(id = R.string.phone_number),
