@@ -3,6 +3,7 @@ package com.hyperdesign.myapplication.presentation.home.ui.screens
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -111,8 +112,10 @@ fun HomeScreen(
     var newBranchId by remember { mutableStateOf(0) }
 
     LaunchedEffect(newBranchId) {
+        Log.d("branchId",newBranchId.toString())
         if (newBranchId != 0) {
             homeViewModel.handleIntents(HomeIntents.GetHomeMenuId(newBranchId))
+            homeViewModel.tokenManager.saveBranchId(newBranchId)
         }
     }
 

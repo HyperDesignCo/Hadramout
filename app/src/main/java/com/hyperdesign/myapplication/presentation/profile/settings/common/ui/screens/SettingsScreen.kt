@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hyperdesign.myapplication.R
 import com.hyperdesign.myapplication.presentation.common.wedgits.MainHeader
 import com.hyperdesign.myapplication.presentation.common.wedgits.ShowAuthentaionDialge
+import com.hyperdesign.myapplication.presentation.home.HomeObject
 import com.hyperdesign.myapplication.presentation.main.MainActivity
 import com.hyperdesign.myapplication.presentation.main.navcontroller.LocalNavController
 import com.hyperdesign.myapplication.presentation.main.navcontroller.Screen
@@ -53,6 +54,7 @@ fun SettingsScreen(settingViewModel: SettingViewModel = koinViewModel()) {
         onLogOut = {
             if (settingViewModel.tokenManager.getUserData()?.authenticated == "authenticated") {
                 settingViewModel.logOut()
+                HomeObject.updateStatus(0)
                 navController.navigate(Screen.LoginInScreen.route) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
